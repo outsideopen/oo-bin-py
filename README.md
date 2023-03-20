@@ -24,6 +24,7 @@ Create a new profile called "Tunnels"
 - Open Firefox with the Tunnels profile:
   - Enter about:config -> accept -> find browser.ssl_override_behavior and change its value from 2 to 1.
   - Preferences -> General -> Network Settings -> Manual proxy configuration
+
       SOCKS HOST: localhost
       Port: 2080
       SOCKS v5: check
