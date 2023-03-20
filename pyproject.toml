@@ -16,4 +16,4 @@ dependencies = ["argcomplete", "pyxdg"]
 Home = "https://github.com/outsideopen/oo-bin"
 
 [project.scripts]
-oo = "oo_bin:main"
+oo = "oo_bin.main:main"
