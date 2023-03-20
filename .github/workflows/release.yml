@@ -1,0 +1,30 @@
+name: Upload release artifact
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get Version
+        id: get_version
+        uses: battila7/get-version-action@v2
+
+      - name: Bump Version
+        run: echo '__version__ = "${{ steps.get_version.outputs.version-without-v }}"' > oo_bin/__init__.py
+
+      - name: Build
+        run: |
+          pip3 install flit
+          flit build
+
+      - name: Upload
+        uses: AButler/upload-release-assets@v2.0
+        with:
+          files: dist/*
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
