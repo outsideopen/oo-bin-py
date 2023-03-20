@@ -5,8 +5,11 @@ from subprocess import DEVNULL, PIPE, Popen
 
 from xdg import BaseDirectory
 
-from oo_bin.errors import (ConfigNotFoundException, DependencyNotMetException,
-                           TunnelAlreadyStartedException)
+from oo_bin.errors import (
+    ConfigNotFoundException,
+    DependencyNotMetException,
+    TunnelAlreadyStartedException,
+)
 from oo_bin.script import Script
 from oo_bin.utils import is_wsl
 
