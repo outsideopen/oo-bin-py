@@ -48,16 +48,21 @@ mkdir $HOME/.config/oo_bin
 
 # Manually copy your tunnels.conf file into $HOME/.config/oo_bin
 
-# Download the latest release (`oo_bin-x.x.x-py3-none-any.whl`) from https://github.com/outsideopen/oo-bin-py/releases/tag
+# Download the latest release (`oo_bin-x.x.x-py3-none-any.whl`) 
+# from https://github.com/outsideopen/oo-bin-py/releases/
 # Once the repo is made public, we can replace this step with a curl command
-pip3 install oo_bin-x.x.x-py3-none-any.whl
+pip3 install ./oo_bin-x.x.x-py3-none-any.whl
 
-# If you get a warning that $HOME/.local/bin is not in the path, fix it by adding it to the path
+# You may get a warning that $HOME/.local/bin is not in the path, fix it by adding to the path
+# Temporarily add
 export PATH=$PATH:$HOME/.local/bin
-echo PATH=$PATH:$HOME/.local/bin > $HOME/.bashrc
+# Permanently add
+echo 'PATH=$PATH:$HOME/.local/bin' >> $HOME/.bashrc
 
 # Activate command line completion
-sudo activate-global-python-argcomplete
+mkdir $HOME/.bash_completion
+activate-global-python-argcomplete --dest $HOME/.bash_completion
+echo 'source $HOME/.bash_completion/python-argcomplete' >> $HOME/.bashrc
 ```
 
 
