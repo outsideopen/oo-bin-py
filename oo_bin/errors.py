@@ -5,8 +5,10 @@ class OOBinException(Exception):
 class TunnelAlreadyStartedException(OOBinException):
     pass
 
+
 class DependencyNotMetException(OOBinException):
     pass
+
 
 class ConfigNotFoundException(OOBinException):
     pass
