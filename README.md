@@ -45,7 +45,6 @@ Run `install.sh`
 
 ```bash
 mkdir $HOME/.config/oo_bin
-
 # Manually copy your tunnels.conf file into $HOME/.config/oo_bin
 
 # Download the latest release (`oo_bin-x.x.x-py3-none-any.whl`) 
@@ -62,6 +61,9 @@ echo 'PATH=$PATH:$HOME/.local/bin' >> $HOME/.bashrc
 # Activate command line completion
 mkdir $HOME/.bash_completion
 activate-global-python-argcomplete --dest $HOME/.bash_completion
+# Temporarily add
+source $HOME/.bash_completion/python-argcomplete
+# Permanently add
 echo 'source $HOME/.bash_completion/python-argcomplete' >> $HOME/.bashrc
 ```
 
