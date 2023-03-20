@@ -26,7 +26,9 @@ Create a new profile called "Tunnels"
   - Preferences -> General -> Network Settings -> Manual proxy configuration
 
       SOCKS HOST: localhost
+
       Port: 2080
+
       SOCKS v5: check
 
 
