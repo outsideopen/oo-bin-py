@@ -161,7 +161,7 @@ class Tunnels(Script):
 
     @staticmethod
     def completion(prefix, parsed_args, **kwargs):
-        return_list = []
+        return_list = ["stop", "status"]
         with open(Tunnels.tunnels_conf) as f:
             lines = f.readlines()
 
@@ -187,9 +187,9 @@ class Tunnels(Script):
     def run(args):
         tunnels = Tunnels()
 
-        if args.status:
+        if args.status or args.name == "status":
             tunnels.status()
-        elif args.stop:
+        elif args.stop or args.name == "stop":
             tunnels.stop()
         else:
             if args.name == "":
