@@ -42,8 +42,8 @@ class Tunnels(Script):
     tunnels_conf = os.path.join(
         BaseDirectory.load_first_config("oo_bin"), "tunnels.conf"
     )
-    ssh_bin = shutil.which("ssh")
-    autossh_bin = shutil.which("autossh")
+    ssh_bin = "ssh" if shutil.which("ssh") else None
+    autossh_bin = "autossh" if shutil.which("autossh") else None
     browser_bin = browser_bin()
     browser_profile = "Tunnels"
     forwarding_port = "2080"
@@ -104,7 +104,6 @@ class Tunnels(Script):
 
     def start(self, jump_host):
         tunnel = self.find_tunnel_name()
-        print(tunnel)
 
         if tunnel:
             raise TunnelAlreadyStartedException(
