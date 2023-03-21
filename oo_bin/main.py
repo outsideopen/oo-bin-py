@@ -10,7 +10,7 @@ from oo_bin.tunnels import Tunnels
 from oo_bin import __version__
 
 
-def main(argv: Sequence[str] | None = None):
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--version", action="version", version=f"{__version__}")
 
@@ -33,7 +33,7 @@ def main(argv: Sequence[str] | None = None):
 
     # NB! This line should be before `parse_args` but after adding any subparsers!
     argcomplete.autocomplete(parser)
-    args = parser.parse_args(argv)
+    args = parser.parse_args()
 
     try:
         if args.command == "tunnels":
