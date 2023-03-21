@@ -11,7 +11,7 @@ from oo_bin.errors import (
     TunnelAlreadyStartedException,
 )
 from oo_bin.script import Script
-from oo_bin.utils import is_wsl
+from oo_bin.utils import is_linux, is_mac, is_wsl
 
 
 def browser_bin():
@@ -20,8 +20,21 @@ def browser_bin():
             "firefox.exe",
             path="/mnt/c/Program Files/Mozilla Firefox:/mnt/c/Program Files (x86)/Mozilla Firefox",
         )
-    else:
+    elif is_mac():
+        bin = shutil.which("firefox")
+        return (
+            bin
+            if bin
+            else shutil.which(
+                "firefox", path="/Applications/Firefox.app/Contents/MacOS/firefox"
+            )
+        )
+
+    elif is_linux():
         return shutil.which("firefox")
+    else:
+        print(f"Error: Your system is not supported", file=sys.stderr)
+        sys.exit(1)
 
 
 class Tunnels(Script):
