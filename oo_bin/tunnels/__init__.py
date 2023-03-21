@@ -124,9 +124,9 @@ class Tunnels(Script):
         ]
         Popen(cmd, stdout=DEVNULL, stderr=DEVNULL)
 
-    def launch_browser(self, url):
-        cmd = f"{Tunnels.browser_bin} -P {Tunnels.browser_profile} {url}"
-        Popen(cmd, stdout=DEVNULL, stderr=DEVNULL, shell=True)
+    def launch_browser(self, urls):
+        cmd = [Tunnels.browser_bin, "-P", Tunnels.browser_profile] + urls.split()
+        Popen(cmd, stdout=DEVNULL, stderr=DEVNULL)
 
     def main(self, name):
         (_name, jump_host, urls) = self.get_config(name)
