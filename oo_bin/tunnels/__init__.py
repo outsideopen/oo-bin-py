@@ -1,6 +1,7 @@
 import os
 import shutil
 import sys
+import time
 from subprocess import DEVNULL, PIPE, Popen
 
 from xdg import BaseDirectory
@@ -45,14 +46,21 @@ class Tunnels(Script):
     autossh_bin = shutil.which("autossh")
     browser_bin = browser_bin()
     browser_profile = "Tunnels"
+    forwarding_port = "2080"
 
-    def find_tunnel(self):
+    def find_tunnel_process(self, cmd):
         p1 = Popen(["ps", "-ef"], stdout=PIPE)
-        p2 = Popen(["grep", Tunnels.autossh_bin], stdin=p1.stdout, stdout=PIPE)
-        p3 = Popen(["grep", "2080"], stdin=p2.stdout, stdout=PIPE)
+        p2 = Popen(["grep", cmd], stdin=p1.stdout, stdout=PIPE)
+        p3 = Popen(["grep", Tunnels.forwarding_port], stdin=p2.stdout, stdout=PIPE)
         p4 = Popen(["grep", "-v", "grep"], stdin=p3.stdout, stdout=PIPE)
-        output = p4.communicate()
+        return p4.communicate()
 
+    def find_tunnel_process_id(self, cmd):
+        output = self.find_tunnel_process(cmd)
+        return output[0].decode("utf-8").split()[1] if len(output[0]) > 0 else None
+
+    def find_tunnel_name(self):
+        output = self.find_tunnel_process(Tunnels.autossh_bin)
         return output[0].decode("utf-8").split()[-1] if len(output[0]) > 0 else None
 
     def get_config(self, name):
@@ -69,7 +77,7 @@ class Tunnels(Script):
         )
 
     def status(self):
-        tunnel = self.find_tunnel()
+        tunnel = self.find_tunnel_name()
 
         if tunnel:
             print(f"Dynamic SSH tunnel running to {tunnel}...")
@@ -79,19 +87,50 @@ class Tunnels(Script):
     def stop(self):
         print("Stopping tunnels...")
         for cmd in [Tunnels.autossh_bin, Tunnels.ssh_bin]:
-            p1 = Popen(["ps", "-ef"], stdout=PIPE)
-            p2 = Popen(["grep", cmd], stdin=p1.stdout, stdout=PIPE)
-            p3 = Popen(["grep", "2080"], stdin=p2.stdout, stdout=PIPE)
-            p4 = Popen(["grep", "-v", "grep"], stdin=p3.stdout, stdout=PIPE)
-            output = p4.communicate()
-
-            pid = output[0].decode("utf-8").split()[1] if len(output[0]) > 0 else None
+            pid = self.find_tunnel_process_id(cmd)
 
             if not pid:
                 print(f"{cmd} is not running", file=sys.stderr)
             else:
                 Popen(["kill", "-9", pid])
+        if not is_wsl():
+            killed = self.kill_browser()
 
+        if not killed:
+            print(
+                f"{Tunnels.browser_bin} with profile {Tunnels.browser_profile} is not running",
+                file=sys.stderr,
+            )
+
+    def start(self, jump_host):
+        tunnel = self.find_tunnel_name()
+        print(tunnel)
+
+        if tunnel:
+            raise TunnelAlreadyStartedException(
+                f"SSH tunnel already running to {tunnel}..."
+            )
+
+        cmd = [
+            Tunnels.autossh_bin,
+            "-N",
+            "-M",
+            "0",
+            "-D",
+            Tunnels.forwarding_port,
+            "-o",
+            "ServerAliveInterval=3",
+            "-o",
+            "ServerAliveCountMax=30",
+            f"{jump_host}",
+        ]
+        Popen(cmd, stdout=DEVNULL, stderr=DEVNULL)
+
+    def launch_browser(self, urls):
+        cmd = [Tunnels.browser_bin, "-P", Tunnels.browser_profile] + urls.split()
+        Popen(cmd, stdout=DEVNULL, stderr=DEVNULL)
+
+    def kill_browser(self):
         p1 = Popen(["ps", "-ef"], stdout=PIPE)
         p2 = Popen(
             ["grep", "-i", Tunnels.browser_bin.split("/")[-1]],
@@ -107,44 +146,17 @@ class Tunnels(Script):
         pid = output[0].decode("utf-8").split()[1] if len(output[0]) > 0 else None
 
         if not pid:
-            print(
-                f"{Tunnels.browser_bin} with profile {Tunnels.browser_profile} is not running",
-                file=sys.stderr,
-            )
+            return False
         else:
             Popen(["kill", "-9", pid])
 
-    def start(self, jump_host):
-        tunnel = self.find_tunnel()
-
-        if tunnel:
-            raise TunnelAlreadyStartedException(
-                f"SSH tunnel already running to {tunnel}..."
-            )
-
-        cmd = [
-            Tunnels.autossh_bin,
-            "-N",
-            "-M",
-            "0",
-            "-D",
-            "2080",
-            "-o",
-            "ServerAliveInterval=3",
-            "-o",
-            "ServerAliveCountMax=30",
-            f"{jump_host}",
-        ]
-        Popen(cmd, stdout=DEVNULL, stderr=DEVNULL)
-
-    def launch_browser(self, urls):
-        cmd = [Tunnels.browser_bin, "-P", Tunnels.browser_profile] + urls.split()
-        Popen(cmd, stdout=DEVNULL, stderr=DEVNULL)
+        return True
 
     def main(self, name):
         (_name, jump_host, urls) = self.get_config(name)
 
         self.start(jump_host)
+        time.sleep(1)
         self.launch_browser(urls)
         print(f"Launching Firefox... {urls}")
 
