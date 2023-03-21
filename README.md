@@ -15,7 +15,9 @@ Outside Open Bin scripts that work across Linux, Mac and Windows Subsystem for L
 
 # Configuration
 
-(TODO!!!! Have tunnels.conf available for secure download by OO employees)
+## SSH
+(**TODO:** Make tunnels.conf available for secure download by OO employees)
+
 You need an SSH configuration, and matching `tunnels.conf`
 
 ## Firefox
@@ -36,35 +38,8 @@ Create a new profile called "Tunnels"
 
 # Installation
 
-## TL;DR
-
-(TODO!!!!)
-Run `install.sh` 
-
-## Manual installation
+Run the following command to install the script as your current user. It can also be used to update to the latest version. 
 
 ```bash
-mkdir $HOME/.config/oo_bin
-# Manually copy your tunnels.conf file into $HOME/.config/oo_bin
-
-# Download the latest release (`oo_bin-x.x.x-py3-none-any.whl`) 
-# from https://github.com/outsideopen/oo-bin-py/releases/
-# Once the repo is made public, we can replace this step with a curl command
-pip3 install ./oo_bin-x.x.x-py3-none-any.whl
-
-# You may get a warning that $HOME/.local/bin is not in the path, fix it by adding to the path
-# Temporarily add
-export PATH=$PATH:$HOME/.local/bin
-# Permanently add
-echo 'PATH=$PATH:$HOME/.local/bin' >> $HOME/.bashrc
-
-# Activate command line completion
-mkdir $HOME/.bash_completion
-activate-global-python-argcomplete --dest $HOME/.bash_completion
-# Temporarily add
-source $HOME/.bash_completion/python-argcomplete
-# Permanently add
-echo 'source $HOME/.bash_completion/python-argcomplete' >> $HOME/.bashrc
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/outsideopen/oo-bin-py/HEAD/install.sh)"
 ```
-
-
