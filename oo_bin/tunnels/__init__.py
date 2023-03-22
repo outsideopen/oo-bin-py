@@ -9,10 +9,12 @@ from xdg import BaseDirectory
 from oo_bin.errors import (
     ConfigNotFoundException,
     DependencyNotMetException,
+    SystemNotSupportedException,
     TunnelAlreadyStartedException,
 )
 from oo_bin.script import Script
 from oo_bin.utils import is_linux, is_mac, is_wsl
+from colorama import Fore
 
 
 def browser_bin():
@@ -33,9 +35,7 @@ def browser_bin():
 
     elif is_linux():
         return shutil.which("firefox")
-    else:
-        print(f"Error: Your system is not supported", file=sys.stderr)
-        sys.exit(1)
+    SystemNotSupportedException("Your system is not supported")
 
 
 class Tunnels(Script):
@@ -67,17 +67,17 @@ class Tunnels(Script):
         tunnel = self.find_tunnel_name()
 
         if tunnel:
-            print(f"Dynamic SSH tunnel running to {tunnel}...")
+            print("Dynamic SSH tunnel running to " + Fore.GREEN + f"{tunnel}")
         else:
-            print("No dynamic SSH tunnels running...")
+            print(Fore.YELLOW + "No dynamic SSH tunnels running")
 
     def stop(self):
-        print("Stopping tunnels...")
+        print("Stopping tunnels")
         for cmd in [Tunnels.autossh_bin, Tunnels.ssh_bin]:
             pid = self.find_tunnel_process_id(cmd)
 
             if not pid:
-                print(f"{cmd} is not running", file=sys.stderr)
+                print(Fore.YELLOW + f"{cmd} is not running", file=sys.stderr)
             else:
                 Popen(["kill", "-9", pid])
         if not is_wsl():
@@ -88,7 +88,7 @@ class Tunnels(Script):
 
         if tunnel:
             raise TunnelAlreadyStartedException(
-                f"SSH tunnel already running to {tunnel}..."
+                f"SSH tunnel already running to {tunnel}"
             )
 
         cmd = [
@@ -147,9 +147,12 @@ class Tunnels(Script):
         time.sleep(1)
         if urls:
             self.launch_browser(urls)
-            print(f"Launching Firefox... {' '.join(urls)}")
+            print(f"Launching Firefox with tabs: {', '.join(urls)}")
         else:
-            print("The tunnel has been started, but no urls are provided.")
+            print(
+                Fore.YELLOW
+                + "The tunnel has been started, but you have no urls configured"
+            )
 
     @staticmethod
     def get_config():

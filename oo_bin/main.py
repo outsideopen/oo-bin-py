@@ -1,13 +1,15 @@
 # PYTHON_ARGCOMPLETE_OK
 import argparse
 import sys
-from collections.abc import Sequence
 
 import argcomplete
 
 from oo_bin.errors import OOBinException
 from oo_bin.tunnels import Tunnels
 from oo_bin import __version__
+from colorama import Fore, init
+
+init(autoreset=True)
 
 
 def main():
@@ -44,7 +46,7 @@ def main():
                 f"Command {args.command} does not exist.",
             )
     except OOBinException as e:
-        print(f"Error: {e}", file=sys.stderr)
+        print(Fore.RED + f"Error: {e}", file=sys.stderr)
         sys.exit(1)
 
 
