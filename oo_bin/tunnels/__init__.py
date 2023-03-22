@@ -164,7 +164,6 @@ class Tunnels(Script):
 
     @staticmethod
     def completion(prefix, parsed_args, **kwargs):
-        print(Tunnels.get_config().keys())
         return tuple(Tunnels.get_config().keys())
 
     @staticmethod
