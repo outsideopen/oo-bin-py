@@ -63,16 +63,6 @@ class Tunnels(Script):
         output = self.find_tunnel_process(Tunnels.autossh_bin)
         return output[0].decode("utf-8").split()[-1] if len(output[0]) > 0 else None
 
-    def get_config(self, name):
-        try:
-            import tomllib
-        except ModuleNotFoundError:
-            import tomli as tomllib
-
-        with open(Tunnels.tunnels_conf, "rb") as f:
-            data = tomllib.load(f)
-            return data.get(name, {})
-
     def status(self):
         tunnel = self.find_tunnel_name()
 
@@ -143,7 +133,7 @@ class Tunnels(Script):
         return True
 
     def main(self, name):
-        config = self.get_config(name)
+        config = Tunnels.get_config().get(name, {})
 
         jump_host = config.get("jump_host", None)
         urls = config.get("urls", None)
@@ -162,16 +152,20 @@ class Tunnels(Script):
             print("The tunnel has been started, but no urls are provided.")
 
     @staticmethod
+    def get_config():
+        try:
+            import tomllib
+        except ModuleNotFoundError:
+            import tomli as tomllib
+
+        with open(Tunnels.tunnels_conf, "rb") as f:
+            data = tomllib.load(f)
+            return data
+
+    @staticmethod
     def completion(prefix, parsed_args, **kwargs):
-        return_list = ["stop", "status"]
-        with open(Tunnels.tunnels_conf) as f:
-            lines = f.readlines()
-
-            for line in lines:
-                vals = line.split(",", 1)
-                return_list.append(vals[0])
-
-        return tuple(return_list)
+        print(Tunnels.get_config().keys())
+        return tuple(Tunnels.get_config().keys())
 
     @staticmethod
     def runtime_dependencies_met():
