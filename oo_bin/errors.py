@@ -12,3 +12,7 @@ class DependencyNotMetException(OOBinException):
 
 class ConfigNotFoundException(OOBinException):
     pass
+
+
+class SystemNotSupportedException(OOBinException):
+    pass
