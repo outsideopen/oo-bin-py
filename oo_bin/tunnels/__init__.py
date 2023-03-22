@@ -40,7 +40,7 @@ def browser_bin():
 
 class Tunnels(Script):
     tunnels_conf = os.path.join(
-        BaseDirectory.load_first_config("oo_bin"), "tunnels.conf"
+        BaseDirectory.load_first_config("oo_bin"), "tunnels.toml"
     )
     ssh_bin = "ssh" if shutil.which("ssh") else None
     autossh_bin = "autossh" if shutil.which("autossh") else None
@@ -64,17 +64,14 @@ class Tunnels(Script):
         return output[0].decode("utf-8").split()[-1] if len(output[0]) > 0 else None
 
     def get_config(self, name):
-        with open(Tunnels.tunnels_conf) as f:
-            lines = f.readlines()
+        try:
+            import tomllib
+        except ModuleNotFoundError:
+            import tomli as tomllib
 
-            for line in lines:
-                (_name, jump_host, urls) = line.split(",", 3)
-                if _name == name:
-                    return (name, jump_host, urls)
-
-        raise ConfigNotFoundException(
-            f"{name} could not be found in your configuration file"
-        )
+        with open(Tunnels.tunnels_conf, "rb") as f:
+            data = tomllib.load(f)
+            return data.get(name, {})
 
     def status(self):
         tunnel = self.find_tunnel_name()
@@ -94,13 +91,7 @@ class Tunnels(Script):
             else:
                 Popen(["kill", "-9", pid])
         if not is_wsl():
-            killed = self.kill_browser()
-
-        if not killed:
-            print(
-                f"{Tunnels.browser_bin} with profile {Tunnels.browser_profile} is not running",
-                file=sys.stderr,
-            )
+            self.kill_browser()
 
     def start(self, jump_host):
         tunnel = self.find_tunnel_name()
@@ -126,7 +117,7 @@ class Tunnels(Script):
         Popen(cmd, stdout=DEVNULL, stderr=DEVNULL)
 
     def launch_browser(self, urls):
-        cmd = [Tunnels.browser_bin, "-P", Tunnels.browser_profile] + urls.split()
+        cmd = [Tunnels.browser_bin, "-P", Tunnels.browser_profile] + urls
         Popen(cmd, stdout=DEVNULL, stderr=DEVNULL)
 
     def kill_browser(self):
@@ -152,12 +143,23 @@ class Tunnels(Script):
         return True
 
     def main(self, name):
-        (_name, jump_host, urls) = self.get_config(name)
+        config = self.get_config(name)
 
-        self.start(jump_host)
+        jump_host = config.get("jump_host", None)
+        urls = config.get("urls", None)
+        if jump_host:
+            self.start(jump_host)
+        else:
+            raise ConfigNotFoundException(
+                f"{name} could not be found in your configuration file"
+            )
+
         time.sleep(1)
-        self.launch_browser(urls)
-        print(f"Launching Firefox... {urls}")
+        if urls:
+            self.launch_browser(urls)
+            print(f"Launching Firefox... {' '.join(urls)}")
+        else:
+            print("The tunnel has been started, but no urls are provided.")
 
     @staticmethod
     def completion(prefix, parsed_args, **kwargs):
