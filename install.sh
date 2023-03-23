@@ -4,7 +4,28 @@ set -e
 
 function make_config {
 	mkdir -p $HOME/.config/oo_bin
-	touch $HOME/.config/oo_bin/tunnels.conf
+}
+
+function install_dependencies {
+	# Case for WSL and Ubuntu linux
+	if [[ $(uname -s) =~ "Linux" ]]; then
+		if which apt-get 2>/dev/null; then
+			if ! which autossh; then
+				apt-get install -y ssh autossh
+			fi
+		else
+			echo "We could not automatically install the dependencies on your system. Please install ssh and autossh manually."
+		fi
+	elif [[ $(uname -s) =~ "Darwin" ]]; then
+		if which brew 2>/dev/null; then
+			if ! which autossh; then
+				brew install autossh
+			fi
+		else
+			echo "Could not find Homebrew (https://brew.sh/). Install Homebrew, or, manually install autossh."
+		fi
+	fi
+
 }
 
 function install_dependencies {
