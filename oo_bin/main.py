@@ -1,7 +1,6 @@
 # PYTHON_ARGCOMPLETE_OK
 import argparse
 import sys
-
 import argcomplete
 
 from oo_bin.errors import OOBinException
@@ -32,6 +31,12 @@ def main():
     tunnels_parser.add_argument(
         "-S", "--stop", action="store_true", help="Stop all running tunnels"
     )
+    tunnels_parser.add_argument(
+        "-u",
+        "--update",
+        action="store_true",
+        help="Update tunnels configuration from remote",
+    )
 
     # NB! This line should be before `parse_args` but after adding any subparsers!
     argcomplete.autocomplete(parser)
@@ -42,7 +47,7 @@ def main():
             Tunnels.runtime_dependencies_met()
             return Tunnels.run(args)
         else:
-            raise NotImplementedError(
+            raise OOBinException(
                 f"Command {args.command} does not exist.",
             )
     except OOBinException as e:

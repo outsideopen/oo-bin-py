@@ -3,17 +3,17 @@ import sys
 import time
 from subprocess import DEVNULL, PIPE, Popen
 
+from colorama import Fore
 
+from oo_bin.config import tunnels_config
 from oo_bin.errors import (
     ConfigNotFoundException,
     DependencyNotMetException,
     SystemNotSupportedException,
     TunnelAlreadyStartedException,
 )
-from oo_bin.config import tunnels_config
 from oo_bin.script import Script
-from oo_bin.utils import is_linux, is_mac, is_wsl
-from colorama import Fore
+from oo_bin.utils import is_linux, is_mac, is_wsl, update_tunnels_config
 
 
 def browser_bin():
@@ -43,6 +43,7 @@ class Tunnels(Script):
     browser_bin = browser_bin()
     browser_profile = "Tunnels"
     forwarding_port = "2080"
+    config = tunnels_config()
 
     def find_tunnel_process(self, cmd):
         p1 = Popen(["ps", "-ef"], stdout=PIPE)
@@ -174,6 +175,8 @@ class Tunnels(Script):
             tunnels.status()
         elif args.stop or args.name == "stop":
             tunnels.stop()
+        elif args.update:
+            update_tunnels_config()
         else:
             if args.name == "":
                 raise ConfigNotFoundException("You need to specify a name")
