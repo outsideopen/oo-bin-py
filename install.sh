@@ -4,7 +4,6 @@ set -e
 
 function make_config {
 	mkdir -p $HOME/.config/oo_bin
-	touch $HOME/.config/oo_bin/tunnels.conf
 }
 
 function install_dependencies {
