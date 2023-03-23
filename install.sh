@@ -7,6 +7,28 @@ function make_config {
 	touch $HOME/.config/oo_bin/tunnels.conf
 }
 
+function install_dependencies {
+	# Case for WSL and Ubuntu linux
+	if [[ $(uname -s) =~ "Linux" ]]; then
+		if which apt-get 2>/dev/null; then
+			if ! which autossh; then
+				apt-get install -y ssh autossh
+			fi
+		else
+			echo "We could not automatically install the dependencies on your system. Please install ssh and autossh manually."
+		fi
+	elif [[ $(uname -s) =~ "Darwin" ]]; then
+		if which brew 2>/dev/null; then
+			if ! which autossh; then
+				brew install autossh
+			fi
+		else
+			echo "Could not find Homebrew (https://brew.sh/). Install Homebrew, or, manually install autossh."
+		fi
+	fi
+
+}
+
 function install {
 	VERSION=$(curl -L https://api.github.com/repos/outsideopen/oo-bin-py/releases/latest | grep tag_name | grep -Eo '[0-9]\.[0-9]\.[0-9]')
 	curl -LJO https://github.com/outsideopen/oo-bin-py/releases/download/${VERSION}/oo_bin-${VERSION}-py3-none-any.whl
@@ -79,6 +101,7 @@ function convert_tunnels_conf {
 }
 
 make_config
+install_dependencies
 install
 bash_add_local_bin_to_path
 bash_add_argscomplete
