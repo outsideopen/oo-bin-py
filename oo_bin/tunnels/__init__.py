@@ -1,11 +1,11 @@
-import os
 import shutil
 import sys
 import time
 from subprocess import DEVNULL, PIPE, Popen
 
-from xdg import BaseDirectory
+from colorama import Fore
 
+from oo_bin.config import tunnels_config
 from oo_bin.errors import (
     ConfigNotFoundException,
     DependencyNotMetException,
@@ -13,8 +13,7 @@ from oo_bin.errors import (
     TunnelAlreadyStartedException,
 )
 from oo_bin.script import Script
-from oo_bin.utils import is_linux, is_mac, is_wsl
-from colorama import Fore
+from oo_bin.utils import is_linux, is_mac, is_wsl, update_tunnels_config
 
 
 def browser_bin():
@@ -39,14 +38,12 @@ def browser_bin():
 
 
 class Tunnels(Script):
-    tunnels_conf = os.path.join(
-        BaseDirectory.load_first_config("oo_bin"), "tunnels.toml"
-    )
     ssh_bin = "ssh" if shutil.which("ssh") else None
     autossh_bin = "autossh" if shutil.which("autossh") else None
     browser_bin = browser_bin()
     browser_profile = "Tunnels"
     forwarding_port = "2080"
+    config = tunnels_config()
 
     def find_tunnel_process(self, cmd):
         p1 = Popen(["ps", "-ef"], stdout=PIPE)
@@ -133,7 +130,7 @@ class Tunnels(Script):
         return True
 
     def main(self, name):
-        config = Tunnels.get_config().get(name, {})
+        config = Tunnels.config.get(name, {})
 
         jump_host = config.get("jump_host", None)
         urls = config.get("urls", None)
@@ -155,19 +152,8 @@ class Tunnels(Script):
             )
 
     @staticmethod
-    def get_config():
-        try:
-            import tomllib
-        except ModuleNotFoundError:
-            import tomli as tomllib
-
-        with open(Tunnels.tunnels_conf, "rb") as f:
-            data = tomllib.load(f)
-            return data
-
-    @staticmethod
     def completion(prefix, parsed_args, **kwargs):
-        return tuple(Tunnels.get_config().keys())
+        return tuple(Tunnels.config.keys())
 
     @staticmethod
     def runtime_dependencies_met():
@@ -189,6 +175,8 @@ class Tunnels(Script):
             tunnels.status()
         elif args.stop or args.name == "stop":
             tunnels.stop()
+        elif args.update:
+            update_tunnels_config()
         else:
             if args.name == "":
                 raise ConfigNotFoundException("You need to specify a name")
