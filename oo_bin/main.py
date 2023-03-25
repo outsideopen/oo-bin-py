@@ -6,12 +6,15 @@ import argcomplete
 from oo_bin.errors import OOBinException
 from oo_bin.tunnels import Tunnels
 from oo_bin import __version__
+from oo_bin.utils import auto_update
 from colorama import Fore, init
 
 init(autoreset=True)
 
 
 def main():
+    auto_update()
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--version", action="version", version=f"{__version__}")
 
