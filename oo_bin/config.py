@@ -11,10 +11,10 @@ except ModuleNotFoundError:
 __package_name__ = "oo_bin"
 
 main_config_path = os.path.join(
-    BaseDirectory.load_first_config(__package_name__), "config.toml"
+    BaseDirectory.save_config_path(__package_name__), "config.toml"
 )
 tunnels_config_path = os.path.join(
-    BaseDirectory.load_first_config(__package_name__), "tunnels.toml"
+    BaseDirectory.save_config_path(__package_name__), "tunnels.toml"
 )
 
 
@@ -30,7 +30,7 @@ def main_config():
 
 def backup_tunnels_config():
     tunnels_bak = os.path.join(
-        BaseDirectory.load_first_config(__package_name__), "tunnels.toml.bak"
+        BaseDirectory.save_config_path(__package_name__), "tunnels.toml.bak"
     )
     copyfile(tunnels_config_path, tunnels_bak)
 
