@@ -78,21 +78,20 @@ function add_tunnels_config_download {
     fi
 }
 
-function bash_add_argscomplete {
+function bash_add_completions {
     echo ''
 
-    if cat $HOME/.bashrc | grep -q 'source $HOME/.bash_completion/python-argcomplete'; then
-        echo '`python-argcomplete` is already sourced in your bashrc. Nothing to be done'
+    if cat $HOME/.bashrc | grep -q 'source $HOME/.config/oo_bin/oo-complete.bash'; then
+        echo '`.config/oo_bin/oo-complete.bash` is already sourced in your bashrc. Nothing to be done'
     else
         # Activate command line completion
-        mkdir -p $HOME/.bash_completion
-        activate-global-python-argcomplete --dest $HOME/.bash_completion
+        _OO_COMPLETE=bash_source oo > ~/.config/oo_bin/oo-complete.bash
 
-        echo 'Sourcing `python-argcomplete` in ~/.bashrc'
+        echo 'Sourcing `~/.config/oo_bin/oo-complete.bash` in ~/.bashrc'
         # Temporarily add
-        source $HOME/.bash_completion/python-argcomplete
+        source $HOME/.config/oo_bin/oo-complete.bash
         # Permanently add
-        echo 'source $HOME/.bash_completion/python-argcomplete' >>$HOME/.bashrc
+        echo 'source $HOME/.config/oo_bin/oo-complete.bash' >>$HOME/.bashrc
     fi
 }
 
@@ -134,5 +133,5 @@ install_dependencies
 install
 add_tunnels_config_download
 bash_add_local_bin_to_path
-bash_add_argscomplete
+bash_add_completions
 convert_tunnels_conf
