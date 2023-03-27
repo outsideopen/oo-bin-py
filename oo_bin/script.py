@@ -7,7 +7,7 @@ class Script(ABC):
 
     @staticmethod
     @abstractmethod
-    def completion(prefix, parsed_args, **kwargs):
+    def shell_complete(ctx, param, incomplete):
         raise NotImplementedError()
 
     @staticmethod

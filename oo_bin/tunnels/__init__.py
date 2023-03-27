@@ -152,8 +152,12 @@ class Tunnels(Script):
             )
 
     @staticmethod
-    def completion(prefix, parsed_args, **kwargs):
-        return tuple(Tunnels.config.keys())
+    def shell_complete(ctx, param, incomplete):
+        tunnels_list = list(Tunnels.config.keys())
+        tunnels_list.sort()
+        return [
+            k for k in tunnels_list + ["status", "stop"] if k.startswith(incomplete)
+        ]
 
     @staticmethod
     def runtime_dependencies_met():
@@ -171,14 +175,14 @@ class Tunnels(Script):
     def run(args):
         tunnels = Tunnels()
 
-        if args.status or args.name == "status":
+        if args["status"] or args["name"] == "status":
             tunnels.status()
-        elif args.stop or args.name == "stop":
+        elif args["stop"] or args["name"] == "stop":
             tunnels.stop()
-        elif args.update:
+        elif args["update"]:
             update_tunnels_config()
         else:
-            if args.name == "":
+            if args["name"] == "":
                 raise ConfigNotFoundException("You need to specify a name")
             else:
-                tunnels.main(args.name)
+                tunnels.main(args["name"])
