@@ -1,9 +1,11 @@
+import os
 import shutil
 import sys
 import time
 from subprocess import DEVNULL, PIPE, Popen
 
 from colorama import Fore
+from xdg import BaseDirectory
 
 from oo_bin.config import tunnels_config
 from oo_bin.errors import (
@@ -44,39 +46,43 @@ class Tunnels(Script):
     browser_profile = "Tunnels"
     forwarding_port = "2080"
     config = tunnels_config()
-
-    def find_tunnel_process(self, cmd):
-        p1 = Popen(["ps", "-ef"], stdout=PIPE)
-        p2 = Popen(["grep", cmd], stdin=p1.stdout, stdout=PIPE)
-        p3 = Popen(["grep", Tunnels.forwarding_port], stdin=p2.stdout, stdout=PIPE)
-        p4 = Popen(["grep", "-v", "grep"], stdin=p3.stdout, stdout=PIPE)
-        return p4.communicate()
-
-    def find_tunnel_process_id(self, cmd):
-        output = self.find_tunnel_process(cmd)
-        return output[0].decode("utf-8").split()[1] if len(output[0]) > 0 else None
+    data_path = BaseDirectory.save_data_path("oo_bin")
+    pid_file = os.path.join(data_path, "autossh_pid")
+    firefox_pid_file = os.path.join(data_path, "firefox_pid")
 
     def find_tunnel_name(self):
-        output = self.find_tunnel_process(Tunnels.autossh_bin)
-        return output[0].decode("utf-8").split()[-1] if len(output[0]) > 0 else None
+        try:
+            with open(Tunnels.pid_file, "r") as f:
+                pid = f.read()
+                output = Popen(["ps", "-f", "-p", pid], stdout=PIPE).communicate()
+
+                return (
+                    output[0].decode("utf-8").split()[-1]
+                    if len(output[0]) > 0
+                    else None
+                )
+        except FileNotFoundError:
+            return None
 
     def status(self):
         tunnel = self.find_tunnel_name()
 
         if tunnel:
-            print("Dynamic SSH tunnel running to " + Fore.GREEN + f"{tunnel}")
+            print("SSH tunnel running to " + Fore.GREEN + f"{tunnel}")
         else:
-            print(Fore.YELLOW + "No dynamic SSH tunnels running")
+            print(Fore.YELLOW + "No SSH tunnel is running")
 
     def stop(self):
-        print("Stopping tunnels")
-        for cmd in [Tunnels.autossh_bin, Tunnels.ssh_bin]:
-            pid = self.find_tunnel_process_id(cmd)
-
-            if not pid:
-                print(Fore.YELLOW + f"{cmd} is not running", file=sys.stderr)
-            else:
+        try:
+            with open(Tunnels.pid_file, "r") as f:
+                print("Stopping tunnel to " + Fore.GREEN + f"{self.find_tunnel_name()}")
+                pid = f.read()
                 Popen(["kill", "-9", pid])
+                os.remove(Tunnels.pid_file)
+
+        except FileNotFoundError:
+            print(Fore.YELLOW + "autossh is not running", file=sys.stderr)
+
         if not is_wsl():
             self.kill_browser()
 
@@ -101,31 +107,27 @@ class Tunnels(Script):
             "ServerAliveCountMax=30",
             f"{jump_host}",
         ]
-        Popen(cmd, stdout=DEVNULL, stderr=DEVNULL)
+        pid = Popen(cmd, stdout=DEVNULL, stderr=DEVNULL).pid
+
+        with open(Tunnels.pid_file, "w") as f:
+            f.write(f"{pid}")
 
     def launch_browser(self, urls):
         cmd = [Tunnels.browser_bin, "-P", Tunnels.browser_profile] + urls
-        Popen(cmd, stdout=DEVNULL, stderr=DEVNULL)
+        pid = Popen(cmd, stdout=DEVNULL, stderr=DEVNULL).pid
+
+        with open(Tunnels.firefox_pid_file, "w") as f:
+            f.write(f"{pid}")
 
     def kill_browser(self):
-        p1 = Popen(["ps", "-ef"], stdout=PIPE)
-        p2 = Popen(
-            ["grep", "-i", Tunnels.browser_bin.split("/")[-1]],
-            stdin=p1.stdout,
-            stdout=PIPE,
-        )
-        p3 = Popen(
-            ["grep", "-i", Tunnels.browser_profile], stdin=p2.stdout, stdout=PIPE
-        )
-        p4 = Popen(["grep", "-v", "grep"], stdin=p3.stdout, stdout=PIPE)
-        output = p4.communicate()
+        try:
+            with open(Tunnels.firefox_pid_file, "r") as f:
+                pid = f.read()
+                Popen(["kill", "-9", pid])
+                os.remove(Tunnels.firefox_pid_file)
 
-        pid = output[0].decode("utf-8").split()[1] if len(output[0]) > 0 else None
-
-        if not pid:
+        except FileNotFoundError:
             return False
-        else:
-            Popen(["kill", "-9", pid])
 
         return True
 
