@@ -37,3 +37,23 @@ def backup_tunnels_config():
 
 def tunnels_config():
     return __get_config__(tunnels_config_path)
+
+
+def rdp_config():
+    config = tunnels_config()
+    rdp_config = {k: v for k, v in config.items() if v.get("type", "socks5") == "rdp"}
+    return rdp_config
+
+
+def socks5_config():
+    config = tunnels_config()
+    socks5_config = {
+        k: v for k, v in config.items() if v.get("type", "socks5") == "socks5"
+    }
+    return socks5_config
+
+
+def vnc_config():
+    config = tunnels_config()
+    vnc_config = {k: v for k, v in config.items() if v.get("type", "socks5") == "vnc"}
+    return vnc_config
