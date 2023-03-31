@@ -65,6 +65,6 @@ def auto_update():
 
     if auto_update:
         last_updated = __get_last_updated_time__()
-        if last_updated < datetime.today() - timedelta(days=7):
+        if last_updated < datetime.today() - timedelta(days=1):
             update_tunnels_config()
             __set_last_updated_time__()

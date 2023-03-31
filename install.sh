@@ -57,12 +57,11 @@ function add_tunnels_config_download {
         esac
 
         read -p "url: [https://outsideopen.com/drop/tunnels.toml] " URL
-        URL=${URL:-https://outsideopen.com/drop/tunnels.toml}
-        read -p "username: [oo] " USERNAME
-        USERNAME=${USERNAME:-oo}
+        URL=${URL:-https://outsideopen.com/oo_bin/tunnels.toml}
+        read -r -p "username: " USERNAME
         read -r -s -p "password: " PASSWORD
         echo ""
-        read -p "Automatically check for updates, once a week? (Y/N): " AUTO
+        read -p "Automatically check for updates, once a day? (Y/N): " AUTO
         case $AUTO in
             [yY]*) AUTO="true" ;;
             *) AUTO="false" ;;
