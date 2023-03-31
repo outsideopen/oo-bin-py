@@ -62,7 +62,7 @@ function add_tunnels_config_download {
         USERNAME=${USERNAME:-oo}
         read -r -s -p "password: " PASSWORD
         echo ""
-        read -p "Automatically check for updates, once a week? (Y/N): " AUTO
+        read -p "Automatically check for updates, once a day? (Y/N): " AUTO
         case $AUTO in
             [yY]*) AUTO="true" ;;
             *) AUTO="false" ;;
