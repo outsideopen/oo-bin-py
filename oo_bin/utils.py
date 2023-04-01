@@ -53,9 +53,12 @@ def __set_last_updated_time__():
 
 
 def __get_last_updated_time__():
-    with open(last_update_file, "r") as f:
-        line = f.readline().strip()
-        return datetime.strptime(line, "%Y-%m-%d %H:%M:%S.%f")
+    try:
+        with open(last_update_file, "r") as f:
+            line = f.readline().strip()
+            return datetime.strptime(line, "%Y-%m-%d %H:%M:%S.%f")
+    except FileNotFoundError:
+        return datetime.min
 
 
 def auto_update():
