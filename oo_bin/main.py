@@ -36,6 +36,10 @@ def cli():
 @click.argument("profile", shell_complete=Socks5.shell_complete, required=False)
 # @click.argument("host", required=False)
 def tunnels(ctx, status, stop, update, profile):
+    if profile is None:
+        click.echo(ctx.get_help())
+        return None
+
     if ctx.invoked_subcommand is None:
         socks5 = Socks5(profile)
         socks5.runtime_dependencies_met()
@@ -57,6 +61,10 @@ def tunnels(ctx, status, stop, update, profile):
 @click.argument("profile", shell_complete=Rdp.shell_complete, required=False)
 # @click.argument("host", required=True)
 def rdp(status, stop, update, profile):
+    if profile is None:
+        click.echo(click.get_current_context().get_help())
+        return None
+
     rdp = Rdp(profile)
     rdp.runtime_dependencies_met()
     return rdp.run({"status": status, "stop": stop, "update": update})
@@ -71,6 +79,10 @@ def rdp(status, stop, update, profile):
 @click.argument("profile", shell_complete=Vnc.shell_complete, required=False)
 # @click.argument("host", required=True)
 def vnc(status, stop, update, profile):
+    if profile is None:
+        click.echo(click.get_current_context().get_help())
+        return None
+
     vnc = Vnc(profile)
     vnc.runtime_dependencies_met()
     return vnc.run({"status": status, "stop": stop, "update": update})
