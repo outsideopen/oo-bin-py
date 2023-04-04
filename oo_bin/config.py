@@ -19,9 +19,12 @@ tunnels_config_path = os.path.join(
 
 
 def __get_config__(path):
-    with open(path, "rb") as f:
-        data = tomllib.load(f)
-        return data
+    try:
+        with open(path, "rb") as f:
+            data = tomllib.load(f)
+            return data
+    except FileNotFoundError:
+        return {}
 
 
 def main_config():

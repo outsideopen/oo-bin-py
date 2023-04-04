@@ -33,7 +33,7 @@ We support the following Remote desktop clients
 ## SSH
 (**TODO:** Make tunnels.conf available for secure download by OO employees)
 
-You need an SSH configuration, and matching `tunnels.conf`
+You need an SSH configuration, and matching `tunnels.toml`
 
 ## Firefox
 
