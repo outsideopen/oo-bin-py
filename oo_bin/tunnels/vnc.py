@@ -1,4 +1,5 @@
 import os
+import shutil
 from subprocess import DEVNULL, Popen
 
 from click.shell_completion import CompletionItem
@@ -8,10 +9,11 @@ from oo_bin.config import vnc_config
 from oo_bin.errors import (
     ConfigNotFoundException,
     DependencyNotMetException,
+    SystemNotSupportedException,
     TunnelAlreadyStartedException,
 )
 from oo_bin.tunnels.tunnel import Tunnel
-from oo_bin.utils import update_tunnels_config
+from oo_bin.utils import is_linux, is_mac, is_wsl, update_tunnels_config
 
 
 class Vnc(Tunnel):
@@ -74,14 +76,32 @@ class Vnc(Tunnel):
             f.write(f"{pid}")
 
         self.__launch_vnc__()
-        print("Launching vnc")
+
+    def __vnc_cmd__(self):
+        if is_wsl():
+            viewer = shutil.which(
+                "vncviewer.exe", path="/mnt/c/Program Files/RealVNC/VNC Viewer"
+            )
+            return [
+                viewer,
+                "-useaddressbook",
+                f"{self.config['host']}::{self.config['port']}",
+            ]
+        elif is_mac():
+            url = f"vnc://{self.config['host']:{self.config['port']}}"
+            return ["open", url]
+
+        elif is_linux():
+            url = f"vnc://{self.config['host']}:{self.config['port']}"
+            print("Automatically launching VNC client on linux is not supported")
+            print(f"You can manually launch your client at {url}")
+
+            return ["true"]
+
+        SystemNotSupportedException("Your system is not supported")
 
     def __launch_vnc__(self):
-        config = vnc_config()
-        forward_host = config.get("forward_host", "localhost")
-        forward_port = config.get("forward_port", "5900")
-
-        cmd = ["rdesktop", f"{forward_host}:{forward_port}"]
+        cmd = self.__vnc_cmd__()
         pid = Popen(cmd).pid
 
         with open(self.__vnc_pid_file__, "w") as f:

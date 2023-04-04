@@ -21,6 +21,10 @@ We support the following Remote desktop clients
 - [Microsoft Remote Desktop](https://apps.apple.com/app/microsoft-remote-desktop/id1295203466?mt=12) (Mac)<sup>*</sup>
 - [Rdesktop](http://www.rdesktop.org/) (Linux)
 
+## Vnc
+
+- [RealVNC](https://www.realvnc.com/en/connect/download/viewer/windows/) (Windows)<sup>*</sup>
+- Built in VNC Viewer (Mac)
 
 <sup>*</sup> Opens the app, but does not launch the correct profile
 
