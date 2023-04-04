@@ -13,6 +13,17 @@ Outside Open Bin scripts that work across Linux, Mac and Windows Subsystem for L
 - ssh
 - Autossh
 
+## RDP
+
+We support the following Remote desktop clients
+
+- [mstsc](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/mstsc) (Windows)
+- [Microsoft Remote Desktop](https://apps.apple.com/app/microsoft-remote-desktop/id1295203466?mt=12) (Mac)<sup>*</sup>
+- [Rdesktop](http://www.rdesktop.org/) (Linux)
+
+
+<sup>*</sup> Opens the app, but does not launch the correct profile
+
 # Configuration
 
 ## SSH
