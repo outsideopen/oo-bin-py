@@ -57,10 +57,6 @@ class Rdp(Tunnel):
                 f"/v:{self.config['forward_host']}:{self.config['forward_port']}",
             ]
         elif is_mac():
-            rdp = shutil.which(
-                "Microsoft Remote Desktop",
-                path="/Applications/Microsoft Remote Desktop.app/Contents/MacOS",
-            )
             url = "rdp://"
             if self.config["user"]:
                 url += f"{self.config['user']}@"
@@ -69,14 +65,11 @@ class Rdp(Tunnel):
             return ["open", url]
 
         elif is_linux():
-            rdp = shutil.which("rdesktop")
-            return [
-                rdp,
-                "-g",
-                f"{self.config['width']}x{self.config['height']}",
-                "-e",
-                f"{self.config['forward_host']}:{self.config['forward_port']}",
-            ]
+            url = f"rdp://{self.config['host']}:{self.config['port']}"
+            print("Automatically launching RDP client on linux is not supported")
+            print(f"You can manually launch your client at {url}")
+
+            return ["true"]
 
         SystemNotSupportedException("Your system is not supported")
 
