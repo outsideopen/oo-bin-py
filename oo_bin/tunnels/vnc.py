@@ -39,8 +39,6 @@ class Vnc(Tunnel):
             "jump_host": section.get("jump_host", None),
             "host": section.get("host", None),
             "port": section.get("port", None),
-            "width": section.get("width", "1920"),
-            "height": section.get("height", "1080"),
             "forward_host": section.get("forward_host", "127.0.0.1"),
             "forward_port": section.get("forward_port", "33389"),
         }
