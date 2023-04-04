@@ -31,24 +31,19 @@ We support the following Remote desktop clients
 # Configuration
 
 ## SSH
-(**TODO:** Make tunnels.conf available for secure download by OO employees)
 
 You need an SSH configuration, and matching `tunnels.toml`
 
 ## Firefox
 
-Create a new profile called "Tunnels"
-- Open Firefox with the Tunnels profile:
-  - Enter about:config -> accept -> find browser.ssl_override_behavior and change its value from 2 to 1.
+Set up Tunnels profile in Firefox:
+- Open Firefox and enter `about:profiles` in the URL bar
+- Create a new profile called "Tunnels"
+- Close/re-open Firefox with the Tunnels profile
   - Preferences -> General -> Network Settings -> Manual proxy configuration
-
-      SOCKS HOST: localhost
-
-      Port: 2080
-
-      SOCKS v5: check
-
-
+    -  SOCKS HOST: localhost
+    -  Port: 2080
+    -  SOCKS v5: check
 
 
 # Installation
