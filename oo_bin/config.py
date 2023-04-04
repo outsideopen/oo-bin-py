@@ -1,5 +1,6 @@
 import os
 from shutil import copyfile
+from os.path import exists
 
 from xdg import BaseDirectory
 
@@ -32,10 +33,11 @@ def main_config():
 
 
 def backup_tunnels_config():
-    tunnels_bak = os.path.join(
-        BaseDirectory.save_config_path(__package_name__), "tunnels.toml.bak"
-    )
-    copyfile(tunnels_config_path, tunnels_bak)
+    if exists(tunnels_config_path):
+        tunnels_bak = os.path.join(
+            BaseDirectory.save_config_path(__package_name__), "tunnels.toml.bak"
+        )
+        copyfile(tunnels_config_path, tunnels_bak)
 
 
 def tunnels_config():
