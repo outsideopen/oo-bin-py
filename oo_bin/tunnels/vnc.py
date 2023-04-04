@@ -79,11 +79,13 @@ class Vnc(Tunnel):
 
     def __vnc_cmd__(self):
         if is_wsl():
-            viewer = shutil.which("vncviewer.exe", path="/mnt/c/Program Files/RealVNC/VNC Viewer")
+            viewer = shutil.which(
+                "vncviewer.exe", path="/mnt/c/Program Files/RealVNC/VNC Viewer"
+            )
             return [
                 viewer,
                 "-useaddressbook",
-                f"{self.config['host']}::{self.config['port']}"
+                f"{self.config['host']}::{self.config['port']}",
             ]
         elif is_mac():
             url = f"vnc://{self.config['host']:{self.config['port']}}"
