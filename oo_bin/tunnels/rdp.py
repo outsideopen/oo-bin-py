@@ -1,6 +1,9 @@
 import os
+import shutil
+import sys
 from subprocess import DEVNULL, Popen
 
+import colorama
 from click.shell_completion import CompletionItem
 from xdg import BaseDirectory
 
@@ -8,9 +11,10 @@ from oo_bin.config import rdp_config
 from oo_bin.errors import (
     ConfigNotFoundException,
     DependencyNotMetException,
+    SystemNotSupportedException,
 )
 from oo_bin.tunnels.tunnel import Tunnel
-from oo_bin.utils import is_wsl, update_tunnels_config
+from oo_bin.utils import is_linux, is_mac, is_wsl, update_tunnels_config
 
 
 class Rdp(Tunnel):
@@ -34,11 +38,47 @@ class Rdp(Tunnel):
 
         return {
             "jump_host": section.get("jump_host", None),
+            "user": section.get("user", None),
             "host": section.get("host", None),
             "port": section.get("port", None),
+            "width": section.get("width", "1920"),
+            "height": section.get("height", "1080"),
             "forward_host": section.get("forward_host", "127.0.0.1"),
             "forward_port": section.get("forward_port", "33389"),
         }
+
+    def __rdp_cmd__(self):
+        if is_wsl():
+            mstsc = shutil.which("mstsc.exe", path="/mnt/c/Windows/system32")
+            return [
+                mstsc,
+                f"/w:{self.config['width']}",
+                f"/h:{self.config['height']}",
+                f"/v:{self.config['forward_host']}:{self.config['forward_port']}",
+            ]
+        elif is_mac():
+            rdp = shutil.which(
+                "Microsoft Remote Desktop",
+                path="/Applications/Microsoft Remote Desktop.app/Contents/MacOS",
+            )
+            url = "rdp://"
+            if self.config["user"]:
+                url += f"{self.config['user']}@"
+            url += f"{self.config['host']:{self.config['port']}}"
+
+            return ["open", url]
+
+        elif is_linux():
+            rdp = shutil.which("rdesktop")
+            return [
+                rdp,
+                "-g",
+                f"{self.config['width']}x{self.config['height']}",
+                "-e",
+                f"{self.config['forward_host']}:{self.config['forward_port']}",
+            ]
+
+        SystemNotSupportedException("Your system is not supported")
 
     def stop(self):
         super().stop()
@@ -73,14 +113,18 @@ class Rdp(Tunnel):
         print("Launching rdp")
 
     def __launch_rdp__(self):
-        cmd = [
-            "rdesktop",
-            f"{self.config['forward_host']}:{self.config['forward_port']}",
-        ]
-        pid = Popen(cmd, stdout=DEVNULL, stderr=DEVNULL).pid
+        try:
+            cmd = self.__rdp_cmd__()
+            pid = Popen(cmd, stdout=DEVNULL, stderr=DEVNULL).pid
 
-        with open(self.__rdp_pid_file__, "w") as f:
-            f.write(f"{pid}")
+            with open(self.__rdp_pid_file__, "w") as f:
+                f.write(f"{pid}")
+        except TypeError:
+            print(
+                colorama.Fore.RED + f"Error: Could not find RDP executable",
+                file=sys.stderr,
+            )
+            sys.exit(1)
 
     def __kill_rdp__(self):
         try:
