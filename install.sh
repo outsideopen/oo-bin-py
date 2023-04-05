@@ -29,7 +29,7 @@ function install_dependencies {
 }
 
 function install {
-    VERSION=$(curl -L https://api.github.com/repos/outsideopen/oo-bin-py/releases/latest | grep tag_name | grep -Eo '[0-9]\.[0-9]\.[0-9]')
+    VERSION=$(curl -L https://api.github.com/repos/outsideopen/oo-bin-py/releases/latest | grep tag_name | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
     curl -LJO https://github.com/outsideopen/oo-bin-py/releases/download/${VERSION}/oo_bin-${VERSION}-py3-none-any.whl
 
     pip3 install ./"oo_bin-${VERSION}-py3-none-any.whl"
