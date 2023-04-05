@@ -40,7 +40,7 @@ class Vnc(Tunnel):
             "host": section.get("host", None),
             "port": section.get("port", None),
             "forward_host": section.get("forward_host", "127.0.0.1"),
-            "forward_port": section.get("forward_port", "33389"),
+            "forward_port": section.get("forward_port", "5900"),
         }
 
     def stop(self):
@@ -85,14 +85,14 @@ class Vnc(Tunnel):
             return [
                 viewer,
                 "-useaddressbook",
-                f"{self.config['host']}::{self.config['port']}",
+                f"{self.config['forward_host']}::{self.config['forward_port']}",
             ]
         elif is_mac():
-            url = f"vnc://{self.config['host']:{self.config['port']}}"
+            url = f"vnc://{self.config['forward_host']:{self.config['forward_port']}}"
             return ["open", url]
 
         elif is_linux():
-            url = f"vnc://{self.config['host']}:{self.config['port']}"
+            url = f"vnc://{self.config['forward_host']}:{self.config['forward_port']}"
             print("Automatically launching VNC client on linux is not supported")
             print(f"You can manually launch your client at {url}")
 

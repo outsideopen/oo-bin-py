@@ -57,15 +57,13 @@ class Rdp(Tunnel):
                 f"/v:{self.config['forward_host']}:{self.config['forward_port']}",
             ]
         elif is_mac():
-            url = "rdp://"
-            if self.config["user"]:
-                url += f"{self.config['user']}@"
-            url += f"{self.config['host']:{self.config['port']}}"
+            url = f"rdp://{self.config['forward_host']:{self.config['forward_port']}}"
 
             return ["open", url]
 
         elif is_linux():
-            url = f"rdp://{self.config['host']}:{self.config['port']}"
+            url = f"rdp://{self.config['forward_host']}:{self.config['forward_port']}"
+
             print("Automatically launching RDP client on linux is not supported")
             print(f"You can manually launch your client at {url}")
 
