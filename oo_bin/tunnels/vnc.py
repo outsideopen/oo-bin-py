@@ -71,7 +71,7 @@ class Vnc(Tunnel):
             f"{self.config['jump_host']}",
         ]
 
-        with open(self.__cache_file__, "w+") as f1:
+        with open(self.__cache_file__, "a") as f1:
             pid = Popen(cmd, stdout=DEVNULL, stderr=f1).pid
 
             with open(self.__pid_file__, "w") as f2:
@@ -105,7 +105,7 @@ class Vnc(Tunnel):
     def __launch_vnc__(self):
         cmd = self.__vnc_cmd__()
 
-        with open(self.__cache_file__, "w+") as f1:
+        with open(self.__cache_file__, "a") as f1:
             pid = Popen(cmd, stdout=DEVNULL, stderr=f1).pid
 
             with open(self.__vnc_pid_file__, "w") as f2:
@@ -116,7 +116,7 @@ class Vnc(Tunnel):
             with open(self.__vnc_pid_file__, "r") as f1:
                 pid = f1.read()
 
-                with open(self.__cache_file__, "w+") as f2:
+                with open(self.__cache_file__, "a") as f2:
                     Popen(["kill", pid], stdout=DEVNULL, stderr=f2)
                     os.remove(self.__vnc_pid_file__)
 

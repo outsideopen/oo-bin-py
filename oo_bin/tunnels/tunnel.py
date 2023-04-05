@@ -64,7 +64,7 @@ class Tunnel(Script):
                 print("Stopping tunnel to " + Fore.GREEN + f"{self.jump_host()}")
                 pid = f1.read()
 
-                with open(self.__cache_file__, "w+") as f2:
+                with open(self.__cache_file__, "a") as f2:
                     Popen(["kill", pid], stdout=DEVNULL, stderr=f2)
                     os.remove(self.__pid_file__)
 
