@@ -70,10 +70,12 @@ class Vnc(Tunnel):
             f"{self.__ssh_config__}",
             f"{self.config['jump_host']}",
         ]
-        pid = Popen(cmd, stdout=DEVNULL, stderr=DEVNULL).pid
 
-        with open(self.__pid_file__, "w") as f:
-            f.write(f"{pid}")
+        with open(self.__cache_file__, "w+") as f1:
+            pid = Popen(cmd, stdout=DEVNULL, stderr=f1).pid
+
+            with open(self.__pid_file__, "w") as f2:
+                f2.write(f"{pid}")
 
         self.__launch_vnc__()
 
@@ -102,17 +104,21 @@ class Vnc(Tunnel):
 
     def __launch_vnc__(self):
         cmd = self.__vnc_cmd__()
-        pid = Popen(cmd).pid
 
-        with open(self.__vnc_pid_file__, "w") as f:
-            f.write(f"{pid}")
+        with open(self.__cache_file__, "w+") as f1:
+            pid = Popen(cmd, stdout=DEVNULL, stderr=f1).pid
+
+            with open(self.__vnc_pid_file__, "w") as f2:
+                f2.write(f"{pid}")
 
     def __kill_vnc__(self):
         try:
-            with open(self.__vnc_pid_file__, "r") as f:
-                pid = f.read()
-                Popen(["kill", pid], stdout=DEVNULL, stderr=DEVNULL)
-                os.remove(self.__vnc_pid_file__)
+            with open(self.__vnc_pid_file__, "r") as f1:
+                pid = f1.read()
+
+                with open(self.__cache_file__, "w+") as f2:
+                    Popen(["kill", pid], stdout=DEVNULL, stderr=f2)
+                    os.remove(self.__vnc_pid_file__)
 
         except FileNotFoundError:
             return False

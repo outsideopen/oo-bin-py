@@ -4,6 +4,7 @@ import sys
 from subprocess import DEVNULL, PIPE, Popen
 
 from colorama import Fore
+from xdg import BaseDirectory
 
 from oo_bin.config import main_config
 from oo_bin.errors import DependencyNotMetException, TunnelAlreadyStartedException
@@ -13,6 +14,12 @@ from oo_bin.script import Script
 class Tunnel(Script):
     def __init__(self, profile):
         self.profile = profile
+        self.__cache_file__ = os.path.join(
+            BaseDirectory.save_cache_path("oo_bin"), "tunnels.log"
+        )
+        # Clear logfile... we only save errors for the current session
+        open(self.__cache_file__, "w").close()
+
         self.__autossh_bin__ = "autossh" if shutil.which("autossh") else None
 
         self.__ssh_config__ = os.path.expanduser(
@@ -53,11 +60,13 @@ class Tunnel(Script):
 
     def stop(self):
         try:
-            with open(self.__pid_file__, "r") as f:
+            with open(self.__pid_file__, "r") as f1:
                 print("Stopping tunnel to " + Fore.GREEN + f"{self.jump_host()}")
-                pid = f.read()
-                Popen(["kill", pid], stdout=DEVNULL, stderr=DEVNULL)
-                os.remove(self.__pid_file__)
+                pid = f1.read()
+
+                with open(self.__cache_file__, "w+") as f2:
+                    Popen(["kill", pid], stdout=DEVNULL, stderr=f2)
+                    os.remove(self.__pid_file__)
 
         except FileNotFoundError:
             print(Fore.YELLOW + "autossh is not running", file=sys.stderr)
