@@ -36,18 +36,6 @@ function install {
     rm oo_bin-${VERSION}-py3-none-any.whl
 }
 
-function bash_add_local_bin_to_path {
-    echo ''
-
-    if cat $HOME/.bashrc | grep -q 'PATH=$PATH:$HOME/.local/bin'; then
-        echo '`$HOME/.local/bin` is already added to your path. Nothing to be done'
-    else
-        echo 'Adding `PATH=$PATH:$HOME/.local/bin` to ~/.bashrc'
-        export PATH=$PATH:$HOME/.local/bin
-        echo 'PATH=$PATH:$HOME/.local/bin' >>$HOME/.bashrc
-    fi
-}
-
 function add_tunnels_config_download {
     if ! grep -s -q "\[tunnels\.update\]" $HOME/.config/oo_bin/config.toml; then
         read -p "Enable remote tunnels config update? (Y/N): " CONFIRM
@@ -77,6 +65,30 @@ function add_tunnels_config_download {
     fi
 }
 
+function bash_version_check {
+    VERSION=$(bash --version | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
+    MAJOR_VERSION=$(echo $VERSION | sed -E 's/([0-9]+)\.[0-9]+\.[0-9]+/\1/')
+
+    if [ "${MAJOR_VERSION}" -lt "4" ]; then
+        echo "Command line completions requires Bash v4+"
+        echo "The completions will not be installed, please consider updating bash, and running this script again."
+        return 1
+    fi
+    return 0
+}
+
+function bash_add_local_bin_to_path {
+    echo ''
+
+    if cat $HOME/.bashrc | grep -q 'PATH=$PATH:$HOME/.local/bin'; then
+        echo '`$HOME/.local/bin` is already added to your path. Nothing to be done'
+    else
+        echo 'Adding `PATH=$PATH:$HOME/.local/bin` to ~/.bashrc'
+        export PATH=$PATH:$HOME/.local/bin
+        echo 'PATH=$PATH:$HOME/.local/bin' >>$HOME/.bashrc
+    fi
+}
+
 function bash_add_completions {
     echo ''
 
@@ -84,7 +96,7 @@ function bash_add_completions {
         echo '`.config/oo_bin/oo-complete.bash` is already sourced in your bashrc. Nothing to be done'
     else
         # Activate command line completion
-        _OO_COMPLETE=bash_source oo > ~/.config/oo_bin/oo-complete.bash
+        _OO_COMPLETE=bash_source oo >~/.config/oo_bin/oo-complete.bash
 
         echo 'Sourcing `~/.config/oo_bin/oo-complete.bash` in ~/.bashrc'
         # Temporarily add
@@ -131,6 +143,8 @@ make_config
 install_dependencies
 install
 add_tunnels_config_download
-bash_add_local_bin_to_path
-bash_add_completions
+if bash_version_check; then
+    bash_add_local_bin_to_path
+    bash_add_completions
+fi
 convert_tunnels_conf
