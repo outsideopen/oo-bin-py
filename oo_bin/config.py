@@ -1,6 +1,6 @@
 import os
-from shutil import copyfile
 from os.path import exists
+from shutil import copyfile
 
 from xdg import BaseDirectory
 
@@ -16,6 +16,9 @@ main_config_path = os.path.join(
 )
 tunnels_config_path = os.path.join(
     BaseDirectory.save_config_path(__package_name__), "tunnels.toml"
+)
+ssh_config_path = os.path.join(
+    BaseDirectory.save_config_path(__package_name__), "ssh_config"
 )
 
 
@@ -38,6 +41,12 @@ def backup_tunnels_config():
             BaseDirectory.save_config_path(__package_name__), "tunnels.toml.bak"
         )
         copyfile(tunnels_config_path, tunnels_bak)
+
+    if exists(ssh_config_path):
+        ssh_bak = os.path.join(
+            BaseDirectory.save_config_path(__package_name__), "ssh_config.bak"
+        )
+        copyfile(ssh_config_path, ssh_bak)
 
 
 def tunnels_config():

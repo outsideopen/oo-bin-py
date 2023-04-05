@@ -93,6 +93,8 @@ class Socks5(Tunnel):
             "ServerAliveInterval=3",
             "-o",
             "ServerAliveCountMax=30",
+            "-F",
+            f"{self.__ssh_config__}",
             f"{self.config['jump_host']}",
         ]
         with open(self.__cache_file__, "a") as f1:
