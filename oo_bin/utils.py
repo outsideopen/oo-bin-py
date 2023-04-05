@@ -7,7 +7,7 @@ import requests
 from colorama import Fore
 from xdg import BaseDirectory
 
-from oo_bin.config import backup_tunnels_config, main_config, tunnels_config_path
+from oo_bin.config import backup_tunnels_config, main_config, config_path
 
 data_path = BaseDirectory.save_data_path("oo_bin")
 last_update_file = os.path.join(data_path, "last_update")
@@ -34,16 +34,21 @@ def update_tunnels_config():
     if enabled:
         backup_tunnels_config()
 
-        urls = [f"{update.get('url')}/tunnels.toml", f"{update.get('url')}/ssh_config"]
+        files = ["tunnels.toml", "ssh_config"]
         username = update.get("username")
         password = update.get("password")
 
-        for url in urls:
-            with requests.get(url, auth=(username, password), stream=True) as r:
+        for file in files:
+            with requests.get(
+                f"{update.get('url')}/{file}", auth=(username, password), stream=True
+            ) as r:
                 r.raise_for_status()
-                with open(tunnels_config_path, "wb") as f:
+                with open(f"{config_path}/{file}", "wb") as f:
                     shutil.copyfileobj(r.raw, f)
-            print(Fore.GREEN + f"Your configuration has been updated from {url}")
+            print(
+                Fore.GREEN
+                + f"Your configuration has been updated from {update.get('url')}/{file}"
+            )
     else:
         print(Fore.RED + "Remote updates are disabled in your configuration")
 

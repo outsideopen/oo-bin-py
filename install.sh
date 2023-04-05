@@ -143,6 +143,8 @@ make_config
 install_dependencies
 install
 add_tunnels_config_download
+# We need to update here, or the completions fail
+oo tunnels --update
 if bash_version_check; then
     bash_add_local_bin_to_path
     bash_add_completions

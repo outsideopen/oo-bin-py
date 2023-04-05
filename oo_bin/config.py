@@ -11,6 +11,7 @@ except ModuleNotFoundError:
 
 __package_name__ = "oo_bin"
 
+config_path = BaseDirectory.save_config_path(__package_name__)
 main_config_path = os.path.join(
     BaseDirectory.save_config_path(__package_name__), "config.toml"
 )
