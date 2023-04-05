@@ -95,10 +95,11 @@ class Socks5(Tunnel):
             "ServerAliveCountMax=30",
             f"{self.config['jump_host']}",
         ]
-        pid = Popen(cmd, stdout=DEVNULL, stderr=DEVNULL).pid
+        with open(self.__cache_file__, "w+") as f1:
+            pid = Popen(cmd, stdout=DEVNULL, stderr=f1).pid
 
-        with open(self.__pid_file__, "w") as f:
-            f.write(f"{pid}")
+            with open(self.__pid_file__, "w") as f2:
+                f2.write(f"{pid}")
 
         time.sleep(1)
 
@@ -114,16 +115,19 @@ class Socks5(Tunnel):
 
     def __launch_browser__(self, urls):
         cmd = [self.__browser_bin__, "-P", self.__browser_profile__] + urls
-        pid = Popen(cmd, stdout=DEVNULL, stderr=DEVNULL).pid
 
-        with open(self.__firefox_pid_file__, "w") as f:
-            f.write(f"{pid}")
+        with open(self.__cache_file__, "w+") as f1:
+            pid = Popen(cmd, stdout=DEVNULL, stderr=f1).pid
+
+            with open(self.__firefox_pid_file__, "w") as f2:
+                f2.write(f"{pid}")
 
     def __kill_browser__(self):
         try:
-            with open(self.__firefox_pid_file__, "r") as f:
-                pid = f.read()
-                Popen(["kill", "-9", pid], stdout=DEVNULL, stderr=DEVNULL)
+            with open(self.__firefox_pid_file__, "r") as f1:
+                pid = f1.read()
+                with open(self.__cache_file__, "w+") as f2:
+                    Popen(["kill", "-9", pid], stdout=DEVNULL, stderr=f2)
                 os.remove(self.__firefox_pid_file__)
 
         except FileNotFoundError:

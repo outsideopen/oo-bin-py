@@ -95,10 +95,11 @@ class Rdp(Tunnel):
             f"{self.__ssh_config__}",
             f"{self.config['jump_host']}",
         ]
-        pid = Popen(cmd, stdout=DEVNULL, stderr=DEVNULL).pid
+        with open(self.__cache_file__, "w+") as f1:
+            pid = Popen(cmd, stdout=DEVNULL, stderr=f1).pid
 
-        with open(self.__pid_file__, "w") as f:
-            f.write(f"{pid}")
+            with open(self.__pid_file__, "w") as f2:
+                f2.write(f"{pid}")
 
         self.__launch_rdp__()
         print("Launching rdp")
@@ -106,10 +107,13 @@ class Rdp(Tunnel):
     def __launch_rdp__(self):
         try:
             cmd = self.__rdp_cmd__()
-            pid = Popen(cmd, stdout=DEVNULL, stderr=DEVNULL).pid
 
-            with open(self.__rdp_pid_file__, "w") as f:
-                f.write(f"{pid}")
+            with open(self.__cache_file__, "w+") as f1:
+                pid = Popen(cmd, stdout=DEVNULL, stderr=f1).pid
+
+                with open(self.__rdp_pid_file__, "w") as f2:
+                    f2.write(f"{pid}")
+
         except TypeError:
             print(
                 colorama.Fore.RED + f"Error: Could not find RDP executable",
@@ -119,9 +123,11 @@ class Rdp(Tunnel):
 
     def __kill_rdp__(self):
         try:
-            with open(self.__rdp_pid_file__, "r") as f:
-                pid = f.read()
-                Popen(["kill", pid], stdout=DEVNULL, stderr=DEVNULL)
+            with open(self.__rdp_pid_file__, "r") as f1:
+                pid = f1.read()
+
+                with open(self.__cache_file__, "w+") as f2:
+                    Popen(["kill", pid], stdout=DEVNULL, stderr=f2)
                 os.remove(self.__rdp_pid_file__)
 
         except FileNotFoundError:
