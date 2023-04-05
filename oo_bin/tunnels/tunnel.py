@@ -6,7 +6,7 @@ from subprocess import DEVNULL, PIPE, Popen
 from colorama import Fore
 from xdg import BaseDirectory
 
-from oo_bin.config import main_config
+from oo_bin.config import main_config, ssh_config_path
 from oo_bin.errors import DependencyNotMetException, TunnelAlreadyStartedException
 from oo_bin.script import Script
 
@@ -22,10 +22,8 @@ class Tunnel(Script):
 
         self.__autossh_bin__ = "autossh" if shutil.which("autossh") else None
 
-        self.__ssh_config__ = os.path.expanduser(
-            main_config()
-            .get("tunnels", {})
-            .get("ssh_config", os.path.expanduser("~/.ssh/config"))
+        self.__ssh_config__ = (
+            main_config().get("tunnels", {}).get("ssh_config", ssh_config_path)
         )
 
     def jump_host(self):

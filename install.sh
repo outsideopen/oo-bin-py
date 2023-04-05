@@ -44,8 +44,8 @@ function add_tunnels_config_download {
             *) return ;;
         esac
 
-        read -p "url: [https://outsideopen.com/oo_bin/tunnels.toml] " URL
-        URL=${URL:-https://outsideopen.com/oo_bin/tunnels.toml}
+        read -p "url: [https://outsideopen.com/oo_bin] " URL
+        URL=${URL:-https://outsideopen.com/oo_bin}
         read -r -p "username: " USERNAME
         read -r -s -p "password: " PASSWORD
         echo ""

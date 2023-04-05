@@ -34,15 +34,16 @@ def update_tunnels_config():
     if enabled:
         backup_tunnels_config()
 
-        url = update.get("url")
+        urls = [f"{update.get('url')}/tunnels.toml", f"{update.get('url')}/ssh_config"]
         username = update.get("username")
         password = update.get("password")
 
-        with requests.get(url, auth=(username, password), stream=True) as r:
-            r.raise_for_status()
-            with open(tunnels_config_path, "wb") as f:
-                shutil.copyfileobj(r.raw, f)
-        print(Fore.GREEN + f"Your configuration has been updated from {url}")
+        for url in urls:
+            with requests.get(url, auth=(username, password), stream=True) as r:
+                r.raise_for_status()
+                with open(tunnels_config_path, "wb") as f:
+                    shutil.copyfileobj(r.raw, f)
+            print(Fore.GREEN + f"Your configuration has been updated from {url}")
     else:
         print(Fore.RED + "Remote updates are disabled in your configuration")
 
