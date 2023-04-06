@@ -78,8 +78,6 @@ function bash_version_check {
 }
 
 function bash_add_local_bin_to_path {
-    echo ''
-
     if cat $HOME/.bashrc | grep -q 'PATH=$PATH:$HOME/.local/bin'; then
         echo '`$HOME/.local/bin` is already added to your path. Nothing to be done'
     else
@@ -90,63 +88,38 @@ function bash_add_local_bin_to_path {
 }
 
 function bash_add_completions {
-    echo ''
+    # Activate command line completion
+    _OO_COMPLETE=bash_source oo >$HOME/.config/oo_bin/oo-complete.bash
 
     if cat $HOME/.bashrc | grep -q 'source $HOME/.config/oo_bin/oo-complete.bash'; then
         echo '`.config/oo_bin/oo-complete.bash` is already sourced in your bashrc. Nothing to be done'
     else
-        # Activate command line completion
-        _OO_COMPLETE=bash_source oo >~/.config/oo_bin/oo-complete.bash
-
-        echo 'Sourcing `~/.config/oo_bin/oo-complete.bash` in ~/.bashrc'
-        # Temporarily add
-        source $HOME/.config/oo_bin/oo-complete.bash
-        # Permanently add
+        echo 'Adding `source ~/.config/oo_bin/oo-complete.bash` to ~/.bashrc'
         echo 'source $HOME/.config/oo_bin/oo-complete.bash' >>$HOME/.bashrc
     fi
 }
 
-function convert_tunnels_conf {
-    OLD_CONFIG=$HOME/.config/oo_bin/tunnels.conf
-    NEW_CONFIG=$HOME/.config/oo_bin/tunnels.toml
-
-    if [ -f "$OLD_CONFIG" ]; then
-        while IFS=',' read -r NAME JUMP_HOST URLS || [ -n "$line" ]; do
-            if [ "$NAME" == "Location" ]; then continue; fi
-            echo "[${NAME}]" >>$NEW_CONFIG
-            echo "jump_host = '${JUMP_HOST}'" >>$NEW_CONFIG
-
-            echo "${JUMP_HOST}"
-            FIRST=true
-            URL_STRING="["
-            for URL in ${URLS//$'\r'/}; do
-                if [ "$FIRST" = true ]; then
-                    URL_STRING="$URL_STRING'${URL}'"
-                    FIRST=false
-                else
-                    URL_STRING="$URL_STRING, '${URL}'"
-                fi
-            done
-            URL_STRING="$URL_STRING]"
-
-            echo "urls = ${URL_STRING}" >>$NEW_CONFIG
-            echo "" >>$NEW_CONFIG
-        done <$OLD_CONFIG
-
-        echo "converted $OLD_CONFIG to $NEW_CONFIG"
-        mv $OLD_CONFIG $OLD_CONFIG.bak
-        echo "renamed $OLD_CONFIG to $OLD_CONFIG.bak"
-    fi
-}
-
 make_config
+echo 'Install Dependencies'
+echo '********************'
 install_dependencies
+echo ''
+echo 'Install Bin Scripts'
+echo '*******************'
 install
+echo ''
+echo 'Config Auto Update'
+echo '******************'
 add_tunnels_config_download
 # We need to update here, or the completions fail
 oo tunnels --update
+echo ''
+echo 'Bash Updates'
+echo '************'
 if bash_version_check; then
     bash_add_local_bin_to_path
     bash_add_completions
 fi
-convert_tunnels_conf
+
+echo ''
+echo "If your .baschrc was modified, you may need to restart your terminal for the changes to take effect."
