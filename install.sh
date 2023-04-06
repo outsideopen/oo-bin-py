@@ -82,7 +82,7 @@ function bash_add_local_bin_to_path {
         echo '`$HOME/.local/bin` is already added to your path. Nothing to be done'
     else
         echo 'Adding `PATH=$PATH:$HOME/.local/bin` to ~/.bashrc'
-        PATH=$PATH:$HOME/.local/bin
+        export PATH=$PATH:$HOME/.local/bin
         echo 'PATH=$PATH:$HOME/.local/bin' >>$HOME/.bashrc
     fi
 }
@@ -104,6 +104,10 @@ echo 'Install Dependencies'
 echo '********************'
 install_dependencies
 echo ''
+echo 'Add ~/.local/bin to the path'
+echo '****************************'
+bash_add_local_bin_to_path
+echo ''
 echo 'Install Bin Scripts'
 echo '*******************'
 install
@@ -114,12 +118,10 @@ add_tunnels_config_download
 # We need to update here, or the completions fail
 oo tunnels --update
 echo ''
-echo 'Bash Updates'
-echo '************'
+echo 'Configure Completions'
+echo '*********************'
 if bash_version_check; then
-    bash_add_local_bin_to_path
     bash_add_completions
 fi
-
 echo ''
 echo "If your .baschrc was modified, you may need to restart your terminal for the changes to take effect."
