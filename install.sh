@@ -11,7 +11,7 @@ function install_dependencies {
     if [[ $(uname -s) =~ "Linux" ]]; then
         if which apt-get 2>/dev/null; then
             if ! which autossh; then
-                apt-get install -y ssh autossh
+                sudo apt-get install -y ssh autossh
             fi
         else
             echo "We could not automatically install the dependencies on your system. Please install ssh and autossh manually."
