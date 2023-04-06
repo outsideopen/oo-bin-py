@@ -11,7 +11,7 @@ function install_dependencies {
     if [[ $(uname -s) =~ "Linux" ]]; then
         if which apt-get 2>/dev/null; then
             if ! which autossh; then
-                sudo apt-get -y update && sudo apt-get install -y ssh autossh
+                sudo apt-get -y update && sudo apt-get install -y ssh autossh python3-pip
             fi
         else
             echo "We could not automatically install the dependencies on your system. Please install ssh and autossh manually."
@@ -82,7 +82,7 @@ function bash_add_local_bin_to_path {
         echo '`$HOME/.local/bin` is already added to your path. Nothing to be done'
     else
         echo 'Adding `PATH=$PATH:$HOME/.local/bin` to ~/.bashrc'
-        export PATH=$PATH:$HOME/.local/bin
+        PATH=$PATH:$HOME/.local/bin
         echo 'PATH=$PATH:$HOME/.local/bin' >>$HOME/.bashrc
     fi
 }
