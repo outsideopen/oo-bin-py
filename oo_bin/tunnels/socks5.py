@@ -162,13 +162,20 @@ class Socks5(Tunnel):
     def shell_complete(ctx, param, incomplete):
         config = socks5_config()
         tunnels_list = list(config.keys())
-        return [
+        completions = [
             CompletionItem(k, help="socks5")
             for k in tunnels_list
             if k.startswith(incomplete)
-        ] + [
-            CompletionItem("status", help="Tunnel status"),
-            CompletionItem("stop", help="Stop tunnel"),
-            CompletionItem("rdp", help="sub-command"),
-            CompletionItem("vnc", help="sub-command"),
         ]
+        extras = [
+            CompletionItem(e["name"], help=e["help"])
+            for e in [
+                {"name": "status", "help": "Tunnel status"},
+                {"name": "stop", "help": "Stop tunnel"},
+                {"name": "rdp", "help": "sub-command"},
+                {"name": "vnc", "help": "sub-command"},
+            ]
+            if e["name"].startswith(incomplete)
+        ]
+
+        return completions + extras
