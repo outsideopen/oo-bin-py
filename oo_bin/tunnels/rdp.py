@@ -155,11 +155,19 @@ class Rdp(Tunnel):
     def shell_complete(ctx, param, incomplete):
         config = rdp_config()
         tunnels_list = list(config.keys())
-        return [
+
+        completions = [
             CompletionItem(k, help="rdp")
             for k in tunnels_list
             if k.startswith(incomplete)
-        ] + [
-            CompletionItem("status", help="Tunnel status"),
-            CompletionItem("stop", help="Stop tunnel"),
         ]
+        extras = [
+            CompletionItem(e["name"], help=e["help"])
+            for e in [
+                {"name": "status", "help": "Tunnel status"},
+                {"name": "stop", "help": "Stop tunnel"},
+            ]
+            if e["name"].startswith(incomplete)
+        ]
+
+        return completions + extras
