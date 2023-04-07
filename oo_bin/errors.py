@@ -2,6 +2,10 @@ class OOBinError(Exception):
     pass
 
 
+class ProcessFailedError(OOBinError):
+    pass
+
+
 class TunnelAlreadyStartedError(OOBinError):
     pass
 

@@ -5,12 +5,14 @@ from subprocess import DEVNULL, Popen
 
 from click.shell_completion import CompletionItem
 from colorama import Fore
+from progress.bar import IncrementalBar
 from xdg import BaseDirectory
 
 from oo_bin.config import main_config, socks5_config
 from oo_bin.errors import (
     ConfigNotFoundError,
     DependencyNotMetError,
+    ProcessFailedError,
     SystemNotSupportedError,
     TunnelAlreadyStartedError,
 )
@@ -98,12 +100,24 @@ class Socks5(Tunnel):
             f"{self.config['jump_host']}",
         ]
         with open(self.__cache_file__, "a") as f1:
-            pid = Popen(cmd, stdout=DEVNULL, stderr=f1).pid
+            process = Popen(cmd, stdout=DEVNULL, stderr=f1)
+            pid = process.pid
 
             with open(self.__pid_file__, "w") as f2:
                 f2.write(f"{pid}")
 
-        time.sleep(1)
+            bar = IncrementalBar(
+                f"Starting {self.profile}", max=10, suffix="%(percent)d%%"
+            )
+            for i in range(0, 10):
+                time.sleep(0.1)
+                bar.next()
+                if process.poll():
+                    msg = f"autossh failed after {i * 0.1}s.\
+You can view the logs at {self.__cache_file__}"
+
+                    raise ProcessFailedError(msg)
+            bar.finish()
 
         urls = self.config["urls"]
         if urls:
