@@ -9,10 +9,10 @@ from xdg import BaseDirectory
 
 from oo_bin.config import main_config, socks5_config
 from oo_bin.errors import (
-    ConfigNotFoundException,
-    DependencyNotMetException,
-    SystemNotSupportedException,
-    TunnelAlreadyStartedException,
+    ConfigNotFoundError,
+    DependencyNotMetError,
+    SystemNotSupportedError,
+    TunnelAlreadyStartedError,
 )
 from oo_bin.tunnels.tunnel import Tunnel
 from oo_bin.utils import is_linux, is_mac, is_wsl, update_tunnels_config
@@ -38,7 +38,7 @@ class Socks5(Tunnel):
         section = config.get(self.profile, {})
 
         if not section:
-            raise ConfigNotFoundException(
+            raise ConfigNotFoundError(
                 f"{self.profile} could not be found in your configuration file"
             )
 
@@ -66,7 +66,7 @@ class Socks5(Tunnel):
 
         elif is_linux():
             return shutil.which("firefox")
-        SystemNotSupportedException("Your system is not supported")
+        SystemNotSupportedError("Your system is not supported")
 
     def stop(self):
         super().stop()
@@ -78,7 +78,7 @@ class Socks5(Tunnel):
         running_jump_host = self.jump_host()
 
         if running_jump_host:
-            raise TunnelAlreadyStartedException(
+            raise TunnelAlreadyStartedError(
                 f"SSH tunnel already running to {running_jump_host}"
             )
 
@@ -139,12 +139,12 @@ class Socks5(Tunnel):
 
     def runtime_dependencies_met(self):
         if not self.__autossh_bin__:
-            raise DependencyNotMetException(
+            raise DependencyNotMetError(
                 "autossh is not installed, or is not in the path"
             )
 
         if not self.__browser_bin__:
-            raise DependencyNotMetException(
+            raise DependencyNotMetError(
                 "firefox is not installed, or is not in the path"
             )
 

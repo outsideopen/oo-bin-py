@@ -1,18 +1,18 @@
-class OOBinException(Exception):
+class OOBinError(Exception):
     pass
 
 
-class TunnelAlreadyStartedException(OOBinException):
+class TunnelAlreadyStartedError(OOBinError):
     pass
 
 
-class DependencyNotMetException(OOBinException):
+class DependencyNotMetError(OOBinError):
     pass
 
 
-class ConfigNotFoundException(OOBinException):
+class ConfigNotFoundError(OOBinError):
     pass
 
 
-class SystemNotSupportedException(OOBinException):
+class SystemNotSupportedError(OOBinError):
     pass

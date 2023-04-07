@@ -8,11 +8,8 @@ from click.shell_completion import CompletionItem
 from xdg import BaseDirectory
 
 from oo_bin.config import rdp_config
-from oo_bin.errors import (
-    ConfigNotFoundException,
-    DependencyNotMetException,
-    SystemNotSupportedException,
-)
+from oo_bin.errors import (ConfigNotFoundError, DependencyNotMetError,
+                           SystemNotSupportedError)
 from oo_bin.tunnels.tunnel import Tunnel
 from oo_bin.utils import is_linux, is_mac, is_wsl, update_tunnels_config
 
@@ -32,7 +29,7 @@ class Rdp(Tunnel):
         section = config.get(self.profile, {})
 
         if not section:
-            raise ConfigNotFoundException(
+            raise ConfigNotFoundError(
                 f"{self.profile} could not be found in your configuration file"
             )
 
@@ -69,7 +66,7 @@ class Rdp(Tunnel):
 
             return ["true"]
 
-        SystemNotSupportedException("Your system is not supported")
+        SystemNotSupportedError("Your system is not supported")
 
     def stop(self):
         super().stop()
@@ -95,6 +92,7 @@ class Rdp(Tunnel):
             f"{self.__ssh_config__}",
             f"{self.config['jump_host']}",
         ]
+
         with open(self.__cache_file__, "a") as f1:
             pid = Popen(cmd, stdout=DEVNULL, stderr=f1).pid
 
@@ -137,7 +135,7 @@ class Rdp(Tunnel):
 
     def runtime_dependencies_met(self):
         if not self.__autossh_bin__:
-            raise DependencyNotMetException(
+            raise DependencyNotMetError(
                 "autossh is not installed, or is not in the path"
             )
 

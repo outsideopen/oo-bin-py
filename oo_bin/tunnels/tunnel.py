@@ -7,7 +7,7 @@ from colorama import Fore
 from xdg import BaseDirectory
 
 from oo_bin.config import main_config, ssh_config_path
-from oo_bin.errors import DependencyNotMetException, TunnelAlreadyStartedException
+from oo_bin.errors import DependencyNotMetError, TunnelAlreadyStartedError
 from oo_bin.script import Script
 
 
@@ -73,12 +73,12 @@ class Tunnel(Script):
         running_jump_host = self.jump_host()
 
         if running_jump_host:
-            raise TunnelAlreadyStartedException(
+            raise TunnelAlreadyStartedError(
                 f"SSH tunnel already running to {running_jump_host}"
             )
 
     def runtime_dependencies_met(self):
         if not self.__autossh_bin__:
-            raise DependencyNotMetException(
+            raise DependencyNotMetError(
                 "autossh is not installed, or is not in the path"
             )

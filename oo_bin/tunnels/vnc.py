@@ -7,10 +7,10 @@ from xdg import BaseDirectory
 
 from oo_bin.config import vnc_config
 from oo_bin.errors import (
-    ConfigNotFoundException,
-    DependencyNotMetException,
-    SystemNotSupportedException,
-    TunnelAlreadyStartedException,
+    ConfigNotFoundError,
+    DependencyNotMetError,
+    SystemNotSupportedError,
+    TunnelAlreadyStartedError,
 )
 from oo_bin.tunnels.tunnel import Tunnel
 from oo_bin.utils import is_linux, is_mac, is_wsl, update_tunnels_config
@@ -31,7 +31,7 @@ class Vnc(Tunnel):
         section = config.get(self.profile, {})
 
         if not section:
-            raise ConfigNotFoundException(
+            raise ConfigNotFoundError(
                 f"{self.profile} could not be found in your configuration file"
             )
 
@@ -50,7 +50,7 @@ class Vnc(Tunnel):
         running_jump_host = self.jump_host()
 
         if running_jump_host:
-            raise TunnelAlreadyStartedException(
+            raise TunnelAlreadyStartedError(
                 f"SSH tunnel already running to {running_jump_host}"
             )
 
@@ -100,7 +100,7 @@ class Vnc(Tunnel):
 
             return ["true"]
 
-        SystemNotSupportedException("Your system is not supported")
+        SystemNotSupportedError("Your system is not supported")
 
     def __launch_vnc__(self):
         cmd = self.__vnc_cmd__()
@@ -127,7 +127,7 @@ class Vnc(Tunnel):
 
     def runtime_dependencies_met(self):
         if not self.__autossh_bin__:
-            raise DependencyNotMetException(
+            raise DependencyNotMetError(
                 "autossh is not installed, or is not in the path"
             )
 
