@@ -5,14 +5,16 @@ from subprocess import DEVNULL, Popen
 
 from click.shell_completion import CompletionItem
 from colorama import Fore
+from progress.bar import IncrementalBar
 from xdg import BaseDirectory
 
 from oo_bin.config import main_config, socks5_config
 from oo_bin.errors import (
-    ConfigNotFoundException,
-    DependencyNotMetException,
-    SystemNotSupportedException,
-    TunnelAlreadyStartedException,
+    ConfigNotFoundError,
+    DependencyNotMetError,
+    ProcessFailedError,
+    SystemNotSupportedError,
+    TunnelAlreadyStartedError,
 )
 from oo_bin.tunnels.tunnel import Tunnel
 from oo_bin.utils import is_linux, is_mac, is_wsl, update_tunnels_config
@@ -38,7 +40,7 @@ class Socks5(Tunnel):
         section = config.get(self.profile, {})
 
         if not section:
-            raise ConfigNotFoundException(
+            raise ConfigNotFoundError(
                 f"{self.profile} could not be found in your configuration file"
             )
 
@@ -66,7 +68,7 @@ class Socks5(Tunnel):
 
         elif is_linux():
             return shutil.which("firefox")
-        SystemNotSupportedException("Your system is not supported")
+        SystemNotSupportedError("Your system is not supported")
 
     def stop(self):
         super().stop()
@@ -78,7 +80,7 @@ class Socks5(Tunnel):
         running_jump_host = self.jump_host()
 
         if running_jump_host:
-            raise TunnelAlreadyStartedException(
+            raise TunnelAlreadyStartedError(
                 f"SSH tunnel already running to {running_jump_host}"
             )
 
@@ -98,12 +100,24 @@ class Socks5(Tunnel):
             f"{self.config['jump_host']}",
         ]
         with open(self.__cache_file__, "a") as f1:
-            pid = Popen(cmd, stdout=DEVNULL, stderr=f1).pid
+            process = Popen(cmd, stdout=DEVNULL, stderr=f1)
+            pid = process.pid
 
             with open(self.__pid_file__, "w") as f2:
                 f2.write(f"{pid}")
 
-        time.sleep(1)
+            bar = IncrementalBar(
+                f"Starting {self.profile}", max=10, suffix="%(percent)d%%"
+            )
+            for i in range(0, 10):
+                time.sleep(0.1)
+                bar.next()
+                if process.poll():
+                    msg = f"autossh failed after {i * 0.1}s.\
+You can view the logs at {self.__cache_file__}"
+
+                    raise ProcessFailedError(msg)
+            bar.finish()
 
         urls = self.config["urls"]
         if urls:
@@ -139,12 +153,12 @@ class Socks5(Tunnel):
 
     def runtime_dependencies_met(self):
         if not self.__autossh_bin__:
-            raise DependencyNotMetException(
+            raise DependencyNotMetError(
                 "autossh is not installed, or is not in the path"
             )
 
         if not self.__browser_bin__:
-            raise DependencyNotMetException(
+            raise DependencyNotMetError(
                 "firefox is not installed, or is not in the path"
             )
 

@@ -1,16 +1,19 @@
 import os
 import shutil
+import time
 from subprocess import DEVNULL, Popen
 
 from click.shell_completion import CompletionItem
+from progress.bar import IncrementalBar
 from xdg import BaseDirectory
 
 from oo_bin.config import vnc_config
 from oo_bin.errors import (
-    ConfigNotFoundException,
-    DependencyNotMetException,
-    SystemNotSupportedException,
-    TunnelAlreadyStartedException,
+    ConfigNotFoundError,
+    DependencyNotMetError,
+    ProcessFailedError,
+    SystemNotSupportedError,
+    TunnelAlreadyStartedError,
 )
 from oo_bin.tunnels.tunnel import Tunnel
 from oo_bin.utils import is_linux, is_mac, is_wsl, update_tunnels_config
@@ -31,7 +34,7 @@ class Vnc(Tunnel):
         section = config.get(self.profile, {})
 
         if not section:
-            raise ConfigNotFoundException(
+            raise ConfigNotFoundError(
                 f"{self.profile} could not be found in your configuration file"
             )
 
@@ -50,7 +53,7 @@ class Vnc(Tunnel):
         running_jump_host = self.jump_host()
 
         if running_jump_host:
-            raise TunnelAlreadyStartedException(
+            raise TunnelAlreadyStartedError(
                 f"SSH tunnel already running to {running_jump_host}"
             )
 
@@ -72,10 +75,24 @@ class Vnc(Tunnel):
         ]
 
         with open(self.__cache_file__, "a") as f1:
-            pid = Popen(cmd, stdout=DEVNULL, stderr=f1).pid
+            process = Popen(cmd, stdout=DEVNULL, stderr=f1)
+            pid = process.pid
 
             with open(self.__pid_file__, "w") as f2:
                 f2.write(f"{pid}")
+
+            bar = IncrementalBar(
+                f"Starting {self.profile}", max=10, suffix="%(percent)d%%"
+            )
+            for i in range(0, 10):
+                time.sleep(0.1)
+                bar.next()
+                if process.poll():
+                    msg = f"autossh failed after {i * 0.1}s.\
+You can view the logs at {self.__cache_file__}"
+
+                    raise ProcessFailedError(msg)
+            bar.finish()
 
         self.__launch_vnc__()
 
@@ -100,7 +117,7 @@ class Vnc(Tunnel):
 
             return ["true"]
 
-        SystemNotSupportedException("Your system is not supported")
+        SystemNotSupportedError("Your system is not supported")
 
     def __launch_vnc__(self):
         cmd = self.__vnc_cmd__()
@@ -127,7 +144,7 @@ class Vnc(Tunnel):
 
     def runtime_dependencies_met(self):
         if not self.__autossh_bin__:
-            raise DependencyNotMetException(
+            raise DependencyNotMetError(
                 "autossh is not installed, or is not in the path"
             )
 

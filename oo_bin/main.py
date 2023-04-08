@@ -4,7 +4,7 @@ import click
 import colorama
 
 from oo_bin import __version__
-from oo_bin.errors import OOBinException
+from oo_bin.errors import OOBinError
 from oo_bin.tunnels import Rdp, Socks5, Vnc
 from oo_bin.utils import auto_update
 
@@ -93,6 +93,6 @@ def main():
 
     try:
         cli()
-    except OOBinException as e:
+    except OOBinError as e:
         print(colorama.Fore.RED + f"Error: {e}", file=sys.stderr)
         sys.exit(1)

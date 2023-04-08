@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.7"
 dynamic = ["version"]
 
-dependencies = ["click", "colorama", "pyxdg", "requests", "tomli >= 1.1.0 ; python_version < '3.11'"]
+dependencies = ["click", "colorama", "progress", "pyxdg", "requests", "tomli >= 1.1.0 ; python_version < '3.11'"]
 
 [project.urls]
 Home = "https://github.com/outsideopen/oo-bin"
