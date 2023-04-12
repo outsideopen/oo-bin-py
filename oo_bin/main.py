@@ -4,6 +4,7 @@ import click
 import colorama
 
 from oo_bin import __version__
+from oo_bin.dnsme import Dnsme
 from oo_bin.errors import OOBinError
 from oo_bin.tunnels import Rdp, Socks5, Vnc
 from oo_bin.utils import auto_update
@@ -26,7 +27,14 @@ def cli():
     pass
 
 
-@cli.group(cls=SkipArg, invoke_without_command=True)
+@cli.command(help="DNS Information")
+@click.argument("domain")
+def dnsme(domain):
+    dnsme = Dnsme(domain)
+    print(dnsme)
+
+
+@cli.group(cls=SkipArg, invoke_without_command=True, help="Manage tunnels")
 @click.pass_context
 @click.option("-S", "--stop", is_flag=True, help="Stop all running socks5 tunnels")
 @click.option("-s", "--status", is_flag=True, help="Socks5 tunnels status")
@@ -52,7 +60,7 @@ def tunnels(ctx, status, stop, update, profile):
         )
 
 
-@tunnels.command()
+@tunnels.command(help="Manage rdp tunnels")
 @click.option("-S", "--stop", is_flag=True, help="Stop all running rdp tunnels")
 @click.option("-s", "--status", is_flag=True, help="Rdp tunnels status")
 @click.option(
@@ -70,7 +78,7 @@ def rdp(status, stop, update, profile):
     return rdp.run({"status": status, "stop": stop, "update": update})
 
 
-@tunnels.command()
+@tunnels.command(help="Manage vnc tunnels")
 @click.option("-S", "--stop", is_flag=True, help="Stop running vnc tunnels")
 @click.option("-s", "--status", is_flag=True, help="Vnc tunnels status")
 @click.option(

@@ -11,7 +11,7 @@ function install_dependencies {
     if [[ $(uname -s) =~ "Linux" ]]; then
         if which apt-get 2>/dev/null; then
             if ! which autossh; then
-                sudo apt-get -y update && sudo apt-get install -y ssh autossh python3-pip
+                sudo apt-get -y update && sudo apt-get install -y ssh autossh python3-pip whois
             fi
         else
             echo "We could not automatically install the dependencies on your system. Please install ssh and autossh manually."
@@ -19,7 +19,7 @@ function install_dependencies {
     elif [[ $(uname -s) =~ "Darwin" ]]; then
         if which brew 2>/dev/null; then
             if ! which autossh; then
-                brew install autossh
+                brew install autossh whois
             fi
         else
             echo "Could not find Homebrew (https://brew.sh/). Install Homebrew, or, manually install autossh."

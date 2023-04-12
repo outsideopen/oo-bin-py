@@ -20,3 +20,7 @@ class ConfigNotFoundError(OOBinError):
 
 class SystemNotSupportedError(OOBinError):
     pass
+
+
+class DomainNotExistError(OOBinError):
+    pass
