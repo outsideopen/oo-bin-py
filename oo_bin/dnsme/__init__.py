@@ -121,7 +121,7 @@ class Dnsme:
         s += "\n"
 
         s += f"{Style.BRIGHT}MX Records\n"
-        for mx_entry in self.__mx_lookup__:
+        for mx_entry in sorted(self.__mx_lookup__, key=lambda d: (d.preference, d.exchange)):
             s += f"{Style.RESET_ALL}{mx_entry.preference: <2} {mx_entry.exchange}\n"
         s += "\n"
 
