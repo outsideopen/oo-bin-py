@@ -186,8 +186,8 @@ You can view the logs at {self.__cache_file__}"
             for e in [
                 {"name": "status", "help": "Tunnel status"},
                 {"name": "stop", "help": "Stop tunnel"},
-                {"name": "rdp", "help": "sub-command"},
-                {"name": "vnc", "help": "sub-command"},
+                {"name": "rdp", "help": "Manage rdp tunnels"},
+                {"name": "vnc", "help": "Manage vnc tunnels"},
             ]
             if e["name"].startswith(incomplete)
         ]
