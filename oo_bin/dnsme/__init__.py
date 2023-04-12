@@ -7,7 +7,7 @@ import dns.reversename
 import whois
 from colorama import Style
 
-from oo_bin.errors import DomainNotExistError, DependencyNotMetError
+from oo_bin.errors import DependencyNotMetError, DomainNotExistError
 
 
 class Dnsme:
@@ -33,7 +33,7 @@ class Dnsme:
     def __a_lookup__(self):
         try:
             if not self.a:
-                self.a = dns.resolver.resolve(self.domain, "A")
+                self.a = sorted(dns.resolver.resolve(self.domain, "A"))
             return self.a
         except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
             return []
@@ -42,7 +42,10 @@ class Dnsme:
     def __mx_lookup__(self):
         try:
             if not self.mx:
-                self.mx = dns.resolver.resolve(self.domain, "MX")
+                self.mx = sorted(
+                    dns.resolver.resolve(self.domain, "MX"),
+                    key=lambda d: (d.preference, d.exchange),
+                )
             return self.mx
         except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
             return []
@@ -51,7 +54,7 @@ class Dnsme:
     def __ns_lookup__(self):
         try:
             if not self.ns:
-                self.ns = dns.resolver.resolve(self.domain, "NS")
+                self.ns = sorted(dns.resolver.resolve(self.domain, "NS"))
             return self.ns
         except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
             return []
@@ -81,7 +84,7 @@ class Dnsme:
     @property
     def __dmarc_lookup__(self):
         try:
-            return dns.resolver.resolve(f"_dmarc.{self.domain}", "TXT")
+            return sorted(dns.resolver.resolve(f"_dmarc.{self.domain}", "TXT"))
         except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
             return []
 
@@ -111,7 +114,7 @@ class Dnsme:
     @property
     def __txt_lookup__(self):
         if not self.txt:
-            self.txt = dns.resolver.resolve(self.domain, "TXT")
+            self.txt = sorted(dns.resolver.resolve(self.domain, "TXT"))
         return self.txt
 
     def __str__(self):
@@ -119,6 +122,7 @@ class Dnsme:
         s += f"{Style.RESET_ALL}Registrar: {self.__whois__.registrar}\n"
         s += f"{self.domain} expires in {(self.__whois__.expiration_date - datetime.now()).days} \
 days on {self.__whois__.expiration_date.astimezone()}\n"
+
         s += "\n"
 
         s += f"{Style.BRIGHT}A Records\n"
@@ -127,9 +131,7 @@ days on {self.__whois__.expiration_date.astimezone()}\n"
         s += "\n"
 
         s += f"{Style.BRIGHT}MX Records\n"
-        for mx_entry in sorted(
-            self.__mx_lookup__, key=lambda d: (d.preference, d.exchange)
-        ):
+        for mx_entry in self.__mx_lookup__:
             s += f"{Style.RESET_ALL}{mx_entry.preference: <2} {mx_entry.exchange}\n"
         s += "\n"
 
