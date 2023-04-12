@@ -1,4 +1,5 @@
 import re
+import shutil
 from datetime import datetime
 
 import dns.resolver
@@ -6,12 +7,16 @@ import dns.reversename
 import whois
 from colorama import Style
 
-from oo_bin.errors import DomainNotExistError
+from oo_bin.errors import DomainNotExistError, DependencyNotMetError
 
 
 class Dnsme:
     def __init__(self, domain):
         self.domain = domain
+
+        if not shutil.which("whois"):
+            raise DependencyNotMetError("whois is not installed, or is not in the path")
+
         if not self.__whois__:
             raise DomainNotExistError(f"The domain {self.domain} does not exist")
 
