@@ -117,7 +117,8 @@ class Dnsme:
     def __str__(self):
         s = f"{Style.BRIGHT}Registrar Info\n"
         s += f"{Style.RESET_ALL}Registrar: {self.__whois__.registrar}\n"
-        s += f"{self.domain} expires in {(self.__whois__.expiration_date - datetime.now()).days} days on {self.__whois__.expiration_date.astimezone()}\n"
+        s += f"{self.domain} expires in {(self.__whois__.expiration_date - datetime.now()).days} \
+days on {self.__whois__.expiration_date.astimezone()}\n"
         s += "\n"
 
         s += f"{Style.BRIGHT}A Records\n"
@@ -126,7 +127,9 @@ class Dnsme:
         s += "\n"
 
         s += f"{Style.BRIGHT}MX Records\n"
-        for mx_entry in sorted(self.__mx_lookup__, key=lambda d: (d.preference, d.exchange)):
+        for mx_entry in sorted(
+            self.__mx_lookup__, key=lambda d: (d.preference, d.exchange)
+        ):
             s += f"{Style.RESET_ALL}{mx_entry.preference: <2} {mx_entry.exchange}\n"
         s += "\n"
 
