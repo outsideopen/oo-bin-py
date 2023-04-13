@@ -4,9 +4,10 @@ import click
 import colorama
 
 from oo_bin import __version__
-from oo_bin.commands.dnsme import dnsme
-from oo_bin.commands.tunnels import tunnels
+from oo_bin.dnsme.command import dnsme
 from oo_bin.errors import OOBinError
+from oo_bin.macme.command import macme
+from oo_bin.tunnels.command import tunnels
 from oo_bin.utils import auto_update
 
 colorama.init(autoreset=True)
@@ -19,6 +20,7 @@ def cli():
 
 
 cli.add_command(dnsme)
+cli.add_command(macme)
 cli.add_command(tunnels)
 
 
