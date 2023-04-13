@@ -9,7 +9,7 @@ class MacType(click.ParamType):
     name = "mac"
 
     def convert(self, value, param, ctx):
-        regex = r'^([0-9a-fA-F]{2}[-|:|\.]){5}[0-9a-fA-F]{2}|[0-9a-fA-F]{12}|([0-9a-fA-F]{4}[\.]){2}[0-9a-fA-F]{4}$'
+        regex = r"^([0-9a-fA-F]{2}[-|:|\.]){5}[0-9a-fA-F]{2}|[0-9a-fA-F]{12}|([0-9a-fA-F]{4}[\.]){2}[0-9a-fA-F]{4}$"
         p = re.compile(regex)
         if re.match(p, value):
             return value
