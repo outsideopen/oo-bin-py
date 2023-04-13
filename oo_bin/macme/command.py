@@ -9,10 +9,11 @@ class MacType(click.ParamType):
     name = "mac"
 
     def convert(self, value, param, ctx):
-        regex = r"^([0-9a-fA-F]{2}[-|:|\.]){5}[0-9a-fA-F]{2}|[0-9a-fA-F]{12}|([0-9a-fA-F]{4}[\.]){2}[0-9a-fA-F]{4}$"
-        p = re.compile(regex)
-        if re.match(p, value):
-            return value
+        # strip unwanted characters, simpler validation
+        mac = re.sub('[^0-9a-f]', '', value, flags=re.IGNORECASE)
+        if re.match('^[0-9a-fA-F]{12}$', mac):
+            # normalize to : with all upper
+            return ":".join([f'{mac[i:i+2]}' for i in range(0, 12, 2)]).upper()
         else:
             self.fail(f"{value!r} is not a valid mac address", param, ctx)
 
