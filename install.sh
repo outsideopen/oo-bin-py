@@ -66,7 +66,7 @@ function add_tunnels_config_download {
 }
 
 function bash_version_check {
-    VERSION=$(bash --version | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
+    VERSION=$(bash --version | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
     MAJOR_VERSION=$(echo $VERSION | sed -E 's/([0-9]+)\.[0-9]+\.[0-9]+/\1/')
 
     if [ "${MAJOR_VERSION}" -lt "4" ]; then
