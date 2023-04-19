@@ -32,7 +32,7 @@ function install {
     VERSION=$(curl -L https://api.github.com/repos/outsideopen/oo-bin-py/releases/latest | grep tag_name | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
     curl -LJO https://github.com/outsideopen/oo-bin-py/releases/download/${VERSION}/oo_bin-${VERSION}-py3-none-any.whl
 
-    pip3 install ./"oo_bin-${VERSION}-py3-none-any.whl"
+    pip3 install --force-reinstall ./"oo_bin-${VERSION}-py3-none-any.whl"
     rm oo_bin-${VERSION}-py3-none-any.whl
 }
 
@@ -88,14 +88,34 @@ function bash_add_local_bin_to_path {
 }
 
 function bash_add_completions {
-    # Activate command line completion
     _OO_COMPLETE=bash_source oo >$HOME/.config/oo_bin/oo-complete.bash
 
     if cat $HOME/.bashrc | grep -q 'source $HOME/.config/oo_bin/oo-complete.bash'; then
-        echo '`.config/oo_bin/oo-complete.bash` is already sourced in your bashrc. Nothing to be done'
+        echo '`~/.config/oo_bin/oo-complete.bash` is already sourced in your bashrc. Nothing to be done'
     else
         echo 'Adding `source ~/.config/oo_bin/oo-complete.bash` to ~/.bashrc'
         echo 'source $HOME/.config/oo_bin/oo-complete.bash' >>$HOME/.bashrc
+    fi
+}
+
+function zsh_add_completions {
+    _OO_COMPLETE=zsh_source oo >$HOME/.config/oo_bin/oo-complete.zsh
+
+    if cat $HOME/.zshrc | grep -q 'source $HOME/.config/oo_bin/oo-complete.zsh'; then
+        echo '`~/.config/oo_bin/oo-complete.zsh` is already sourced in your zshhrc. Nothing to be done'
+    else
+        echo 'Adding `source ~/.config/oo_bin/oo-complete.zsh` to ~/.zshrc'
+        echo 'autoload -Uz compinit && compinit' >>$HOME/.zshrc
+        echo 'source $HOME/.config/oo_bin/oo-complete.zsh' >>$HOME/.zshrc
+    fi
+}
+
+function fish_add_completions {
+    if test -f $HOME/.config/fish/completions/oo.fish; then
+        echo '`~/.config/fish/completions/oo.fish` already exists. Nothing to be done'
+    else
+        _OO_COMPLETE=fish_source oo >$HOME/.config/fish/completions/oo.fish
+        echo 'Created/Updated ~/.config/fish/completions/oo.fish'
     fi
 }
 
@@ -115,13 +135,23 @@ echo ''
 echo 'Config Auto Update'
 echo '******************'
 add_tunnels_config_download
-# We need to update here, or the completions fail
+# We need to update here, or the completions may fail
 oo tunnels --update
 echo ''
 echo 'Configure Completions'
 echo '*********************'
+# We check the bash version, because Mac still has an old version of Bash by default
 if bash_version_check; then
     bash_add_completions
 fi
+
+if which zsh &>/dev/null; then
+    zsh_add_completions
+fi
+
+if which fish &>/dev/null; then
+    fish_add_completions
+fi
+
 echo ''
-echo "If your .baschrc was modified, you may need to restart your terminal for the changes to take effect."
+echo "If your .baschrc/.zshrc was modified, you may need to restart your terminal for the changes to take effect."
