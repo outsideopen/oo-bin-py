@@ -15,6 +15,9 @@ config_path = BaseDirectory.save_config_path(__package_name__)
 main_config_path = os.path.join(
     BaseDirectory.save_config_path(__package_name__), "config.toml"
 )
+tunnels_local_config_path = os.path.join(
+    BaseDirectory.save_config_path(__package_name__), "tunnels_local.toml"
+)
 tunnels_config_path = os.path.join(
     BaseDirectory.save_config_path(__package_name__), "tunnels.toml"
 )
@@ -51,7 +54,11 @@ def backup_tunnels_config():
 
 
 def tunnels_config():
-    return __get_config__(tunnels_config_path)
+    local_config = __get_config__(tunnels_local_config_path)
+    config = __get_config__(tunnels_config_path)
+    config.update(local_config)
+
+    return config
 
 
 def rdp_config():
