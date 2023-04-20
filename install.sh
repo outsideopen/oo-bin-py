@@ -19,7 +19,13 @@ function install_dependencies {
     elif [[ $(uname -s) =~ "Darwin" ]]; then
         if which brew 2>/dev/null; then
             if ! which autossh; then
-                brew install autossh whois python
+                brew install autossh
+            fi
+            if ! which whois; then
+                brew whois
+            fi
+            if [ "$(which python3)" != "/usr/local/bin/python3" ]; then 
+                brew install python
             fi
         else
             echo "Could not find Homebrew (https://brew.sh/). Install Homebrew, or, manually install autossh."
