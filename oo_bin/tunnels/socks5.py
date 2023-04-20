@@ -62,7 +62,7 @@ class Socks5(Tunnel):
                 bin
                 if bin
                 else shutil.which(
-                    "firefox", path="/Applications/Firefox.app/Contents/MacOS/firefox"
+                    "firefox", path="/Applications/Firefox.app/Contents/MacOS"
                 )
             )
 
