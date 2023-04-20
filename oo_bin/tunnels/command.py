@@ -22,7 +22,7 @@ class SkipArg(click.Group):
 @click.argument("profile", shell_complete=Socks5.shell_complete, required=False)
 # @click.argument("host", required=False)
 def tunnels(ctx, status, stop, update, profile):
-    if not profile and not update:
+    if not profile and not update and not ctx.invoked_subcommand:
         click.echo(ctx.get_help())
         return None
 
