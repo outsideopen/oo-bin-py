@@ -107,13 +107,14 @@ class Socks5(Tunnel):
                 f2.write(f"{pid}")
 
             bar = IncrementalBar(
-                f"Starting {self.profile}", max=10, suffix="%(percent)d%%"
+                f"Starting {self.profile}", max=20, suffix="%(percent)d%%"
             )
-            for i in range(0, 10):
+            for i in range(0, 20):
                 time.sleep(0.1)
                 bar.next()
                 if process.poll():
-                    msg = f"autossh failed after {i * 0.1}s.\
+                    print("")
+                    msg = f"autossh failed after {(i * 0.1):.2g}s.\
 You can view the logs at {self.__cache_file__}"
 
                     raise ProcessFailedError(msg)
