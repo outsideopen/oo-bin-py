@@ -1,6 +1,7 @@
 import click
 
 from oo_bin.tunnels import Rdp, Socks5, Vnc
+from oo_bin.tunnels.tunnel_type import TunnelType
 
 
 class SkipArg(click.Group):
@@ -14,61 +15,63 @@ class SkipArg(click.Group):
 
 @click.group(cls=SkipArg, invoke_without_command=True, help="Manage tunnels")
 @click.pass_context
-@click.option("-S", "--stop", is_flag=True, help="Stop all running socks5 tunnels")
-@click.option("-s", "--status", is_flag=True, help="Socks5 tunnels status")
 @click.option(
     "-u", "--update", is_flag=True, help="Update tunnels configuration from remote"
 )
 @click.argument("profile", shell_complete=Socks5.shell_complete, required=False)
-# @click.argument("host", required=False)
-def tunnels(ctx, status, stop, update, profile):
+def tunnels(ctx, update, profile):
     if not profile and not update and not ctx.invoked_subcommand:
         click.echo(ctx.get_help())
         return None
 
     if ctx.invoked_subcommand is None:
-        socks5 = Socks5(profile)
-        socks5.runtime_dependencies_met()
-        return socks5.run(
-            {
-                "stop": stop,
-                "status": status,
-                "update": update,
-            }
-        )
+        socks = Socks5(profile)
+        socks.runtime_dependencies_met()
+        return socks.run({"update": update})
 
 
+@tunnels.command("stop", help="Stop Socks tunnels")
+@click.pass_context
+@click.argument("profile", shell_complete=Socks5.stop_complete, required=False)
+def stop(ctx, profile):
+    if not profile:
+        socks = Socks5(None)
+        socks.stop()
+    else:
+        socks = Socks5(profile)
+        socks.stop(profile=profile)
+
+
+# @click.group(cls=SkipArg, invoke_without_command=True, help="Manage RDP tunnels")
 @tunnels.command(help="Manage rdp tunnels")
-@click.option("-S", "--stop", is_flag=True, help="Stop all running rdp tunnels")
-@click.option("-s", "--status", is_flag=True, help="Rdp tunnels status")
-@click.option(
-    "-u", "--update", is_flag=True, help="Update tunnels configuration from remote"
-)
 @click.argument("profile", shell_complete=Rdp.shell_complete, required=False)
-# @click.argument("host", required=True)
-def rdp(status, stop, update, profile):
-    if not profile and not update:
+def rdp(profile):
+    if not profile:
         click.echo(click.get_current_context().get_help())
-        return None
+    else:
+        rdp = Rdp(profile)
+        rdp.runtime_dependencies_met()
+        rdp.run()
 
-    rdp = Rdp(profile)
-    rdp.runtime_dependencies_met()
-    return rdp.run({"status": status, "stop": stop, "update": update})
+
+@tunnels.command(help="Stop all tunnels")
+def stopall():
+    socks = Socks5(None)
+    socks.stop()
+
+
+@tunnels.command(help="Tunnels status")
+def status():
+    socks = Socks5(None)
+    socks.status()
 
 
 @tunnels.command(help="Manage vnc tunnels")
-@click.option("-S", "--stop", is_flag=True, help="Stop running vnc tunnels")
-@click.option("-s", "--status", is_flag=True, help="Vnc tunnels status")
-@click.option(
-    "-u", "--update", is_flag=True, help="Update tunnels configuration from remote"
-)
 @click.argument("profile", shell_complete=Vnc.shell_complete, required=False)
-# @click.argument("host", required=True)
-def vnc(status, stop, update, profile):
-    if not profile and not update:
+def vnc(profile):
+    if not profile:
         click.echo(click.get_current_context().get_help())
-        return None
-
-    vnc = Vnc(profile)
-    vnc.runtime_dependencies_met()
-    return vnc.run({"status": status, "stop": stop, "update": update})
+    else:
+        vnc = Vnc(profile)
+        vnc.runtime_dependencies_met()
+        vnc.run()

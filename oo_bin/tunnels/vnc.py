@@ -13,10 +13,10 @@ from oo_bin.errors import (
     DependencyNotMetError,
     ProcessFailedError,
     SystemNotSupportedError,
-    TunnelAlreadyStartedError,
 )
 from oo_bin.tunnels.tunnel import Tunnel
-from oo_bin.utils import is_linux, is_mac, is_wsl, update_tunnels_config
+from oo_bin.tunnels.tunnel_type import TunnelType
+from oo_bin.utils import is_linux, is_mac, is_wsl
 
 
 class Vnc(Tunnel):
@@ -24,7 +24,10 @@ class Vnc(Tunnel):
         super().__init__(profile)
 
         data_path = BaseDirectory.save_data_path("oo_bin")
-        self.__pid_file__ = os.path.join(data_path, "vnc_autossh_pid")
+        self.__pid_file__ = os.path.join(
+            data_path, f"{self.profile}_{TunnelType.VNC.value}_autossh_pid"
+        )
+
         self.__vnc_pid_file__ = os.path.join(data_path, "vnc_pid")
 
     @property
@@ -43,19 +46,14 @@ class Vnc(Tunnel):
             "host": section.get("host", None),
             "port": section.get("port", None),
             "forward_host": section.get("forward_host", "127.0.0.1"),
-            "forward_port": section.get("forward_port", "5900"),
+            "forward_port": section.get("forward_port", self.open_port()),
         }
 
     def stop(self):
         super().stop()
 
     def start(self):
-        running_jump_host = self.jump_host()
-
-        if running_jump_host:
-            raise TunnelAlreadyStartedError(
-                f"SSH tunnel already running to {running_jump_host}"
-            )
+        super().start()
 
         cmd = [
             self.__autossh_bin__,
@@ -148,15 +146,8 @@ You can view the logs at {self.__cache_file__}"
                 "autossh is not installed, or is not in the path"
             )
 
-    def run(self, args):
-        if args["status"] or self.profile == "status":
-            self.status()
-        elif args["stop"] or self.profile == "stop":
-            self.stop()
-        elif args["update"]:
-            update_tunnels_config()
-        else:
-            self.start()
+    def run(self):
+        self.start()
 
     @staticmethod
     def shell_complete(ctx, param, incomplete):
@@ -178,3 +169,12 @@ You can view the logs at {self.__cache_file__}"
         ]
 
         return completions + extras
+
+    @staticmethod
+    def stop_complete(ctx, param, incomplete):
+        vnc = Vnc(None)
+        processes = [x.profile for x in vnc.__tunnel_processes__(type=TunnelType.VNC)]
+        completions = [
+            CompletionItem(k, help="vnc") for k in processes if k.startswith(incomplete)
+        ]
+        return completions

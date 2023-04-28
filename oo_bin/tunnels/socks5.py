@@ -1,6 +1,7 @@
 import os
 import shutil
 import time
+from pathlib import Path
 from subprocess import DEVNULL, Popen
 
 from click.shell_completion import CompletionItem
@@ -14,9 +15,9 @@ from oo_bin.errors import (
     DependencyNotMetError,
     ProcessFailedError,
     SystemNotSupportedError,
-    TunnelAlreadyStartedError,
 )
 from oo_bin.tunnels.tunnel import Tunnel
+from oo_bin.tunnels.tunnel_type import TunnelType
 from oo_bin.utils import is_linux, is_mac, is_wsl, update_tunnels_config
 
 
@@ -30,8 +31,13 @@ class Socks5(Tunnel):
         )
 
         data_path = BaseDirectory.save_data_path("oo_bin")
-        self.__pid_file__ = os.path.join(data_path, "socks5_autossh_pid")
-        self.__firefox_pid_file__ = os.path.join(data_path, "firefox_pid")
+        self.__pid_file__ = os.path.join(
+            data_path, f"{self.profile}_{TunnelType.SOCKS.value}_autossh_pid"
+        )
+
+        self.__firefox_pid_file__ = os.path.join(
+            data_path, f"{self.profile}_firefox_pid"
+        )
 
     @property
     def config(self):
@@ -70,19 +76,14 @@ class Socks5(Tunnel):
             return shutil.which("firefox")
         SystemNotSupportedError("Your system is not supported")
 
-    def stop(self):
-        super().stop()
+    def stop(self, type=None, profile=None):
+        super().stop(type=type, profile=profile)
 
         if not is_wsl():
-            self.__kill_browser__()
+            self.__kill_browser__(profile)
 
     def start(self):
-        running_jump_host = self.jump_host()
-
-        if running_jump_host:
-            raise TunnelAlreadyStartedError(
-                f"SSH tunnel already running to {running_jump_host}"
-            )
+        super().start()
 
         cmd = [
             self.__autossh_bin__,
@@ -139,13 +140,24 @@ You can view the logs at {self.__cache_file__}"
             with open(self.__firefox_pid_file__, "w") as f2:
                 f2.write(f"{pid}")
 
-    def __kill_browser__(self):
+    def __kill_browser__(self, profile=None):
+        data_path = BaseDirectory.save_data_path("oo_bin")
+
+        pid_files = []
+
+        if profile:
+            pid_files = [os.path.join(data_path, f"{profile}_firefox_pid")]
+        else:
+            pid_files = Path(data_path).glob("*_firefox_pid")
+
         try:
-            with open(self.__firefox_pid_file__, "r") as f1:
-                pid = f1.read()
-                with open(self.__cache_file__, "a") as f2:
-                    Popen(["kill", "-9", pid], stdout=DEVNULL, stderr=f2)
-                os.remove(self.__firefox_pid_file__)
+            for pid_file in pid_files:
+                with open(pid_file, "r") as f1:
+                    pid = f1.read()
+
+                    with open(self.__cache_file__, "a") as f2:
+                        Popen(["kill", "-9", pid], stdout=DEVNULL, stderr=f2)
+                    os.remove(pid_file)
 
         except FileNotFoundError:
             return False
@@ -164,33 +176,62 @@ You can view the logs at {self.__cache_file__}"
             )
 
     def run(self, args):
-        if args["status"] or self.profile == "status":
-            self.status()
-        elif args["stop"] or self.profile == "stop":
-            self.stop()
-        elif args["update"]:
+        if args["update"]:
             update_tunnels_config()
         else:
             self.start()
 
     @staticmethod
     def shell_complete(ctx, param, incomplete):
+        print(ctx)
+        print(param)
+        print(incomplete)
         config = socks5_config()
         tunnels_list = list(config.keys())
         completions = [
-            CompletionItem(k, help="socks5")
+            CompletionItem(k, help="socks")
             for k in tunnels_list
             if k.startswith(incomplete)
         ]
         extras = [
-            CompletionItem(e["name"], help=e["help"])
-            for e in [
-                {"name": "status", "help": "Tunnel status"},
-                {"name": "stop", "help": "Stop tunnel"},
-                {"name": "rdp", "help": "Manage rdp tunnels"},
-                {"name": "vnc", "help": "Manage vnc tunnels"},
-            ]
-            if e["name"].startswith(incomplete)
+            #     CompletionItem(e["name"], help=e["help"]) for e in [
+            #         {
+            #             "name": "status",
+            #             "help": "Tunnel status"
+            #         },
+            #         {
+            #             "name": "stop",
+            #             "help": "Stop tunnel"
+            #         },
+            #         {
+            #             "name": "stopall",
+            #             "help": "Stop all tunnel"
+            #         },
+            #         {
+            #             "name": "rdp",
+            #             "help": "Manage rdp tunnels"
+            #         },
+            #         {
+            #             "name": "vnc",
+            #             "help": "Manage vnc tunnels"
+            #         },
+            #     ] if e["name"].startswith(incomplete)
         ]
 
         return completions + extras
+
+    @staticmethod
+    def stop_complete(ctx, param, incomplete):
+        print(ctx)
+        print(param)
+        print(incomplete)
+        socks = Socks5(None)
+        processes = [
+            x.profile for x in socks.__tunnel_processes__(type=TunnelType.SOCKS)
+        ]
+        completions = [
+            CompletionItem(k, help="socks")
+            for k in processes
+            if k.startswith(incomplete)
+        ]
+        return completions
