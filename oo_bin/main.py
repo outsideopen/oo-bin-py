@@ -6,10 +6,10 @@ import colorama
 from oo_bin import __version__
 from oo_bin.dnsme.command import dnsme
 from oo_bin.errors import OOBinError
-from oo_bin.hexme.command import hexme
 from oo_bin.macme.command import macme
 from oo_bin.tunnels.command import tunnels
 from oo_bin.utils import auto_update
+from oo_bin.hexme.command import hexme
 
 colorama.init(autoreset=True)
 

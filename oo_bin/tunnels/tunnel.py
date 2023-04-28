@@ -1,19 +1,27 @@
 import os
 import shutil
+import socket
 import sys
-from subprocess import DEVNULL, PIPE, Popen
+from pathlib import Path
 
-from colorama import Fore
+import tabulate as t
+from colorama import Fore, Style
 from xdg import BaseDirectory
 
 from oo_bin.config import main_config, ssh_config_path
 from oo_bin.errors import DependencyNotMetError, TunnelAlreadyStartedError
 from oo_bin.script import Script
+from oo_bin.tunnels.tunnel_process import TunnelProcess
+from oo_bin.tunnels.tunnel_type import TunnelType
+
+t.PRESERVE_WHITESPACE = True
 
 
 class Tunnel(Script):
     def __init__(self, profile):
         self.profile = profile
+        self.tunnel_processes = self.__tunnel_processes__()
+
         self.__cache_file__ = os.path.join(
             BaseDirectory.save_cache_path("oo_bin"), "tunnels.log"
         )
@@ -26,55 +34,99 @@ class Tunnel(Script):
             main_config().get("tunnels", {}).get("ssh_config", ssh_config_path)
         )
 
-    def jump_host(self):
-        try:
-            with open(self.__pid_file__, "r") as f:
-                pid = f.read()
-                output = Popen(["ps", "-f", "-p", pid], stdout=PIPE).communicate()
-                if len(output[0]) > 0:
-                    output = output[0].decode("utf-8")
-                else:
-                    return None
+    def __tunnel_processes__(self, type=None):
+        data_path = BaseDirectory.save_data_path("oo_bin")
 
-                if len(output.split("\n")) > 1:
-                    output = output.split("\n")[1]
-                else:
-                    return None
-                if len(output) > 0:
-                    return output.split()[-1].strip()
+        processes = []
+        if not type or type == TunnelType.SOCKS:
+            processes += [
+                TunnelProcess(TunnelType.SOCKS, x)
+                for x in sorted(Path(data_path).glob("*_Socks_*"), key=os.path.getmtime)
+            ]
 
-                return None
+        if not type or type == TunnelType.RDP:
+            processes += [
+                TunnelProcess(TunnelType.RDP, x)
+                for x in sorted(Path(data_path).glob("*_Rdp_*"), key=os.path.getmtime)
+            ]
 
-        except FileNotFoundError:
-            return None
+        if not type or type == TunnelType.VNC:
+            processes += [
+                TunnelProcess(TunnelType.VNC, x)
+                for x in sorted(Path(data_path).glob("*_Vnc_*"), key=os.path.getmtime)
+            ]
+        return processes
+
+    def __tunnel_process__(self, profile):
+        tunnel_processes = [
+            x for x in self.__tunnel_processes__() if profile == x.profile
+        ]
+        return tunnel_processes[0] if tunnel_processes else None
 
     def status(self):
-        jump_host = self.jump_host()
+        headers = ["Profile", "Jump Host", "Type", "PID"]
 
-        if jump_host:
-            print("SSH tunnel running to " + Fore.GREEN + f"{jump_host}")
+        table = []
+        keys = [e for e in TunnelType]
+
+        for key in keys:
+            tunnel_processes = [x for x in self.tunnel_processes if key == x.type]
+            for tunnel_process in tunnel_processes:
+                if tunnel_process.pid:
+                    table.append(
+                        [
+                            tunnel_process.profile,
+                            tunnel_process.jump_host,
+                            tunnel_process.type.value,
+                            tunnel_process.pid,
+                        ]
+                    )
+
+        if table:
+            print(t.tabulate(table, headers, tablefmt="grid"))
         else:
-            print(Fore.YELLOW + "No SSH tunnel is running")
+            print(f"\n{Style.BRIGHT}No tunnels running!")
 
-    def stop(self):
-        try:
-            with open(self.__pid_file__, "r") as f1:
-                print("Stopping tunnel to " + Fore.GREEN + f"{self.jump_host()}")
-                pid = f1.read()
+    def stop(self, type=None, profile=None):
+        headers = ["Profile", "Jump Host", "Type", "PID"]
+        table = []
 
-                with open(self.__cache_file__, "a") as f2:
-                    Popen(["kill", pid], stdout=DEVNULL, stderr=f2)
-                    os.remove(self.__pid_file__)
+        processes = []
+        if type:
+            processes = self.__tunnel_processes__(type=type)
+        elif profile:
+            process = self.__tunnel_process__(profile)
+            processes = [process] if process else []
+        else:
+            processes = self.__tunnel_processes__(type=type)
 
-        except FileNotFoundError:
-            print(Fore.YELLOW + "autossh is not running", file=sys.stderr)
+        for process in processes:
+            try:
+                process.stop()
+                table.append(
+                    [
+                        process.profile,
+                        process.jump_host,
+                        process.type.value,
+                        process.pid,
+                    ]
+                )
+
+            except FileNotFoundError:
+                print(f"{Fore.YELLOW}autossh is not running", file=sys.stderr)
+
+        if len(processes) > 0:
+            print(f"{Style.BRIGHT}The following processes were stopped")
+            print(t.tabulate(table, headers, tablefmt="grid"))
+        else:
+            print(f"{Style.BRIGHT}No processes were stopped")
 
     def start(self):
-        running_jump_host = self.jump_host()
+        tunnel_process = self.__tunnel_process__(self.profile)
 
-        if running_jump_host:
+        if tunnel_process:
             raise TunnelAlreadyStartedError(
-                f"SSH tunnel already running to {running_jump_host}"
+                f"Tunnel for profile {self.profile} already running!"
             )
 
     def runtime_dependencies_met(self):
@@ -82,3 +134,8 @@ class Tunnel(Script):
             raise DependencyNotMetError(
                 "autossh is not installed, or is not in the path"
             )
+
+    def open_port(self):
+        sock = socket.socket()
+        sock.bind(("", 0))
+        return sock.getsockname()[1]

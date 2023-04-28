@@ -17,15 +17,20 @@ from oo_bin.errors import (
     SystemNotSupportedError,
 )
 from oo_bin.tunnels.tunnel import Tunnel
-from oo_bin.utils import is_linux, is_mac, is_wsl, update_tunnels_config
+from oo_bin.tunnels.tunnel_type import TunnelType
+from oo_bin.utils import is_linux, is_mac, is_wsl
 
 
 class Rdp(Tunnel):
     def __init__(self, profile):
         super().__init__(profile)
+        self.forward_port = self.open_port()
 
         data_path = BaseDirectory.save_data_path("oo_bin")
-        self.__pid_file__ = os.path.join(data_path, "rdp_autossh_pid")
+        self.__pid_file__ = os.path.join(
+            data_path, f"{self.profile}_{TunnelType.RDP.value}_autossh_pid"
+        )
+
         self.__rdp_pid_file__ = os.path.join(data_path, "rdp_pid")
 
     @property
@@ -47,7 +52,7 @@ class Rdp(Tunnel):
             "width": section.get("width", "1920"),
             "height": section.get("height", "1080"),
             "forward_host": section.get("forward_host", "127.0.0.1"),
-            "forward_port": section.get("forward_port", "33389"),
+            "forward_port": section.get("forward_port", self.forward_port),
         }
 
     def __rdp_cmd__(self):
@@ -74,8 +79,8 @@ class Rdp(Tunnel):
 
         SystemNotSupportedError("Your system is not supported")
 
-    def stop(self):
-        super().stop()
+    def stop(self, type=None, profile=None):
+        super().stop(type=type, profile=profile)
 
         if not is_wsl():
             self.__kill_rdp__()
@@ -159,15 +164,8 @@ You can view the logs at {self.__cache_file__}"
                 "autossh is not installed, or is not in the path"
             )
 
-    def run(self, args):
-        if args["status"] or self.profile == "status":
-            self.status()
-        elif args["stop"] or self.profile == "stop":
-            self.stop()
-        elif args["update"]:
-            update_tunnels_config()
-        else:
-            self.start()
+    def run(self):
+        self.start()
 
     @staticmethod
     def shell_complete(ctx, param, incomplete):
@@ -189,3 +187,12 @@ You can view the logs at {self.__cache_file__}"
         ]
 
         return completions + extras
+
+    @staticmethod
+    def stop_complete(ctx, param, incomplete):
+        rdp = Rdp(None)
+        processes = [x.profile for x in rdp.__tunnel_processes__(type=TunnelType.RDP)]
+        completions = [
+            CompletionItem(k, help="rdp") for k in processes if k.startswith(incomplete)
+        ]
+        return processes
