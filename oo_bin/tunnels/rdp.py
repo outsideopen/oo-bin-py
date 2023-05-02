@@ -24,7 +24,6 @@ from oo_bin.utils import is_linux, is_mac, is_wsl
 class Rdp(Tunnel):
     def __init__(self, profile):
         super().__init__(profile)
-        self.forward_port = self.open_port()
 
         data_path = BaseDirectory.save_data_path("oo_bin")
         self.__pid_file__ = os.path.join(

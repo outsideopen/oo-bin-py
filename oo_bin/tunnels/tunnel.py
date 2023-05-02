@@ -20,6 +20,7 @@ t.PRESERVE_WHITESPACE = True
 class Tunnel(Script):
     def __init__(self, profile):
         self.profile = profile
+        self.forward_port = self.open_port()
         self.tunnel_processes = self.__tunnel_processes__()
 
         self.__cache_file__ = os.path.join(

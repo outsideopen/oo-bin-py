@@ -2,12 +2,13 @@ import os
 import shutil
 from datetime import datetime, timedelta
 from platform import uname
+from subprocess import PIPE, Popen
 
 import requests
 from colorama import Fore
 from xdg import BaseDirectory
 
-from oo_bin.config import backup_tunnels_config, main_config, config_path
+from oo_bin.config import backup_tunnels_config, config_path, main_config
 
 data_path = BaseDirectory.save_data_path("oo_bin")
 last_update_file = os.path.join(data_path, "last_update")
@@ -15,6 +16,13 @@ last_update_file = os.path.join(data_path, "last_update")
 
 def is_wsl():
     return "microsoft-standard" in uname().release
+
+
+def wsl_user():
+    cmd = ["powershell.exe", "$env:UserName"]
+    process = Popen(cmd, stdout=PIPE)
+    output = process.communicate()
+    return output[0].decode("utf-8").strip()
 
 
 def is_mac():
