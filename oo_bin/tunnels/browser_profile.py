@@ -27,15 +27,13 @@ class BrowserProfile:
             else self.__find_primary_profile_path__()
         )
 
-        if is_wsl():
-            user = wsl_user()
-            environ["TMPDIR"] = f"/mnt/c/Users/{user}/AppData/oo_bin/Profiles"
-
         if clone:
             self.profile = FirefoxProfile.clone(
                 primary_profile_path,
                 path_to=profile_path,
-                ignore=ignore_patterns("lock", "storage"),
+                ignore=ignore_patterns(
+                    "cache2", "lock", "places.sqlite", "startupCache", "storage"
+                ),
                 restore=False,
             )
         else:

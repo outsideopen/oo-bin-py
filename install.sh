@@ -24,7 +24,7 @@ function install_dependencies {
             if ! which whois; then
                 brew whois
             fi
-            if [ "$(which python3)" != "/usr/local/bin/python3" ]; then
+            if [ "$(which python3)" != "/usr/local/bin/python3" ]; then 
                 brew install python
             fi
         else
@@ -35,15 +35,7 @@ function install_dependencies {
 }
 
 function install {
-    if [ -v $1 ]; then
-        VERSION=$(curl -L https://api.github.com/repos/outsideopen/oo-bin-py/releases/latest | grep tag_name | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
-    else
-        VERSION=$(curl -L https://api.github.com/repos/outsideopen/oo-bin-py/releases | jq -r 'map(select(.prerelease)) | first | .tag_name')
-        if [ $VERSION == "null" ]; then
-            echo "No Prerelease is available."
-            exit 1
-        fi
-    fi
+    VERSION=$(curl -L https://api.github.com/repos/outsideopen/oo-bin-py/releases/latest | grep tag_name | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
     curl -LJO https://github.com/outsideopen/oo-bin-py/releases/download/${VERSION}/oo_bin-${VERSION}-py3-none-any.whl
 
     pip3 install --force-reinstall ./"oo_bin-${VERSION}-py3-none-any.whl"
@@ -133,17 +125,6 @@ function fish_add_completions {
     fi
 }
 
-for i in "$@"; do
-    case $i in
-        --prerelease)
-            PRERELEASE=YES
-            ;;
-        *)
-            # unknown option
-            ;;
-    esac
-done
-
 make_config
 echo 'Install Dependencies'
 echo '********************'
@@ -155,7 +136,7 @@ bash_add_local_bin_to_path
 echo ''
 echo 'Install Bin Scripts'
 echo '*******************'
-install $PRERELEASE
+install
 echo ''
 echo 'Config Auto Update'
 echo '******************'
