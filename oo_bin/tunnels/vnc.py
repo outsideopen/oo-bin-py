@@ -46,7 +46,7 @@ class Vnc(Tunnel):
             "host": section.get("host", None),
             "port": section.get("port", None),
             "forward_host": section.get("forward_host", "127.0.0.1"),
-            "forward_port": section.get("forward_port", self.open_port()),
+            "forward_port": section.get("forward_port", self.forward_port),
         }
 
     def stop(self):

@@ -9,13 +9,14 @@ from colorama import Fore
 from progress.bar import IncrementalBar
 from xdg import BaseDirectory
 
-from oo_bin.config import main_config, socks5_config
+from oo_bin.config import socks5_config
 from oo_bin.errors import (
     ConfigNotFoundError,
     DependencyNotMetError,
     ProcessFailedError,
     SystemNotSupportedError,
 )
+from oo_bin.tunnels.browser_profile import BrowserProfile
 from oo_bin.tunnels.tunnel import Tunnel
 from oo_bin.tunnels.tunnel_type import TunnelType
 from oo_bin.utils import is_linux, is_mac, is_wsl, update_tunnels_config
@@ -26,9 +27,12 @@ class Socks5(Tunnel):
         super().__init__(profile)
 
         self.__browser_bin__ = self.__browser_bin__()
-        self.__browser_profile__ = (
-            main_config().get("tunnels", {}).get("browser_profile", "Tunnels")
-        )
+
+        if profile:
+            self.__browser_profile__ = BrowserProfile(
+                proxy_host=self.config["forward_host"],
+                proxy_port=self.config["forward_port"],
+            )
 
         data_path = BaseDirectory.save_data_path("oo_bin")
         self.__pid_file__ = os.path.join(
@@ -52,7 +56,8 @@ class Socks5(Tunnel):
 
         return {
             "jump_host": section.get("jump_host", None),
-            "forward_port": section.get("forward_port", "2080"),
+            "forward_host": section.get("forward_host", "127.0.0.1"),
+            "forward_port": section.get("forward_port", self.forward_port),
             "urls": section.get("urls", None),
         }
 
@@ -62,6 +67,9 @@ class Socks5(Tunnel):
                 "firefox.exe",
                 path="/mnt/c/Program Files/Mozilla Firefox:/mnt/c/Program Files (x86)/Mozilla Firefox",
             )
+
+        elif is_linux():
+            return shutil.which("firefox")
         elif is_mac():
             bin = shutil.which("firefox")
             return (
@@ -71,9 +79,6 @@ class Socks5(Tunnel):
                     "firefox", path="/Applications/Firefox.app/Contents/MacOS"
                 )
             )
-
-        elif is_linux():
-            return shutil.which("firefox")
         SystemNotSupportedError("Your system is not supported")
 
     def stop(self, type=None, profile=None):
@@ -132,13 +137,17 @@ You can view the logs at {self.__cache_file__}"
             )
 
     def __launch_browser__(self, urls):
-        cmd = [self.__browser_bin__, "-P", self.__browser_profile__] + urls
+        cmd = [
+            self.__browser_bin__,
+            "--profile",
+            self.__browser_profile__.normalized_path,
+        ] + urls
 
         with open(self.__cache_file__, "a") as f1:
             pid = Popen(cmd, stdout=DEVNULL, stderr=f1).pid
 
             with open(self.__firefox_pid_file__, "w") as f2:
-                f2.write(f"{pid}")
+                f2.write(f"{pid}\n{self.__browser_profile__.path}")
 
     def __kill_browser__(self, profile=None):
         data_path = BaseDirectory.save_data_path("oo_bin")
@@ -153,11 +162,15 @@ You can view the logs at {self.__cache_file__}"
         try:
             for pid_file in pid_files:
                 with open(pid_file, "r") as f1:
-                    pid = f1.read()
+                    file_content = f1.read().split("\n", 2)
+                    pid = file_content[0] if len(file_content) > 0 else None
+                    profile_path = file_content[0] if len(file_content) > 1 else None
+                    profile = BrowserProfile(profile_path=profile_path, clone=False)
 
                     with open(self.__cache_file__, "a") as f2:
                         Popen(["kill", "-9", pid], stdout=DEVNULL, stderr=f2)
                     os.remove(pid_file)
+                    profile.destroy()
 
         except FileNotFoundError:
             return False
