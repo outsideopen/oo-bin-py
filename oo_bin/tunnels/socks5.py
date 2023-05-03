@@ -196,9 +196,6 @@ You can view the logs at {self.__cache_file__}"
 
     @staticmethod
     def shell_complete(ctx, param, incomplete):
-        print(ctx)
-        print(param)
-        print(incomplete)
         config = socks5_config()
         tunnels_list = list(config.keys())
         completions = [
@@ -235,9 +232,6 @@ You can view the logs at {self.__cache_file__}"
 
     @staticmethod
     def stop_complete(ctx, param, incomplete):
-        print(ctx)
-        print(param)
-        print(incomplete)
         socks = Socks5(None)
         processes = [
             x.profile for x in socks.__tunnel_processes__(type=TunnelType.SOCKS)
