@@ -53,3 +53,11 @@ Run the following command to install the script as your current user. It can als
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/outsideopen/oo-bin-py/HEAD/install.sh)"
 ```
+
+## Install a Pre-release version
+
+Sometimes we want to test a release before we make it publicly available. You can install the latest pre-release version by running
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/outsideopen/oo-bin-py/HEAD/install.sh)" --prerelease
+```
