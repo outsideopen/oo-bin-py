@@ -20,7 +20,7 @@ from oo_bin.utils import is_linux, is_mac, is_wsl
 
 
 class Vnc(Tunnel):
-    def __init__(self, profile):
+    def __init__(self, profile=None):
         super().__init__(profile)
 
         data_path = BaseDirectory.save_data_path("oo_bin")
@@ -172,7 +172,7 @@ You can view the logs at {self.__cache_file__}"
 
     @staticmethod
     def stop_complete(ctx, param, incomplete):
-        vnc = Vnc(None)
+        vnc = Vnc()
         processes = [x.profile for x in vnc.__tunnel_processes__(type=TunnelType.VNC)]
         completions = [
             CompletionItem(k, help="vnc") for k in processes if k.startswith(incomplete)

@@ -23,7 +23,7 @@ from oo_bin.utils import is_linux, is_mac, is_wsl, update_tunnels_config
 
 
 class Socks(Tunnel):
-    def __init__(self, profile):
+    def __init__(self, profile=None):
         super().__init__(profile)
 
         self.__browser_bin__ = self.__browser_bin__()
@@ -232,7 +232,7 @@ You can view the logs at {self.__cache_file__}"
 
     @staticmethod
     def stop_complete(ctx, param, incomplete):
-        socks = Socks(None)
+        socks = Socks()
         processes = [
             x.profile for x in socks.__tunnel_processes__(type=TunnelType.SOCKS)
         ]

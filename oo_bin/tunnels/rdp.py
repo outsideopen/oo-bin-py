@@ -22,7 +22,7 @@ from oo_bin.utils import is_linux, is_mac, is_wsl
 
 
 class Rdp(Tunnel):
-    def __init__(self, profile):
+    def __init__(self, profile=None):
         super().__init__(profile)
 
         data_path = BaseDirectory.save_data_path("oo_bin")
@@ -189,7 +189,7 @@ You can view the logs at {self.__cache_file__}"
 
     @staticmethod
     def stop_complete(ctx, param, incomplete):
-        rdp = Rdp(None)
+        rdp = Rdp()
         processes = [x.profile for x in rdp.__tunnel_processes__(type=TunnelType.RDP)]
         completions = [
             CompletionItem(k, help="rdp") for k in processes if k.startswith(incomplete)
