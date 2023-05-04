@@ -1,6 +1,6 @@
 import click
 
-from oo_bin.tunnels import Rdp, Socks5, Vnc
+from oo_bin.tunnels import Rdp, Socks, Vnc
 from oo_bin.tunnels.tunnel_type import TunnelType
 
 
@@ -18,27 +18,27 @@ class SkipArg(click.Group):
 @click.option(
     "-u", "--update", is_flag=True, help="Update tunnels configuration from remote"
 )
-@click.argument("profile", shell_complete=Socks5.shell_complete, required=False)
+@click.argument("profile", shell_complete=Socks.shell_complete, required=False)
 def tunnels(ctx, update, profile):
     if not profile and not update and not ctx.invoked_subcommand:
         click.echo(ctx.get_help())
         return None
 
     if ctx.invoked_subcommand is None:
-        socks = Socks5(profile)
+        socks = Socks(profile)
         socks.runtime_dependencies_met()
         return socks.run({"update": update})
 
 
 @tunnels.command("stop", help="Stop Socks tunnels")
 @click.pass_context
-@click.argument("profile", shell_complete=Socks5.stop_complete, required=False)
+@click.argument("profile", shell_complete=Socks.stop_complete, required=False)
 def stop(ctx, profile):
     if not profile:
-        socks = Socks5(None)
+        socks = Socks(None)
         socks.stop()
     else:
-        socks = Socks5(profile)
+        socks = Socks(profile)
         socks.stop(profile=profile)
 
 
@@ -56,13 +56,13 @@ def rdp(profile):
 
 @tunnels.command(help="Stop all tunnels")
 def stopall():
-    socks = Socks5(None)
+    socks = Socks(None)
     socks.stop()
 
 
 @tunnels.command(help="Tunnels status")
 def status():
-    socks = Socks5(None)
+    socks = Socks(None)
     socks.status()
 
 

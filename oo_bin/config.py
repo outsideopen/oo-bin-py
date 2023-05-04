@@ -67,12 +67,12 @@ def rdp_config():
     return rdp_config
 
 
-def socks5_config():
+def socks_config():
     config = tunnels_config()
-    socks5_config = {
+    socks_config = {
         k: v for k, v in config.items() if v.get("type", "socks") == "socks"
     }
-    return socks5_config
+    return socks_config
 
 
 def vnc_config():

@@ -9,7 +9,7 @@ from colorama import Fore
 from progress.bar import IncrementalBar
 from xdg import BaseDirectory
 
-from oo_bin.config import socks5_config
+from oo_bin.config import socks_config
 from oo_bin.errors import (
     ConfigNotFoundError,
     DependencyNotMetError,
@@ -22,7 +22,7 @@ from oo_bin.tunnels.tunnel_type import TunnelType
 from oo_bin.utils import is_linux, is_mac, is_wsl, update_tunnels_config
 
 
-class Socks5(Tunnel):
+class Socks(Tunnel):
     def __init__(self, profile):
         super().__init__(profile)
 
@@ -45,7 +45,7 @@ class Socks5(Tunnel):
 
     @property
     def config(self):
-        config = socks5_config()
+        config = socks_config()
 
         section = config.get(self.profile, {})
 
@@ -196,7 +196,7 @@ You can view the logs at {self.__cache_file__}"
 
     @staticmethod
     def shell_complete(ctx, param, incomplete):
-        config = socks5_config()
+        config = socks_config()
         tunnels_list = list(config.keys())
         completions = [
             CompletionItem(k, help="socks")
@@ -232,7 +232,7 @@ You can view the logs at {self.__cache_file__}"
 
     @staticmethod
     def stop_complete(ctx, param, incomplete):
-        socks = Socks5(None)
+        socks = Socks(None)
         processes = [
             x.profile for x in socks.__tunnel_processes__(type=TunnelType.SOCKS)
         ]
