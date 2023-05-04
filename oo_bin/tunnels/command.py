@@ -35,7 +35,7 @@ def tunnels(ctx, update, profile):
 @click.argument("profile", shell_complete=Socks.stop_complete, required=False)
 def stop(ctx, profile):
     if not profile:
-        socks = Socks(None)
+        socks = Socks()
         socks.stop()
     else:
         socks = Socks(profile)
@@ -56,13 +56,13 @@ def rdp(profile):
 
 @tunnels.command(help="Stop all tunnels")
 def stopall():
-    socks = Socks(None)
+    socks = Socks()
     socks.stop()
 
 
 @tunnels.command(help="Tunnels status")
 def status():
-    socks = Socks(None)
+    socks = Socks()
     socks.status()
 
 
