@@ -4,6 +4,8 @@ from shutil import copyfile
 
 from xdg import BaseDirectory
 
+from oo_bin.errors import ConfigNotFoundError
+
 try:
     import tomllib
 except ModuleNotFoundError:
@@ -61,21 +63,29 @@ def tunnels_config():
     return config
 
 
-def rdp_config():
+def __config_by_type__(type="socks", profile=None):
     config = tunnels_config()
-    rdp_config = {k: v for k, v in config.items() if v.get("type") == "rdp"}
-    return rdp_config
+    typed_config = {k: v for k, v in config.items() if v.get("type", "socks") == type}
+
+    if not profile:
+        return typed_config
+    else:
+        section = typed_config.get(profile, {})
+
+        if not section:
+            raise ConfigNotFoundError(
+                f"{profile} could not be found in your configuration file"
+            )
+        return section
 
 
-def socks_config():
-    config = tunnels_config()
-    socks_config = {
-        k: v for k, v in config.items() if v.get("type", "socks") == "socks"
-    }
-    return socks_config
+def socks_config(profile=None):
+    return __config_by_type__(type="socks", profile=profile)
 
 
-def vnc_config():
-    config = tunnels_config()
-    vnc_config = {k: v for k, v in config.items() if v.get("type") == "vnc"}
-    return vnc_config
+def rdp_config(profile=None):
+    return __config_by_type__(type="rdp", profile=profile)
+
+
+def vnc_config(profile=None):
+    return __config_by_type__(type="vnc", profile=profile)

@@ -2,12 +2,12 @@ import os
 
 from click.shell_completion import CompletionItem
 
-from oo_bin.config import socks5_config
+from oo_bin.config import socks_config
 
 
 class Ssh:
     def connect(self, profile):
-        config = socks5_config()
+        config = socks_config()
         section = config.get(profile, {})
         jump_host = section.get("jump_host", None)
 
@@ -15,9 +15,11 @@ class Ssh:
             cmd = ["ssh", jump_host]
             os.spawnvpe(os.P_WAIT, "ssh", cmd, os.environ)
 
+            return cmd
+
     @staticmethod
     def shell_complete(ctx, param, incomplete):
-        config = socks5_config()
+        config = socks_config()
         tunnels_list = list(config.keys())
         completions = [
             CompletionItem(k, help="socks")
