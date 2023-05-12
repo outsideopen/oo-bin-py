@@ -59,6 +59,6 @@ Run the following command to install the script as your current user. It can als
 Sometimes we want to test a release before we make it publicly available. You can install the latest pre-release version by running
 
 ```bash
-curl -O https://raw.githubusercontent.com/outsideopen/oo-bin-py/HEAD/install.sh)
+curl -O https://raw.githubusercontent.com/outsideopen/oo-bin-py/HEAD/install.sh
 ./install.sh --prerelease
 ```
