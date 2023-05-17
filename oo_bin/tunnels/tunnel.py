@@ -10,18 +10,16 @@ from xdg import BaseDirectory
 
 from oo_bin.config import main_config, ssh_config_path
 from oo_bin.errors import DependencyNotMetError, TunnelAlreadyStartedError
-from oo_bin.script import Script
 from oo_bin.tunnels.tunnel_process import TunnelProcess
 from oo_bin.tunnels.tunnel_type import TunnelType
 
 t.PRESERVE_WHITESPACE = True
 
 
-class Tunnel(Script):
+class Tunnel():
     def __init__(self, profile):
         self.profile = profile
         self.forward_port = self.open_port()
-        self.tunnel_processes = self.__tunnel_processes__()
 
         self.__cache_file__ = os.path.join(
             BaseDirectory.save_cache_path("oo_bin"), "tunnels.log"
@@ -35,7 +33,8 @@ class Tunnel(Script):
             main_config().get("tunnels", {}).get("ssh_config", ssh_config_path)
         )
 
-    def __tunnel_processes__(self, type=None):
+    @staticmethod
+    def tunnel_processes(type=None):
         data_path = BaseDirectory.save_data_path("oo_bin")
 
         processes = []
@@ -58,20 +57,22 @@ class Tunnel(Script):
             ]
         return processes
 
-    def __tunnel_process__(self, profile):
+    @staticmethod
+    def tunnel_process(profile):
         tunnel_processes = [
-            x for x in self.__tunnel_processes__() if profile == x.profile
+            x for x in Tunnel.tunnel_processes() if profile == x.profile
         ]
         return tunnel_processes[0] if tunnel_processes else None
 
-    def status(self):
+    @staticmethod
+    def status():
         headers = ["Profile", "Jump Host", "Type", "PID"]
 
         table = []
         keys = [e for e in TunnelType]
 
         for key in keys:
-            tunnel_processes = [x for x in self.tunnel_processes if key == x.type]
+            tunnel_processes = [x for x in Tunnel.tunnel_processes() if key == x.type]
             for tunnel_process in tunnel_processes:
                 if tunnel_process.pid:
                     table.append(
@@ -88,18 +89,16 @@ class Tunnel(Script):
         else:
             print(f"\n{Style.BRIGHT}No tunnels running!")
 
-    def stop(self, type=None, profile=None):
+    def stop(self, profile=None):
         headers = ["Profile", "Jump Host", "Type", "PID"]
         table = []
 
         processes = []
-        if type:
-            processes = self.__tunnel_processes__(type=type)
-        elif profile:
-            process = self.__tunnel_process__(profile)
+        if profile:
+            process = Tunnel.tunnel_process(profile)
             processes = [process] if process else []
         else:
-            processes = self.__tunnel_processes__(type=type)
+            processes = Tunnel.tunnel_processes()
 
         for process in processes:
             try:
@@ -123,7 +122,7 @@ class Tunnel(Script):
             print(f"{Style.BRIGHT}No processes were stopped")
 
     def start(self):
-        tunnel_process = self.__tunnel_process__(self.profile)
+        tunnel_process = Tunnel.tunnel_process(self.profile)
 
         if tunnel_process:
             raise TunnelAlreadyStartedError(

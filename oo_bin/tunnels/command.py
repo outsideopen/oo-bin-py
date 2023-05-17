@@ -1,6 +1,7 @@
 import click
 
-from oo_bin.tunnels import Rdp, Socks, Vnc
+from oo_bin.tunnels import Completions, Rdp, Socks, Vnc, Tunnel
+
 from oo_bin.tunnels.tunnel_type import TunnelType
 
 
@@ -18,7 +19,7 @@ class SkipArg(click.Group):
 @click.option(
     "-u", "--update", is_flag=True, help="Update tunnels configuration from remote"
 )
-@click.argument("profile", shell_complete=Socks.shell_complete, required=False)
+@click.argument("profile", shell_complete=Completions.socks_complete, required=False)
 def tunnels(ctx, update, profile):
     if not profile and not update and not ctx.invoked_subcommand:
         click.echo(ctx.get_help())
@@ -30,21 +31,40 @@ def tunnels(ctx, update, profile):
         return socks.run({"update": update})
 
 
-@tunnels.command("stop", help="Stop Socks tunnels")
+@tunnels.command("stop", help="Stop tunnels")
 @click.pass_context
-@click.argument("profile", shell_complete=Socks.stop_complete, required=False)
+@click.argument("profile", shell_complete=Completions.stop_complete, required=False)
 def stop(ctx, profile):
-    if not profile:
+    if profile:
+        process = Tunnel.tunnel_process(profile)
+
+        if process.type == TunnelType.SOCKS:
+            socks = Socks(profile)
+            socks.stop()
+        elif process.type == TunnelType.RDP:
+            rdp = Rdp(profile)
+            rdp.stop()
+        elif process.type == TunnelType.VNC:
+            vnc = Vnc(profile)
+            vnc.stop()
+    else:
         socks = Socks()
         socks.stop()
-    else:
-        socks = Socks(profile)
-        socks.stop(profile=profile)
+
+        rdp = Rdp()
+        rdp.stop()
+
+        vnc = Vnc()
+        vnc.stop()
 
 
-# @click.group(cls=SkipArg, invoke_without_command=True, help="Manage RDP tunnels")
+@tunnels.command(help="Tunnels status")
+def status():
+    Tunnel.status()
+
+
 @tunnels.command(help="Manage rdp tunnels")
-@click.argument("profile", shell_complete=Rdp.shell_complete, required=False)
+@click.argument("profile", shell_complete=Completions.rdp_complete, required=False)
 def rdp(profile):
     if not profile:
         click.echo(click.get_current_context().get_help())
@@ -54,20 +74,8 @@ def rdp(profile):
         rdp.run()
 
 
-@tunnels.command(help="Stop all tunnels")
-def stopall():
-    socks = Socks()
-    socks.stop()
-
-
-@tunnels.command(help="Tunnels status")
-def status():
-    socks = Socks()
-    socks.status()
-
-
 @tunnels.command(help="Manage vnc tunnels")
-@click.argument("profile", shell_complete=Vnc.shell_complete, required=False)
+@click.argument("profile", shell_complete=Completions.vnc_complete, required=False)
 def vnc(profile):
     if not profile:
         click.echo(click.get_current_context().get_help())

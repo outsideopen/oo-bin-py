@@ -5,7 +5,6 @@ import time
 from subprocess import DEVNULL, Popen
 
 import colorama
-from click.shell_completion import CompletionItem
 from progress.bar import IncrementalBar
 from xdg import BaseDirectory
 
@@ -78,8 +77,8 @@ class Rdp(Tunnel):
 
         SystemNotSupportedError("Your system is not supported")
 
-    def stop(self, type=None, profile=None):
-        super().stop(type=type, profile=profile)
+    def stop(self, profile=None):
+        super().stop(profile)
 
         if not is_wsl():
             self.__kill_rdp__()
@@ -165,33 +164,3 @@ You can view the logs at {self.__cache_file__}"
 
     def run(self):
         self.start()
-
-    @staticmethod
-    def shell_complete(ctx, param, incomplete):
-        config = rdp_config()
-        tunnels_list = list(config.keys())
-
-        completions = [
-            CompletionItem(k, help="rdp")
-            for k in tunnels_list
-            if k.startswith(incomplete)
-        ]
-        extras = [
-            CompletionItem(e["name"], help=e["help"])
-            for e in [
-                {"name": "status", "help": "Tunnel status"},
-                {"name": "stop", "help": "Stop tunnel"},
-            ]
-            if e["name"].startswith(incomplete)
-        ]
-
-        return completions + extras
-
-    @staticmethod
-    def stop_complete(ctx, param, incomplete):
-        rdp = Rdp()
-        processes = [x.profile for x in rdp.__tunnel_processes__(type=TunnelType.RDP)]
-        completions = [
-            CompletionItem(k, help="rdp") for k in processes if k.startswith(incomplete)
-        ]
-        return processes
