@@ -10,6 +10,12 @@ class TunnelProcess:
         self.jump_host = self.__jump_host_from_pid_file__(pid_file)
         self.profile = self.__profile_from_pid_file__(pid_file)
 
+    def is_running(self):
+        if self.__ps_output__(self.pid_file):
+            return True
+        else:
+            return False
+
     def stop(self):
         if self.pid:
             Popen(["kill", self.pid], stdout=DEVNULL)

@@ -4,7 +4,7 @@ from oo_bin.config import rdp_config, vnc_config, socks_config
 from oo_bin.tunnels.tunnel import Tunnel
 
 
-class Completions():
+class Completions:
     @staticmethod
     def rdp_complete(ctx, param, incomplete):
         config = rdp_config()
@@ -28,24 +28,14 @@ class Completions():
             if k.startswith(incomplete)
         ]
         extras = [
-            CompletionItem(e["name"], help=e["help"]) for e in [
-                {
-                    "name": "status",
-                            "help": "Tunnel status"
-                },
-                {
-                    "name": "stop",
-                            "help": "Stop tunnel"
-                },
-                {
-                    "name": "rdp",
-                    "help": "Manage rdp tunnels"
-                },
-                {
-                    "name": "vnc",
-                    "help": "Manage vnc tunnels"
-                },
-            ] if e["name"].startswith(incomplete)
+            CompletionItem(e["name"], help=e["help"])
+            for e in [
+                {"name": "status", "help": "Tunnel status"},
+                {"name": "stop", "help": "Stop tunnel"},
+                {"name": "rdp", "help": "Manage rdp tunnels"},
+                {"name": "vnc", "help": "Manage vnc tunnels"},
+            ]
+            if e["name"].startswith(incomplete)
         ]
 
         return completions + extras
@@ -68,8 +58,6 @@ class Completions():
         processes = Tunnel.tunnel_processes()
         completions = [
             CompletionItem(k.profile, help=k.type.value)
-
-
             for k in processes
             if k.profile.startswith(incomplete)
         ]

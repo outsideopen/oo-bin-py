@@ -48,14 +48,11 @@ def stop(ctx, profile):
             vnc = Vnc(profile)
             vnc.stop()
     else:
+        tunnels = Tunnel()
+        tunnels.stop()
+
         socks = Socks()
-        socks.stop()
-
-        rdp = Rdp()
-        rdp.stop()
-
-        vnc = Vnc()
-        vnc.stop()
+        socks.__kill_browser__()
 
 
 @tunnels.command(help="Tunnels status")

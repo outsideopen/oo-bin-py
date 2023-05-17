@@ -16,8 +16,8 @@ from oo_bin.tunnels.tunnel_type import TunnelType
 t.PRESERVE_WHITESPACE = True
 
 
-class Tunnel():
-    def __init__(self, profile):
+class Tunnel:
+    def __init__(self, profile=None):
         self.profile = profile
         self.forward_port = self.open_port()
 
@@ -75,6 +75,7 @@ class Tunnel():
             tunnel_processes = [x for x in Tunnel.tunnel_processes() if key == x.type]
             for tunnel_process in tunnel_processes:
                 if tunnel_process.pid:
+                    print(tunnel_process.pid)
                     table.append(
                         [
                             tunnel_process.profile,
@@ -124,7 +125,7 @@ class Tunnel():
     def start(self):
         tunnel_process = Tunnel.tunnel_process(self.profile)
 
-        if tunnel_process:
+        if tunnel_process and tunnel_process.is_running():
             raise TunnelAlreadyStartedError(
                 f"Tunnel for profile {self.profile} already running!"
             )
