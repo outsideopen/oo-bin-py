@@ -4,7 +4,6 @@ import time
 from pathlib import Path
 from subprocess import DEVNULL, Popen
 
-from click.shell_completion import CompletionItem
 from colorama import Fore
 from progress.bar import IncrementalBar
 from xdg import BaseDirectory
@@ -81,8 +80,8 @@ class Socks(Tunnel):
             )
         SystemNotSupportedError("Your system is not supported")
 
-    def stop(self, type=None, profile=None):
-        super().stop(type=type, profile=profile)
+    def stop(self, profile=None):
+        super().stop(profile)
 
         if not is_wsl():
             self.__kill_browser__(profile)
@@ -193,52 +192,3 @@ You can view the logs at {self.__cache_file__}"
             update_tunnels_config()
         else:
             self.start()
-
-    @staticmethod
-    def shell_complete(ctx, param, incomplete):
-        config = socks_config()
-        tunnels_list = list(config.keys())
-        completions = [
-            CompletionItem(k, help="socks")
-            for k in tunnels_list
-            if k.startswith(incomplete)
-        ]
-        extras = [
-            #     CompletionItem(e["name"], help=e["help"]) for e in [
-            #         {
-            #             "name": "status",
-            #             "help": "Tunnel status"
-            #         },
-            #         {
-            #             "name": "stop",
-            #             "help": "Stop tunnel"
-            #         },
-            #         {
-            #             "name": "stopall",
-            #             "help": "Stop all tunnel"
-            #         },
-            #         {
-            #             "name": "rdp",
-            #             "help": "Manage rdp tunnels"
-            #         },
-            #         {
-            #             "name": "vnc",
-            #             "help": "Manage vnc tunnels"
-            #         },
-            #     ] if e["name"].startswith(incomplete)
-        ]
-
-        return completions + extras
-
-    @staticmethod
-    def stop_complete(ctx, param, incomplete):
-        socks = Socks()
-        processes = [
-            x.profile for x in socks.__tunnel_processes__(type=TunnelType.SOCKS)
-        ]
-        completions = [
-            CompletionItem(k, help="socks")
-            for k in processes
-            if k.startswith(incomplete)
-        ]
-        return completions

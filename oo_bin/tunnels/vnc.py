@@ -3,7 +3,6 @@ import shutil
 import time
 from subprocess import DEVNULL, Popen
 
-from click.shell_completion import CompletionItem
 from progress.bar import IncrementalBar
 from xdg import BaseDirectory
 
@@ -49,8 +48,8 @@ class Vnc(Tunnel):
             "forward_port": section.get("forward_port", self.forward_port),
         }
 
-    def stop(self):
-        super().stop()
+    def stop(self, profile=None):
+        super().stop(profile)
 
     def start(self):
         super().start()
@@ -148,33 +147,3 @@ You can view the logs at {self.__cache_file__}"
 
     def run(self):
         self.start()
-
-    @staticmethod
-    def shell_complete(ctx, param, incomplete):
-        config = vnc_config()
-        tunnels_list = list(config.keys())
-
-        completions = [
-            CompletionItem(k, help="vnc")
-            for k in tunnels_list
-            if k.startswith(incomplete)
-        ]
-        extras = [
-            CompletionItem(e["name"], help=e["help"])
-            for e in [
-                {"name": "status", "help": "Tunnel status"},
-                {"name": "stop", "help": "Stop tunnel"},
-            ]
-            if e["name"].startswith(incomplete)
-        ]
-
-        return completions + extras
-
-    @staticmethod
-    def stop_complete(ctx, param, incomplete):
-        vnc = Vnc()
-        processes = [x.profile for x in vnc.__tunnel_processes__(type=TunnelType.VNC)]
-        completions = [
-            CompletionItem(k, help="vnc") for k in processes if k.startswith(incomplete)
-        ]
-        return completions
