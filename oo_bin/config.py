@@ -5,6 +5,8 @@ from shutil import copyfile
 from xdg import BaseDirectory
 
 from oo_bin.errors import ConfigNotFoundError
+import sys
+from colorama import Style
 
 try:
     import tomllib
@@ -35,6 +37,10 @@ def __get_config__(path):
             return data
     except FileNotFoundError:
         return {}
+    except tomllib.TOMLDecodeError as e:
+        print(f"\nError at {Style.BRIGHT}{path}", file=sys.stderr)
+        print(f"{e}", file=sys.stderr)
+        sys.exit(1)
 
 
 def main_config():
