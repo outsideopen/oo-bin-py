@@ -24,6 +24,8 @@ class Rdp(Tunnel):
     def __init__(self, profile=None):
         super().__init__(profile)
 
+        self.local_port = self.open_port()
+
         data_path = BaseDirectory.save_data_path("oo_bin")
         self.__pid_file__ = os.path.join(
             data_path, f"{self.profile}_{TunnelType.RDP.value}_autossh_pid"
@@ -49,8 +51,8 @@ class Rdp(Tunnel):
             "port": section.get("port", "3389"),
             "width": section.get("width", "1920"),
             "height": section.get("height", "1080"),
-            "forward_host": "127.0.0.1",
-            "forward_port": section.get("forward_port", self.forward_port),
+            "local_host": "127.0.0.1",
+            "local_port": section.get("local_port", self.local_port),
         }
 
     def __rdp_cmd__(self):
@@ -60,15 +62,15 @@ class Rdp(Tunnel):
                 mstsc,
                 f"/w:{self.config['width']}",
                 f"/h:{self.config['height']}",
-                f"/v:{self.config['forward_host']}:{self.config['forward_port']}",
+                f"/v:{self.config['local_host']}:{self.config['local_port']}",
             ]
         elif is_mac():
-            url = f"rdp://{self.config['forward_host']:{self.config['forward_port']}}"
+            url = f"rdp://{self.config['local_host']:{self.config['local_port']}}"
 
             return ["open", url]
 
         elif is_linux():
-            url = f"rdp://{self.config['forward_host']}:{self.config['forward_port']}"
+            url = f"rdp://{self.config['local_host']}:{self.config['local_port']}"
 
             print("Automatically launching RDP client on linux is not supported")
             print(f"You can manually launch your client at {url}")
@@ -92,7 +94,7 @@ class Rdp(Tunnel):
             "-M",
             "0",
             "-L",
-            f"{self.config['forward_port']}:{self.config['host']}:{self.config['port']}",
+            f"{self.config['local_port']}:{self.config['host']}:{self.config['port']}",
             "-o",
             "ServerAliveInterval=3",
             "-o",
