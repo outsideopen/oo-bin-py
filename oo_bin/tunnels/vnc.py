@@ -48,8 +48,8 @@ class Vnc(Tunnel):
             "forward_port": section.get("forward_port", self.forward_port),
         }
 
-    def stop(self, profile=None):
-        super().stop(profile)
+    def stop(self):
+        super().stop(self.profile)
 
     def start(self):
         super().start()

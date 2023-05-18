@@ -80,11 +80,11 @@ class Socks(Tunnel):
             )
         SystemNotSupportedError("Your system is not supported")
 
-    def stop(self, profile=None):
-        super().stop(profile)
+    def stop(self):
+        super().stop(self.profile)
 
         if not is_wsl():
-            self.__kill_browser__(profile)
+            self.__kill_browser__(self.profile)
 
     def start(self):
         super().start()

@@ -77,8 +77,8 @@ class Rdp(Tunnel):
 
         SystemNotSupportedError("Your system is not supported")
 
-    def stop(self, profile=None):
-        super().stop(profile)
+    def stop(self):
+        super().stop(self.profile)
 
         if not is_wsl():
             self.__kill_rdp__()
