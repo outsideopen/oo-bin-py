@@ -19,7 +19,6 @@ t.PRESERVE_WHITESPACE = True
 class Tunnel:
     def __init__(self, profile=None):
         self.profile = profile
-        self.forward_port = self.open_port()
 
         self.__cache_file__ = os.path.join(
             BaseDirectory.save_cache_path("oo_bin"), "tunnels.log"
@@ -75,7 +74,6 @@ class Tunnel:
             tunnel_processes = [x for x in Tunnel.tunnel_processes() if key == x.type]
             for tunnel_process in tunnel_processes:
                 if tunnel_process.pid:
-                    print(tunnel_process.pid)
                     table.append(
                         [
                             tunnel_process.profile,

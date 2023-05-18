@@ -25,6 +25,8 @@ class Socks(Tunnel):
     def __init__(self, profile=None):
         super().__init__(profile)
 
+        self.forward_port = self.open_port()
+
         self.__browser_bin__ = self.__browser_bin__()
 
         if profile:
