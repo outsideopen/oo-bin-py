@@ -1,4 +1,3 @@
-import os
 from subprocess import DEVNULL, PIPE, Popen
 import re
 

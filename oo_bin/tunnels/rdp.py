@@ -46,10 +46,10 @@ class Rdp(Tunnel):
             "jump_host": section.get("jump_host", None),
             "user": section.get("user", None),
             "host": section.get("host", None),
-            "port": section.get("port", None),
+            "port": section.get("port", "3389"),
             "width": section.get("width", "1920"),
             "height": section.get("height", "1080"),
-            "forward_host": section.get("forward_host", "127.0.0.1"),
+            "forward_host": "127.0.0.1",
             "forward_port": section.get("forward_port", self.forward_port),
         }
 
@@ -92,7 +92,7 @@ class Rdp(Tunnel):
             "-M",
             "0",
             "-L",
-            f"{self.config['forward_host']}:{self.config['forward_port']}:{self.config['host']}:{self.config['port']}",
+            f"{self.config['forward_port']}:{self.config['host']}:{self.config['port']}",
             "-o",
             "ServerAliveInterval=3",
             "-o",

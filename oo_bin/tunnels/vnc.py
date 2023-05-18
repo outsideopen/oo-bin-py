@@ -43,8 +43,8 @@ class Vnc(Tunnel):
         return {
             "jump_host": section.get("jump_host", None),
             "host": section.get("host", None),
-            "port": section.get("port", None),
-            "forward_host": section.get("forward_host", "127.0.0.1"),
+            "port": section.get("port", "5900"),
+            "forward_host": "127.0.0.1",
             "forward_port": section.get("forward_port", self.forward_port),
         }
 
@@ -60,8 +60,7 @@ class Vnc(Tunnel):
             "-M",
             "0",
             "-L",
-            f"{self.config['forward_host']}:{self.config['forward_port']}:{self.config['host']}:\
-{self.config['port']}",
+            f"{self.config['forward_port']}:{self.config['host']}:{self.config['port']}",
             "-o",
             "ServerAliveInterval=3",
             "-o",
