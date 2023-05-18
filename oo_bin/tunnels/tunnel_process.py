@@ -1,5 +1,6 @@
 import os
 from subprocess import DEVNULL, PIPE, Popen
+import re
 
 
 class TunnelProcess:
@@ -64,4 +65,5 @@ class TunnelProcess:
             return None
 
     def __profile_from_pid_file__(self, pid_file):
-        return os.path.basename(pid_file.name).split("_", 1)[0]
+        m = re.search(r"(.*?)(_Socks.*|_Rdp.*|_Vnc.*)", pid_file.name)
+        return str(m.group(1)) if m else None
