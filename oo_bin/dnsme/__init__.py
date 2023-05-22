@@ -114,7 +114,11 @@ class Dnsme:
     @property
     def __txt_lookup__(self):
         if not self.txt:
-            self.txt = sorted(dns.resolver.resolve(self.domain, "TXT"))
+            try:
+                self.txt = sorted(dns.resolver.resolve(self.domain, "TXT"))
+            except dns.resolver.NoAnswer:
+                self.txt = ""
+
         return self.txt
 
     def __str__(self):
