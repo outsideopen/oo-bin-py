@@ -2,6 +2,7 @@ from click.shell_completion import CompletionItem
 
 from oo_bin.config import rdp_config, vnc_config, socks_config
 from oo_bin.tunnels.tunnel import Tunnel
+from oo_bin.tunnels.tunnel_manager import TunnelManager
 
 
 class Completions:
@@ -34,6 +35,7 @@ class Completions:
                 {"name": "stop", "help": "Stop tunnel"},
                 {"name": "rdp", "help": "Manage rdp tunnels"},
                 {"name": "vnc", "help": "Manage vnc tunnels"},
+                {"name": "bp", "help": "Manage browser profiles"},
             ]
             if e["name"].startswith(incomplete)
         ]
@@ -55,10 +57,10 @@ class Completions:
 
     @staticmethod
     def stop_complete(ctx, param, incomplete):
-        processes = Tunnel.tunnel_processes()
+        tunnels = TunnelManager().tunnels()
         completions = [
-            CompletionItem(k.profile, help=k.type.value)
-            for k in processes
-            if k.profile.startswith(incomplete)
+            CompletionItem(k.state.name, help=k.state.type)
+            for k in tunnels
+            if k.state.name.startswith(incomplete)
         ]
         return completions

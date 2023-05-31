@@ -17,17 +17,23 @@ from oo_bin.tunnels.tunnel import Tunnel
 from oo_bin.tunnels.tunnel_type import TunnelType
 from oo_bin.utils import is_linux, is_mac, is_wsl
 
+# from oo_bin.tunnels.tunnel_state_manager import TunnelStateManager
+
 
 class Vnc(Tunnel):
     def __init__(self, profile=None):
         super().__init__(profile)
+        # state_manager = TunnelStateManager()
+        # self.state = state_manager.state(self.profile)
+
+        # self.state.type = TunnelType.VNC.value
 
         self.local_port = self.open_port()
 
         data_path = BaseDirectory.save_data_path("oo_bin")
-        self.__pid_file__ = os.path.join(
-            data_path, f"{self.profile}_{TunnelType.VNC.value}_autossh_pid"
-        )
+        # self.__pid_file__ = os.path.join(
+        #     data_path, f"{self.profile}_{TunnelType.VNC.value}_autossh_pid"
+        # )
 
         self.__vnc_pid_file__ = os.path.join(data_path, "vnc_pid")
 
@@ -51,7 +57,7 @@ class Vnc(Tunnel):
         }
 
     def stop(self):
-        super().stop(self.profile)
+        Popen(["kill", str(self.state.pid)], stdout=DEVNULL)
 
     def start(self):
         super().start()

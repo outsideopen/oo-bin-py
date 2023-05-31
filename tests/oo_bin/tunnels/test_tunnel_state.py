@@ -6,10 +6,6 @@ import tempfile
 
 
 class TestTunnelState:
-    def test_profile_not_found(self):
-        with pytest.raises(FileNotFoundError):
-            TunnelState("non_existing_profile")
-
     def test_new_profile(self):
         (_, state_file) = tempfile.mkstemp()
 

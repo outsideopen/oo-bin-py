@@ -3,11 +3,14 @@ import os
 import json
 from pathlib import Path
 
+from subprocess import PIPE, DEVNULL, Popen
+from oo_bin.errors import InvalidProfileError
+
 
 class TunnelState:
     def __init__(self, profile, state=None, state_file=None):
-        self.__profile__ = profile
-
+        if not profile:
+            raise InvalidProfileError("No profile name given")
         if state_file:
             self.__state_file__ = Path(state_file)
         else:
@@ -16,15 +19,37 @@ class TunnelState:
             )
 
         if not state:
-            with open(self.__state_file__, "r") as f:
-                self.__state__ = json.load(f)
+            try:
+                with open(self.__state_file__, "r") as f:
+                    self.__state__ = json.load(f)
+                    self.name = profile
+            except FileNotFoundError:
+                self.__state__ = {"profile": profile}
 
         else:
             self.__state__ = state
-            self.__save__()
+            self.name = profile
 
     def delete(self):
         self.__state_file__.unlink(missing_ok=True)
+
+    def stop(self):
+        if self.pid:
+            Popen(["kill", str(self.pid)], stdout=DEVNULL)
+
+        self.delete()
+
+    def is_running(self):
+        if self.pid:
+            ps_output = Popen(
+                ["ps", "-f", "-p", str(self.pid)], stdout=PIPE
+            ).communicate()
+
+            ps_utf8 = ps_output[0].decode("utf-8") if len(ps_output[0]) > 0 else ""
+
+            return True if len(ps_utf8.split("\n")) > 2 else False
+        else:
+            return False
 
     def __save__(self):
         with open(self.__state_file__, "w") as f:
@@ -32,7 +57,12 @@ class TunnelState:
 
     @property
     def name(self):
-        return self.__profile__
+        return self.__state__["profile"]
+
+    @name.setter
+    def name(self, value):
+        self.__state__["profile"] = value
+        self.__save__()
 
     @property
     def pid(self):
@@ -78,3 +108,6 @@ class TunnelState:
     def browser_pid(self, value):
         self.__state__["browser_pid"] = value
         self.__save__()
+
+    def __repr__(self):
+        return str(self.__state__)
