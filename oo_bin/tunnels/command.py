@@ -2,7 +2,13 @@ import click
 
 from oo_bin.tunnels import Completions, Rdp, Socks, Vnc, Tunnel
 
-from oo_bin.tunnels.tunnel_type import TunnelType
+from oo_bin.tunnels import TunnelType
+from oo_bin.tunnels import TunnelState
+
+from oo_bin.tunnels.browser_profile import BrowserProfile
+from oo_bin.tunnels import TunnelManager
+
+from colorama import Style
 
 
 class SkipArg(click.Group):
@@ -26,7 +32,7 @@ def tunnels(ctx, update, profile):
         return None
 
     if ctx.invoked_subcommand is None:
-        socks = Socks(profile)
+        socks = Socks(TunnelState(profile))
         socks.runtime_dependencies_met()
         return socks.run({"update": update})
 
@@ -36,28 +42,21 @@ def tunnels(ctx, update, profile):
 @click.argument("profile", shell_complete=Completions.stop_complete, required=False)
 def stop(ctx, profile):
     if profile:
-        process = Tunnel.tunnel_process(profile)
+        tunnel = TunnelManager().tunnel(profile)
+        if tunnel:
+            tunnel.stop()
+        else:
+            print(f"{Style.BRIGHT}No process was stopped")
 
-        if process.type == TunnelType.SOCKS:
-            socks = Socks(profile)
-            socks.stop()
-        elif process.type == TunnelType.RDP:
-            rdp = Rdp(profile)
-            rdp.stop()
-        elif process.type == TunnelType.VNC:
-            vnc = Vnc(profile)
-            vnc.stop()
     else:
-        tunnels = Tunnel()
-        tunnels.stop()
-
-        socks = Socks()
-        socks.__kill_browser__()
+        tunnel_manager = TunnelManager()
+        tunnel_manager.stop_all()
 
 
 @tunnels.command(help="Tunnels status")
 def status():
-    Tunnel.status()
+    tunnel_manager = TunnelManager()
+    tunnel_manager.status()
 
 
 @tunnels.command(help="Manage rdp tunnels")
@@ -80,3 +79,31 @@ def vnc(profile):
         vnc = Vnc(profile)
         vnc.runtime_dependencies_met()
         vnc.run()
+
+
+@tunnels.group()
+# @tunnels.command(help="Manage browser profiles")
+def bp():
+    pass
+
+
+@bp.command(help="Create a new browser profile")
+@click.argument("parent", shell_complete=Completions.browser_profiles, required=False)
+def new(parent):
+    bp = BrowserProfile(parent)
+
+
+@bp.command(help="List browser profiles")
+def ls():
+    pass
+
+
+@bp.command(help="Delete browser profile")
+def rm(name):
+    bp = BrowserProfile(name)
+    bp.destroy()
+
+
+bp.add_command(new)
+bp.add_command(ls)
+bp.add_command(rm)

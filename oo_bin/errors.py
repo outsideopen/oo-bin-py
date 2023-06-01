@@ -24,3 +24,7 @@ class SystemNotSupportedError(OOBinError):
 
 class DomainNotExistError(OOBinError):
     pass
+
+
+class InvalidProfileError(OOBinError):
+    pass

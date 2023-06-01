@@ -22,37 +22,22 @@ from oo_bin.utils import is_linux, is_mac, is_wsl, update_tunnels_config
 
 
 class Socks(Tunnel):
-    def __init__(self, profile=None):
-        super().__init__(profile)
+    def __init__(self, state):
+        super().__init__(state)
+
+        self.state.type = TunnelType.SOCKS.value
 
         self.forward_port = self.open_port()
-
-        self.__browser_bin__ = self.__browser_bin__()
-
-        if profile:
-            self.__browser_profile__ = BrowserProfile(
-                proxy_host=self.config["forward_host"],
-                proxy_port=self.config["forward_port"],
-            )
-
-        data_path = BaseDirectory.save_data_path("oo_bin")
-        self.__pid_file__ = os.path.join(
-            data_path, f"{self.profile}_{TunnelType.SOCKS.value}_autossh_pid"
-        )
-
-        self.__firefox_pid_file__ = os.path.join(
-            data_path, f"{self.profile}_firefox_pid"
-        )
 
     @property
     def config(self):
         config = socks_config()
 
-        section = config.get(self.profile, {})
+        section = config.get(self.state.name, {})
 
         if not section:
             raise ConfigNotFoundError(
-                f"{self.profile} could not be found in your configuration file"
+                f"{self.state.name} could not be found in your configuration file"
             )
 
         return {
@@ -62,7 +47,8 @@ class Socks(Tunnel):
             "urls": section.get("urls", None),
         }
 
-    def __browser_bin__(self):
+    @property
+    def __browser_bin(self):
         if is_wsl():
             return shutil.which(
                 "firefox.exe",
@@ -83,10 +69,12 @@ class Socks(Tunnel):
         SystemNotSupportedError("Your system is not supported")
 
     def stop(self):
-        super().stop(self.profile)
+        Popen(["kill", str(self.state.pid)], stdout=DEVNULL)
 
         if not is_wsl():
-            self.__kill_browser__(self.profile)
+            self.__kill_browser()
+
+        self.state.delete()
 
     def start(self):
         super().start()
@@ -110,11 +98,11 @@ class Socks(Tunnel):
             process = Popen(cmd, stdout=DEVNULL, stderr=f1)
             pid = process.pid
 
-            with open(self.__pid_file__, "w") as f2:
-                f2.write(f"{pid}")
+            self.state.pid = pid
+            self.state.jump_host = self.config["jump_host"]
 
             bar = IncrementalBar(
-                f"Starting {self.profile}", max=20, suffix="%(percent)d%%"
+                f"Starting {self.state.name}", max=20, suffix="%(percent)d%%"
             )
             for i in range(0, 20):
                 time.sleep(0.1)
@@ -129,7 +117,7 @@ You can view the logs at {self.__cache_file__}"
 
         urls = self.config["urls"]
         if urls:
-            self.__launch_browser__(urls)
+            self.__launch_browser(urls)
             print(f"Launching Firefox with tabs: {', '.join(urls)}")
         else:
             print(
@@ -137,44 +125,24 @@ You can view the logs at {self.__cache_file__}"
                 + "The tunnel has been started, but you have no urls configured"
             )
 
-    def __launch_browser__(self, urls):
+    def __launch_browser(self, urls):
+        browser_profile = BrowserProfile(self.state.browser_profile)
+        self.state.browser_profile = browser_profile.normalized_path
+
         cmd = [
-            self.__browser_bin__,
+            self.__browser_bin,
             "--profile",
-            self.__browser_profile__.normalized_path,
+            self.state.browser_profile,
         ] + urls
 
         with open(self.__cache_file__, "a") as f1:
             pid = Popen(cmd, stdout=DEVNULL, stderr=f1).pid
 
-            with open(self.__firefox_pid_file__, "w") as f2:
-                f2.write(f"{pid}\n{self.__browser_profile__.path}")
+            self.state.browser_pid = pid
 
-    def __kill_browser__(self, profile=None):
-        data_path = BaseDirectory.save_data_path("oo_bin")
-
-        pid_files = []
-
-        if profile:
-            pid_files = [os.path.join(data_path, f"{profile}_firefox_pid")]
-        else:
-            pid_files = Path(data_path).glob("*_firefox_pid")
-
-        try:
-            for pid_file in pid_files:
-                with open(pid_file, "r") as f1:
-                    file_content = f1.read().split("\n", 2)
-                    pid = file_content[0] if len(file_content) > 0 else None
-                    profile_path = file_content[0] if len(file_content) > 1 else None
-                    profile = BrowserProfile(profile_path=profile_path, clone=False)
-
-                    with open(self.__cache_file__, "a") as f2:
-                        Popen(["kill", "-9", pid], stdout=DEVNULL, stderr=f2)
-                    os.remove(pid_file)
-                    profile.destroy()
-
-        except FileNotFoundError:
-            return False
+    def __kill_browser(self):
+        with open(self.__cache_file__, "a") as f:
+            Popen(["kill", "-9", str(self.state.browser_pid)], stdout=DEVNULL, stderr=f)
 
         return True
 
@@ -184,7 +152,7 @@ You can view the logs at {self.__cache_file__}"
                 "autossh is not installed, or is not in the path"
             )
 
-        if not self.__browser_bin__:
+        if not self.__browser_bin:
             raise DependencyNotMetError(
                 "firefox is not installed, or is not in the path"
             )

@@ -24,6 +24,8 @@ class Rdp(Tunnel):
     def __init__(self, profile=None):
         super().__init__(profile)
 
+        self.state.type = TunnelType.RDP.value
+
         self.local_port = self.open_port()
 
         data_path = BaseDirectory.save_data_path("oo_bin")
@@ -80,7 +82,7 @@ class Rdp(Tunnel):
         SystemNotSupportedError("Your system is not supported")
 
     def stop(self):
-        super().stop(self.profile)
+        Popen(["kill", str(self.state.pid)], stdout=DEVNULL)
 
         if not is_wsl():
             self.__kill_rdp__()
