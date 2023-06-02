@@ -88,11 +88,11 @@ class Vnc(Tunnel):
             bar = IncrementalBar(
                 f"Starting {self.profile}", max=10, suffix="%(percent)d%%"
             )
-            for i in range(0, 10):
-                time.sleep(0.1)
+            for i in range(0, 20):
+                time.sleep(0.15)
                 bar.next()
                 if process.poll():
-                    msg = f"autossh failed after {i * 0.1}s.\
+                    msg = f"autossh failed after {i * 0.15}s.\
 You can view the logs at {self.__cache_file__}"
 
                     raise ProcessFailedError(msg)
