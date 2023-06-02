@@ -105,11 +105,11 @@ class Socks(Tunnel):
                 f"Starting {self.state.name}", max=20, suffix="%(percent)d%%"
             )
             for i in range(0, 20):
-                time.sleep(0.1)
+                time.sleep(0.15)
                 bar.next()
                 if process.poll():
                     print("")
-                    msg = f"autossh failed after {(i * 0.1):.2g}s.\
+                    msg = f"autossh failed after {(i * 0.15):.2g}s.\
 You can view the logs at {self.__cache_file__}"
 
                     raise ProcessFailedError(msg)
