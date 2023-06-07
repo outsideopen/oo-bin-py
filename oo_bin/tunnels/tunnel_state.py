@@ -92,12 +92,30 @@ class TunnelState:
         self.__save__()
 
     @property
-    def browser_profile(self):
-        return self.__state__.get("browser_profile", None)
+    def forward_port(self):
+        return self.__state__.get("forward_port", None)
 
-    @browser_profile.setter
-    def browser_profile(self, value):
-        self.__state__["browser_profile"] = value
+    @forward_port.setter
+    def forward_port(self, value):
+        self.__state__["forward_port"] = value
+        self.__save__()
+
+    @property
+    def browser_profile_name(self):
+        return self.__state__.get("browser_profile_name", None)
+
+    @browser_profile_name.setter
+    def browser_profile_name(self, value):
+        self.__state__["browser_profile_name"] = value
+        self.__save__()
+
+    @property
+    def browser_profile_path(self):
+        return self.__state__.get("browser_profile_path", None)
+
+    @browser_profile_path.setter
+    def browser_profile_path(self, value):
+        self.__state__["browser_profile_path"] = value
         self.__save__()
 
     @property

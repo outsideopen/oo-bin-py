@@ -1,14 +1,26 @@
 import click
 
-from oo_bin.tunnels import Completions, Rdp, Socks, Vnc, Tunnel
+from oo_bin.tunnels import Completions
 
 from oo_bin.tunnels import TunnelType
-from oo_bin.tunnels import TunnelState
 
 from oo_bin.tunnels.browser_profile import BrowserProfile
 from oo_bin.tunnels import TunnelManager
 
+from xdg import BaseDirectory
 from colorama import Style
+import os
+
+import time
+import math
+import tabulate as t
+
+from pathlib import Path
+from datetime import datetime
+import re
+import shutil
+import configparser
+import namegenerator
 
 
 class SkipArg(click.Group):
@@ -32,7 +44,7 @@ def tunnels(ctx, update, profile):
         return None
 
     if ctx.invoked_subcommand is None:
-        socks = Socks(TunnelState(profile))
+        socks = TunnelManager().add(profile, TunnelType.SOCKS)
         socks.runtime_dependencies_met()
         return socks.run({"update": update})
 
@@ -65,7 +77,7 @@ def rdp(profile):
     if not profile:
         click.echo(click.get_current_context().get_help())
     else:
-        rdp = Rdp(profile)
+        rdp = TunnelManager().add(profile, TunnelType.RDP)
         rdp.runtime_dependencies_met()
         rdp.run()
 
@@ -76,34 +88,98 @@ def vnc(profile):
     if not profile:
         click.echo(click.get_current_context().get_help())
     else:
-        vnc = Vnc(profile)
+        vnc = TunnelManager().add(profile, TunnelType.VNC)
         vnc.runtime_dependencies_met()
         vnc.run()
 
 
 @tunnels.group()
-# @tunnels.command(help="Manage browser profiles")
-def bp():
+# @click.argument("profile", shell_complete=Completions.browser_profile, required=True)
+def profile():
     pass
 
 
-@bp.command(help="Create a new browser profile")
-@click.argument("parent", shell_complete=Completions.browser_profiles, required=False)
-def new(parent):
-    bp = BrowserProfile(parent)
+@profile.command(help="Clone an existing browser profile")
+@click.argument(
+    "parent", shell_complete=Completions.clone_browser_profile, required=False
+)
+def clone(parent):
+    config = configparser.ConfigParser()
+    config.read(os.path.join(BrowserProfile.primary_profile_path(), "profiles.ini"))
+
+    for key in config:
+        if config[key].get("Name", None) == parent:
+            primary_profile_path = os.path.join(
+                BrowserProfile.primary_profile_path(), config[key].get("Path")
+            )
+
+    profile_path = os.path.join(
+        BaseDirectory.save_data_path("oo_bin"), "profiles", f"{namegenerator.gen()}"
+    )
+    cloned = BrowserProfile.clone(
+        primary_profile_path=primary_profile_path, profile_path=profile_path
+    )
+
+    profile = BrowserProfile(cloned.profile)
+
+    with open(Path(os.path.join(profile.normalized_path, "created_at")), "w") as f:
+        f.write(f"{datetime.now()}")
+
+    print(
+        f"Profile cloned from:    {primary_profile_path}\nCreated new profile at: {profile.normalized_path}"
+    )
 
 
-@bp.command(help="List browser profiles")
+@profile.command(help="Create a new browser profile")
+def new():
+    profile_path = os.path.join(
+        BaseDirectory.save_data_path("oo_bin"), "profiles", f"{namegenerator.gen()}"
+    )
+    profile = BrowserProfile(profile_path)
+    print(f"Profile created at: {profile.normalized_path}")
+
+
+@profile.command(help="List browser profiles")
 def ls():
-    pass
+    profiles_dir = Path(
+        os.path.join(BaseDirectory.save_data_path("oo_bin"), "profiles")
+    )
+    profiles = sorted(profiles_dir.glob("*"), key=os.path.getmtime)
+
+    headers = ["Profile Name", "Profile Path"]
+
+    table = []
+
+    for profile in profiles:
+        name = os.path.basename(profile)
+        table.append(
+            [
+                name,
+                profile,
+            ]
+        )
+
+    if table:
+        print(t.tabulate(table, headers, tablefmt="grid"))
+    else:
+        print(
+            f"\nNo profiles found. Run:\n{Style.BRIGHT}oo tunnels profiles clone [parent_profile_name]"
+        )
 
 
-@bp.command(help="Delete browser profile")
-def rm(name):
-    bp = BrowserProfile(name)
-    bp.destroy()
+@profile.command(help="Delete browser profile")
+@click.argument(
+    "profile", shell_complete=Completions.remove_browser_profile, required=False
+)
+def rm(profile):
+    dir = Path(
+        os.path.join(BaseDirectory.save_data_path("oo_bin"), "profiles", profile)
+    )
+    shutil.rmtree(dir)
+
+    print(f"Removed profile at {dir}")
 
 
-bp.add_command(new)
-bp.add_command(ls)
-bp.add_command(rm)
+profile.add_command(clone)
+profile.add_command(ls)
+profile.add_command(rm)
