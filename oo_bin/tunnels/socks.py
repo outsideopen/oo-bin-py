@@ -100,6 +100,7 @@ class Socks(Tunnel):
 
             self.state.pid = pid
             self.state.jump_host = self.config["jump_host"]
+            self.state.forward_port = self.config["forward_port"]
 
             bar = IncrementalBar(
                 f"Starting {self.state.name}", max=20, suffix="%(percent)d%%"
@@ -126,13 +127,15 @@ You can view the logs at {self.__cache_file__}"
             )
 
     def __launch_browser(self, urls):
-        browser_profile = BrowserProfile(self.state.browser_profile)
-        self.state.browser_profile = browser_profile.normalized_path
+        browser_profile = BrowserProfile(self.state.browser_profile_path)
+        browser_profile.set_socks_proxy(
+            self.config["forward_host"], self.config["forward_port"]
+        )
 
         cmd = [
             self.__browser_bin,
             "--profile",
-            self.state.browser_profile,
+            self.state.browser_profile_path,
         ] + urls
 
         with open(self.__cache_file__, "a") as f1:

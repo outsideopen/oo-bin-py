@@ -14,6 +14,7 @@ from oo_bin.tunnels.socks import Socks
 import tabulate as t
 from colorama import Fore, Style
 import sys
+from oo_bin.errors import BrowserProfileUnavailableError
 
 
 @singleton
@@ -48,9 +49,18 @@ class TunnelManager:
 
         return tunnels
 
-    def add(self, profile):
-        tunnel_state = TunnelState(profile)
-        tunnel = Tunnel(tunnel_state)
+    def add(self, profile, type):
+        state = TunnelState(profile)
+        if type == TunnelType.SOCKS:
+            tunnel = Socks(state)
+            (next_profile_name, next_profile_path) = self.next_browser_profile()
+            tunnel.state.browser_profile_name = next_profile_name
+            tunnel.state.browser_profile_path = next_profile_path
+        elif type == TunnelType.RDP:
+            tunnel = Rdp(tunnel)
+        elif type == TunnelType.VNC:
+            tunnel = Vnc(state)
+
         self.__tunnels.append(tunnel)
         return tunnel
 
@@ -66,7 +76,14 @@ class TunnelManager:
             return [x for x in self.__tunnels]
 
     def status(self):
-        headers = ["Profile", "Jump Host", "Type", "PID"]
+        headers = [
+            "Profile",
+            "Jump Host",
+            "Forward Port",
+            "Type",
+            "PID",
+            "Browser Profile",
+        ]
 
         table = []
         keys = [e for e in TunnelType]
@@ -79,8 +96,10 @@ class TunnelManager:
                         [
                             tunnel.state.name,
                             tunnel.state.jump_host,
+                            tunnel.state.forward_port,
                             tunnel.state.type,
                             tunnel.state.pid,
+                            tunnel.state.browser_profile_name,
                         ]
                     )
 
@@ -93,7 +112,7 @@ class TunnelManager:
         self.stop([x.state.name for x in self.__tunnels])
 
     def stop(self, profiles):
-        headers = ["Profile", "Jump Host", "Type", "PID"]
+        headers = ["Profile", "Jump Host", "Type", "PID", "Browser Profile"]
         table = []
 
         tunnels = []
@@ -109,6 +128,7 @@ class TunnelManager:
                         tunnel.state.jump_host,
                         tunnel.state.type,
                         tunnel.state.pid,
+                        tunnel.state.browser_profile_name,
                     ]
                 )
 
@@ -120,3 +140,23 @@ class TunnelManager:
             print(t.tabulate(table, headers, tablefmt="grid"))
         else:
             print(f"{Style.BRIGHT}No processes were stopped")
+
+    def next_browser_profile(self):
+        profiles_dir = Path(
+            os.path.join(BaseDirectory.save_data_path("oo_bin"), "profiles")
+        )
+        all_profiles = [str(x) for x in profiles_dir.glob("*")]
+
+        running_profiles = [x.state.browser_profile_path for x in self.__tunnels]
+
+        available_profiles = list(set(all_profiles) - set(running_profiles))
+
+        if len(available_profiles) == 0:
+            raise BrowserProfileUnavailableError(
+                """No Browser Profile is available.
+
+You can create a new profile by running:      `oo tunnels profile new`
+You can clone an existing profile by running: `oo tunnels profile clone <ProfileName>`"""
+            )
+
+        return (os.path.basename(available_profiles[0]), str(available_profiles[0]))

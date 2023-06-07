@@ -28,3 +28,7 @@ class DomainNotExistError(OOBinError):
 
 class InvalidProfileError(OOBinError):
     pass
+
+
+class BrowserProfileUnavailableError(OOBinError):
+    pass
