@@ -1,10 +1,10 @@
-import os
 import shutil
 import time
 from subprocess import DEVNULL, Popen
+import sys
 
+import colorama
 from progress.bar import IncrementalBar
-from xdg import BaseDirectory
 
 from oo_bin.config import vnc_config
 from oo_bin.errors import (
@@ -21,31 +21,24 @@ from oo_bin.utils import is_linux, is_mac, is_wsl
 
 
 class Vnc(Tunnel):
-    def __init__(self, profile=None):
-        super().__init__(profile)
-        # state_manager = TunnelStateManager()
-        # self.state = state_manager.state(self.profile)
+    def __init__(self, state):
+        super().__init__(state)
 
-        # self.state.type = TunnelType.VNC.value
+        self.state = state
+
+        self.state.type = TunnelType.VNC.value
 
         self.local_port = self.open_port()
-
-        data_path = BaseDirectory.save_data_path("oo_bin")
-        # self.__pid_file__ = os.path.join(
-        #     data_path, f"{self.profile}_{TunnelType.VNC.value}_autossh_pid"
-        # )
-
-        self.__vnc_pid_file__ = os.path.join(data_path, "vnc_pid")
 
     @property
     def config(self):
         config = vnc_config()
 
-        section = config.get(self.profile, {})
+        section = config.get(self.state.name, {})
 
         if not section:
             raise ConfigNotFoundError(
-                f"{self.profile} could not be found in your configuration file"
+                f"{self.state.name} could not be found in your configuration file"
             )
 
         return {
@@ -82,11 +75,11 @@ class Vnc(Tunnel):
             process = Popen(cmd, stdout=DEVNULL, stderr=f1)
             pid = process.pid
 
-            with open(self.__pid_file__, "w") as f2:
-                f2.write(f"{pid}")
+            self.state.pid = pid
+            self.state.jump_host = self.config["jump_host"]
 
             bar = IncrementalBar(
-                f"Starting {self.profile}", max=10, suffix="%(percent)d%%"
+                f"Starting {self.state.name}", max=10, suffix="%(percent)d%%"
             )
             for i in range(0, 20):
                 time.sleep(0.15)
@@ -124,25 +117,24 @@ You can view the logs at {self.__cache_file__}"
         SystemNotSupportedError("Your system is not supported")
 
     def __launch_vnc__(self):
-        cmd = self.__vnc_cmd__()
-
-        with open(self.__cache_file__, "a") as f1:
-            pid = Popen(cmd, stdout=DEVNULL, stderr=f1).pid
-
-            with open(self.__vnc_pid_file__, "w") as f2:
-                f2.write(f"{pid}")
-
-    def __kill_vnc__(self):
         try:
-            with open(self.__vnc_pid_file__, "r") as f1:
-                pid = f1.read()
+            cmd = self.__vnc_cmd__()
 
-                with open(self.__cache_file__, "a") as f2:
-                    Popen(["kill", pid], stdout=DEVNULL, stderr=f2)
-                    os.remove(self.__vnc_pid_file__)
+            with open(self.__cache_file__, "a") as f:
+                pid = Popen(cmd, stdout=DEVNULL, stderr=f).pid
+
+                self.state.vnc_pid = pid
 
         except FileNotFoundError:
-            return False
+            print(
+                colorama.Fore.RED + "Error: Could not find VNC executable",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+    def __kill_vnc__(self):
+        with open(self.__cache_file__, "a") as f:
+            Popen(["kill", str(self.state._vnc_pid)], stdout=DEVNULL, stderr=f)
 
         return True
 

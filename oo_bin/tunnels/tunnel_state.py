@@ -136,5 +136,14 @@ class TunnelState:
         self.__state__["rdp_pid"] = value
         self.__save__()
 
+    @property
+    def vnc_pid(self):
+        return self.__state__.get("vnc_pid", None)
+
+    @vnc_pid.setter
+    def vnc_pid(self, value):
+        self.__state__["vnc_pid"] = value
+        self.__save__()
+
     def __repr__(self):
         return str(self.__state__)
