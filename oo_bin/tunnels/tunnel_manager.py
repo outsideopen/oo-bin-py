@@ -16,6 +16,10 @@ from colorama import Fore, Style
 import sys
 from oo_bin.errors import BrowserProfileUnavailableError
 
+from oo_bin.tunnels.browser_profile import BrowserProfile
+
+from oo_bin.config import main_config
+
 
 @singleton
 class TunnelManager:
@@ -142,10 +146,19 @@ class TunnelManager:
             print(f"{Style.BRIGHT}No processes were stopped")
 
     def next_browser_profile(self):
-        profiles_dir = Path(
-            os.path.join(BaseDirectory.save_data_path("oo_bin"), "profiles")
+        multiple_profiles = (
+            main_config().get("tunnels", {}).get("socks", {}).get("multiple", False)
         )
-        all_profiles = [str(x) for x in profiles_dir.glob("*")]
+
+        if multiple_profiles:
+            profiles_dir = Path(
+                os.path.join(BaseDirectory.save_data_path("oo_bin"), "profiles")
+            )
+
+            all_profiles = [str(x) for x in profiles_dir.glob("*")]
+        else:
+            profiles_dir = BrowserProfile.primary_profile_path()
+            all_profiles = [str(x) for x in profiles_dir.glob("*.Tunnels")]
 
         running_profiles = [x.state.browser_profile_path for x in self.__tunnels]
 
