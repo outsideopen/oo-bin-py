@@ -13,7 +13,6 @@ from oo_bin.errors import BrowserProfileUnavailableError
 from oo_bin.tunnels.browser_profile import BrowserProfile
 from oo_bin.tunnels.rdp import Rdp
 from oo_bin.tunnels.socks import Socks
-from oo_bin.tunnels.tunnel import Tunnel
 from oo_bin.tunnels.tunnel_state import TunnelState
 from oo_bin.tunnels.tunnel_type import TunnelType
 from oo_bin.tunnels.vnc import Vnc

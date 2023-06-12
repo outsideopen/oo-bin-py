@@ -1,12 +1,9 @@
-import os
 import shutil
 import time
-from pathlib import Path
 from subprocess import DEVNULL, Popen
 
 from colorama import Fore
 from progress.bar import IncrementalBar
-from xdg import BaseDirectory
 
 from oo_bin.config import socks_config
 from oo_bin.errors import (
@@ -18,7 +15,7 @@ from oo_bin.errors import (
 from oo_bin.tunnels.browser_profile import BrowserProfile
 from oo_bin.tunnels.tunnel import Tunnel
 from oo_bin.tunnels.tunnel_type import TunnelType
-from oo_bin.utils import is_linux, is_mac, is_wsl, update_tunnels_config
+from oo_bin.utils import is_linux, is_mac, is_wsl
 
 
 class Socks(Tunnel):
@@ -160,8 +157,5 @@ You can view the logs at {self.__cache_file__}"
                 "firefox is not installed, or is not in the path"
             )
 
-    def run(self, args):
-        if args["update"]:
-            update_tunnels_config()
-        else:
-            self.start()
+    def run(self):
+        self.start()
