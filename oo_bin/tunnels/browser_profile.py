@@ -13,10 +13,8 @@ import os
 class BrowserProfile:
     def __init__(self, browser_profile):
         if Path(browser_profile).exists():
-            print("exists")
             self.profile = FirefoxProfile(profile=browser_profile, restore=True)
         else:
-            print("not exists")
             self.profile = FirefoxProfile(profile=browser_profile, restore=False)
 
     def set_socks_proxy(self, host, port):
