@@ -1,7 +1,9 @@
-import pytest
 import os
-from oo_bin.ssh import Ssh
 from pathlib import Path
+
+import pytest
+
+from oo_bin.ssh import Ssh
 
 
 class TestSsh:

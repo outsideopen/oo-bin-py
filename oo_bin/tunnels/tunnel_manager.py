@@ -1,24 +1,22 @@
-from xdg import BaseDirectory
 import os
-from pathlib import Path
-from oo_bin.tunnels.tunnel_state import TunnelState
 import re
+import sys
+from pathlib import Path
 
-from singleton_decorator import singleton
-from oo_bin.tunnels.tunnel import Tunnel
-from oo_bin.tunnels.tunnel_type import TunnelType
-
-from oo_bin.tunnels.rdp import Rdp
-from oo_bin.tunnels.vnc import Vnc
-from oo_bin.tunnels.socks import Socks
 import tabulate as t
 from colorama import Fore, Style
-import sys
-from oo_bin.errors import BrowserProfileUnavailableError
-
-from oo_bin.tunnels.browser_profile import BrowserProfile
+from singleton_decorator import singleton
+from xdg import BaseDirectory
 
 from oo_bin.config import main_config
+from oo_bin.errors import BrowserProfileUnavailableError
+from oo_bin.tunnels.browser_profile import BrowserProfile
+from oo_bin.tunnels.rdp import Rdp
+from oo_bin.tunnels.socks import Socks
+from oo_bin.tunnels.tunnel import Tunnel
+from oo_bin.tunnels.tunnel_state import TunnelState
+from oo_bin.tunnels.tunnel_type import TunnelType
+from oo_bin.tunnels.vnc import Vnc
 
 
 @singleton

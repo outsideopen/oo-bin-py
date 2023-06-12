@@ -1,4 +1,5 @@
 import getpass
+import os
 from pathlib import Path
 from shutil import ignore_patterns
 
@@ -7,7 +8,6 @@ import wslPath
 from mozprofile.profile import FirefoxProfile
 
 from oo_bin.utils import is_linux, is_mac, is_wsl, wsl_user
-import os
 
 
 class BrowserProfile:

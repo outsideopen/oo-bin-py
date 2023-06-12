@@ -1,9 +1,10 @@
-from xdg import BaseDirectory
-import os
 import json
+import os
 from pathlib import Path
+from subprocess import DEVNULL, PIPE, Popen
 
-from subprocess import PIPE, DEVNULL, Popen
+from xdg import BaseDirectory
+
 from oo_bin.errors import InvalidProfileError
 
 

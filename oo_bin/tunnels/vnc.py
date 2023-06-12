@@ -1,7 +1,7 @@
 import shutil
+import sys
 import time
 from subprocess import DEVNULL, Popen
-import sys
 
 import colorama
 from progress.bar import IncrementalBar
