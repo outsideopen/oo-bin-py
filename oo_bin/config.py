@@ -1,12 +1,12 @@
 import os
+import sys
 from os.path import exists
 from shutil import copyfile
 
+from colorama import Style
 from xdg import BaseDirectory
 
 from oo_bin.errors import ConfigNotFoundError
-import sys
-from colorama import Style
 
 try:
     import tomllib

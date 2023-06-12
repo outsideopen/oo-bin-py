@@ -1,9 +1,10 @@
-from xdg import BaseDirectory
-import os
 import json
+import os
 from pathlib import Path
+from subprocess import DEVNULL, PIPE, Popen
 
-from subprocess import PIPE, DEVNULL, Popen
+from xdg import BaseDirectory
+
 from oo_bin.errors import InvalidProfileError
 
 
@@ -125,6 +126,24 @@ class TunnelState:
     @browser_pid.setter
     def browser_pid(self, value):
         self.__state__["browser_pid"] = value
+        self.__save__()
+
+    @property
+    def rdp_pid(self):
+        return self.__state__.get("rdp_pid", None)
+
+    @rdp_pid.setter
+    def rdp_pid(self, value):
+        self.__state__["rdp_pid"] = value
+        self.__save__()
+
+    @property
+    def vnc_pid(self):
+        return self.__state__.get("vnc_pid", None)
+
+    @vnc_pid.setter
+    def vnc_pid(self, value):
+        self.__state__["vnc_pid"] = value
         self.__save__()
 
     def __repr__(self):

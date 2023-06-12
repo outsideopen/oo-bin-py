@@ -1,13 +1,13 @@
 import os
 import shutil
 import socket
+from subprocess import PIPE, Popen
 
 import tabulate as t
 from xdg import BaseDirectory
 
 from oo_bin.config import main_config, ssh_config_path
 from oo_bin.errors import DependencyNotMetError, TunnelAlreadyStartedError
-from subprocess import PIPE, Popen
 
 t.PRESERVE_WHITESPACE = True
 

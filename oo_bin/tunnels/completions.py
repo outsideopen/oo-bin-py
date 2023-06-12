@@ -1,13 +1,13 @@
-from click.shell_completion import CompletionItem
-
-from oo_bin.config import rdp_config, vnc_config, socks_config
-from oo_bin.tunnels.tunnel_manager import TunnelManager
-
-from xdg import BaseDirectory
-from pathlib import Path
-import os
-from oo_bin.tunnels.browser_profile import BrowserProfile
 import configparser
+import os
+from pathlib import Path
+
+from click.shell_completion import CompletionItem
+from xdg import BaseDirectory
+
+from oo_bin.config import rdp_config, socks_config, vnc_config
+from oo_bin.tunnels.browser_profile import BrowserProfile
+from oo_bin.tunnels.tunnel_manager import TunnelManager
 
 
 class Completions:

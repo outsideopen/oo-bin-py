@@ -1,26 +1,20 @@
-import click
-
-from oo_bin.tunnels import Completions
-
-from oo_bin.tunnels import TunnelType
-
-from oo_bin.tunnels.browser_profile import BrowserProfile
-from oo_bin.tunnels import TunnelManager
-
-from xdg import BaseDirectory
-from colorama import Style
-import os
-
-import time
+import configparser
 import math
-import tabulate as t
-
-from pathlib import Path
-from datetime import datetime
+import os
 import re
 import shutil
-import configparser
+import time
+from datetime import datetime
+from pathlib import Path
+
+import click
 import namegenerator
+import tabulate as t
+from colorama import Style
+from xdg import BaseDirectory
+
+from oo_bin.tunnels import Completions, TunnelManager, TunnelType
+from oo_bin.tunnels.browser_profile import BrowserProfile
 
 
 class SkipArg(click.Group):

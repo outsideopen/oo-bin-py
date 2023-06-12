@@ -1,4 +1,5 @@
 import click
+
 from oo_bin.dnsme import Dnsme
 
 

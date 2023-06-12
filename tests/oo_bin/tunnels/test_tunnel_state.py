@@ -1,8 +1,10 @@
-import pytest
-from oo_bin.tunnels import TunnelState, TunnelType
 import json
-from pathlib import Path
 import tempfile
+from pathlib import Path
+
+import pytest
+
+from oo_bin.tunnels import TunnelState, TunnelType
 
 
 class TestTunnelState:
