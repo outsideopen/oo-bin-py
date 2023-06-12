@@ -19,6 +19,8 @@ function install_dependencies {
 			if ! which whois; then
 				sudo apt-get -y update && sudo apt-get install -y whois
 			fi
+			if ! which jq; then
+				sudo apt-get -y update && sudo apt-get install -y jq
 			fi
 		else
 			echo "We could not automatically install the dependencies on your system. Please install ssh and autossh manually."
@@ -33,6 +35,9 @@ function install_dependencies {
 			fi
 			if ! which whois; then
 				brew install whois
+			fi
+			if ! which jq; then
+				brew install jq
 			fi
 		else
 			echo "Could not find Homebrew (https://brew.sh/). Install Homebrew, or, manually install autossh."
