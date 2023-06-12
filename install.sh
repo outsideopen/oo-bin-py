@@ -11,7 +11,14 @@ function install_dependencies {
 	if [[ $(uname -s) =~ "Linux" ]]; then
 		if which apt-get 2>/dev/null; then
 			if ! which autossh; then
-				sudo apt-get -y update && sudo apt-get install -y ssh autossh python3-pip whois
+				sudo apt-get -y update && sudo apt-get install -y autossh
+			fi
+			if ! which pip3; then
+				sudo apt-get -y update && sudo apt-get install -y python3-pip
+			fi
+			if ! which whois; then
+				sudo apt-get -y update && sudo apt-get install -y whois
+			fi
 			fi
 		else
 			echo "We could not automatically install the dependencies on your system. Please install ssh and autossh manually."
