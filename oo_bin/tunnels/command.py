@@ -1,9 +1,6 @@
 import configparser
-import math
 import os
-import re
 import shutil
-import time
 from datetime import datetime
 from pathlib import Path
 
@@ -15,6 +12,7 @@ from xdg import BaseDirectory
 
 from oo_bin.tunnels import Completions, TunnelManager, TunnelType
 from oo_bin.tunnels.browser_profile import BrowserProfile
+from oo_bin.utils import update_tunnels_config
 
 
 class SkipArg(click.Group):
@@ -33,14 +31,16 @@ class SkipArg(click.Group):
 )
 @click.argument("profile", shell_complete=Completions.socks_complete, required=False)
 def tunnels(ctx, update, profile):
-    if not profile and not update and not ctx.invoked_subcommand:
+    if update:
+        return update_tunnels_config()
+    if not profile and not ctx.invoked_subcommand:
         click.echo(ctx.get_help())
         return None
 
     if ctx.invoked_subcommand is None:
         socks = TunnelManager().add(profile, TunnelType.SOCKS)
         socks.runtime_dependencies_met()
-        return socks.run({"update": update})
+        return socks.run()
 
 
 @tunnels.command("stop", help="Stop tunnels")

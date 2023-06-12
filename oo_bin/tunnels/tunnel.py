@@ -29,6 +29,9 @@ class Tunnel:
         )
 
     def is_running(self):
+        if not self.state.pid:
+            return False
+
         ps_output = Popen(
             ["ps", "-f", "-p", str(self.state.pid)], stdout=PIPE
         ).communicate()

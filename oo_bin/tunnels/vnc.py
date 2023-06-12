@@ -17,8 +17,6 @@ from oo_bin.tunnels.tunnel import Tunnel
 from oo_bin.tunnels.tunnel_type import TunnelType
 from oo_bin.utils import is_linux, is_mac, is_wsl
 
-# from oo_bin.tunnels.tunnel_state_manager import TunnelStateManager
-
 
 class Vnc(Tunnel):
     def __init__(self, state):
