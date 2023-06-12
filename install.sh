@@ -28,11 +28,11 @@ function install_dependencies {
 			if ! which autossh; then
 				brew install autossh
 			fi
-			if ! which whois; then
-				brew whois
-			fi
 			if [ "$(which python3)" != "/usr/local/bin/python3" ]; then
 				brew install python
+			fi
+			if ! which whois; then
+				brew install whois
 			fi
 		else
 			echo "Could not find Homebrew (https://brew.sh/). Install Homebrew, or, manually install autossh."
