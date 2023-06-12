@@ -11,7 +11,16 @@ function install_dependencies {
 	if [[ $(uname -s) =~ "Linux" ]]; then
 		if which apt-get 2>/dev/null; then
 			if ! which autossh; then
-				sudo apt-get -y update && sudo apt-get install -y ssh autossh python3-pip whois
+				sudo apt-get -y update && sudo apt-get install -y autossh
+			fi
+			if ! which pip3; then
+				sudo apt-get -y update && sudo apt-get install -y python3-pip
+			fi
+			if ! which whois; then
+				sudo apt-get -y update && sudo apt-get install -y whois
+			fi
+			if ! which jq; then
+				sudo apt-get -y update && sudo apt-get install -y jq
 			fi
 		else
 			echo "We could not automatically install the dependencies on your system. Please install ssh and autossh manually."
@@ -21,11 +30,14 @@ function install_dependencies {
 			if ! which autossh; then
 				brew install autossh
 			fi
-			if ! which whois; then
-				brew whois
-			fi
 			if [ "$(which python3)" != "/usr/local/bin/python3" ]; then
 				brew install python
+			fi
+			if ! which whois; then
+				brew install whois
+			fi
+			if ! which jq; then
+				brew install jq
 			fi
 		else
 			echo "Could not find Homebrew (https://brew.sh/). Install Homebrew, or, manually install autossh."
