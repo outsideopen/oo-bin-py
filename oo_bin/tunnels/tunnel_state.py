@@ -127,5 +127,14 @@ class TunnelState:
         self.__state__["browser_pid"] = value
         self.__save__()
 
+    @property
+    def rdp_pid(self):
+        return self.__state__.get("rdp_pid", None)
+
+    @rdp_pid.setter
+    def rdp_pid(self, value):
+        self.__state__["rdp_pid"] = value
+        self.__save__()
+
     def __repr__(self):
         return str(self.__state__)

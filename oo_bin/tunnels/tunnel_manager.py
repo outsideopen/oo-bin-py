@@ -61,7 +61,7 @@ class TunnelManager:
             tunnel.state.browser_profile_name = next_profile_name
             tunnel.state.browser_profile_path = next_profile_path
         elif type == TunnelType.RDP:
-            tunnel = Rdp(tunnel)
+            tunnel = Rdp(state)
         elif type == TunnelType.VNC:
             tunnel = Vnc(state)
 
