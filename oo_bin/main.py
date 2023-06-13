@@ -10,15 +10,22 @@ from oo_bin.hexme.command import hexme
 from oo_bin.macme.command import macme
 from oo_bin.ssh.command import ssh
 from oo_bin.tunnels.command import tunnels
-from oo_bin.utils import auto_update
+from oo_bin.utils import auto_update, update_package
 
 colorama.init(autoreset=True)
 
 
-@click.group()
+@click.group(invoke_without_command=True)
 @click.version_option(__version__)
-def cli():
-    pass
+@click.option("-u", "--update", is_flag=True, help="Update tunnels package")
+@click.pass_context
+def cli(ctx, update):
+    if update:
+        return update_package()
+
+    if not ctx.invoked_subcommand:
+        click.echo(ctx.get_help())
+        return None
 
 
 cli.add_command(dnsme)
