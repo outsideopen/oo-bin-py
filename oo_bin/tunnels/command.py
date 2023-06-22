@@ -26,7 +26,7 @@ class SkipArg(click.Group):
 @click.group(cls=SkipArg, invoke_without_command=True, help="Manage tunnels")
 @click.pass_context
 @click.argument("profile", shell_complete=Completions.socks_complete, required=False)
-def tunnels(ctx, update, profile):
+def tunnels(ctx, profile):
     if not profile and not ctx.invoked_subcommand:
         click.echo(ctx.get_help())
         return
