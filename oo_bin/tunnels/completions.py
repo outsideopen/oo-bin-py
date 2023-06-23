@@ -5,7 +5,7 @@ from pathlib import Path
 from click.shell_completion import CompletionItem
 from xdg import BaseDirectory
 
-from oo_bin.config import rdp_config, socks_config, vnc_config
+from oo_bin.config import tunnels_config
 from oo_bin.tunnels.browser_profile import BrowserProfile
 from oo_bin.tunnels.tunnel_manager import TunnelManager
 
@@ -13,7 +13,7 @@ from oo_bin.tunnels.tunnel_manager import TunnelManager
 class Completions:
     @staticmethod
     def rdp_complete(ctx, param, incomplete):
-        config = rdp_config()
+        config = tunnels_config()
         tunnels_list = list(config.keys())
 
         completions = [
@@ -26,7 +26,7 @@ class Completions:
 
     @staticmethod
     def socks_complete(ctx, param, incomplete):
-        config = socks_config()
+        config = tunnels_config()
         tunnels_list = list(config.keys())
         completions = [
             CompletionItem(k, help="socks")
@@ -49,7 +49,7 @@ class Completions:
 
     @staticmethod
     def vnc_complete(ctx, param, incomplete):
-        config = vnc_config()
+        config = tunnels_config()
         tunnels_list = list(config.keys())
 
         completions = [
