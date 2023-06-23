@@ -6,7 +6,7 @@ from subprocess import DEVNULL, Popen
 import colorama
 from progress.bar import IncrementalBar
 
-from oo_bin.config import rdp_config
+from oo_bin.config import tunnels_config
 from oo_bin.errors import (
     ConfigNotFoundError,
     DependencyNotMetError,
@@ -30,24 +30,22 @@ class Rdp(Tunnel):
 
     @property
     def config(self):
-        config = rdp_config()
+        config = tunnels_config(profile=self.state.name)
 
-        section = config.get(self.state.name, {})
-
-        if not section:
+        if not config:
             raise ConfigNotFoundError(
                 f"{self.state.name} could not be found in your configuration file"
             )
 
         return {
-            "jump_host": section.get("jump_host", None),
-            "user": section.get("user", None),
-            "host": section.get("host", None),
-            "port": section.get("port", "3389"),
-            "width": section.get("width", "1920"),
-            "height": section.get("height", "1080"),
+            "jump_host": config.get("jump_host", None),
+            "user": config.get("user", None),
+            "host": config.get("host", None),
+            "port": config.get("port", "3389"),
+            "width": config.get("width", "1920"),
+            "height": config.get("height", "1080"),
             "local_host": "127.0.0.1",
-            "local_port": section.get("local_port", self.local_port),
+            "local_port": config.get("local_port", self.local_port),
         }
 
     def __rdp_cmd__(self):

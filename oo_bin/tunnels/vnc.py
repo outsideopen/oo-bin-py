@@ -6,7 +6,7 @@ from subprocess import DEVNULL, Popen
 import colorama
 from progress.bar import IncrementalBar
 
-from oo_bin.config import vnc_config
+from oo_bin.config import tunnels_config
 from oo_bin.errors import (
     ConfigNotFoundError,
     DependencyNotMetError,
@@ -30,21 +30,19 @@ class Vnc(Tunnel):
 
     @property
     def config(self):
-        config = vnc_config()
+        config = tunnels_config(profile=self.state.name)
 
-        section = config.get(self.state.name, {})
-
-        if not section:
+        if not config:
             raise ConfigNotFoundError(
                 f"{self.state.name} could not be found in your configuration file"
             )
 
         return {
-            "jump_host": section.get("jump_host", None),
-            "host": section.get("host", None),
-            "port": section.get("port", "5900"),
+            "jump_host": config.get("jump_host", None),
+            "host": config.get("host", None),
+            "port": config.get("port", "5900"),
             "local_host": "127.0.0.1",
-            "local_port": section.get("local_port", self.local_port),
+            "local_port": config.get("local_port", self.local_port),
         }
 
     def stop(self):

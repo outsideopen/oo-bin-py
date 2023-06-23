@@ -5,7 +5,7 @@ from subprocess import DEVNULL, Popen
 from colorama import Fore
 from progress.bar import IncrementalBar
 
-from oo_bin.config import socks_config
+from oo_bin.config import tunnels_config
 from oo_bin.errors import (
     ConfigNotFoundError,
     DependencyNotMetError,
@@ -28,7 +28,7 @@ class Socks(Tunnel):
 
     @property
     def config(self):
-        config = socks_config()
+        config = tunnels_config()
 
         section = config.get(self.state.name, {})
 

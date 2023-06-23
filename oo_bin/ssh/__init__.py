@@ -2,12 +2,12 @@ import os
 
 from click.shell_completion import CompletionItem
 
-from oo_bin.config import socks_config
+from oo_bin.config import tunnels_config
 
 
 class Ssh:
     def connect(self, profile):
-        config = socks_config()
+        config = tunnels_config()
         section = config.get(profile, {})
         jump_host = section.get("jump_host", None)
 
@@ -19,7 +19,7 @@ class Ssh:
 
     @staticmethod
     def shell_complete(ctx, param, incomplete):
-        config = socks_config()
+        config = tunnels_config()
         tunnels_list = list(config.keys())
         completions = [
             CompletionItem(k, help="socks")
