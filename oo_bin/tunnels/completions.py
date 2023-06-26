@@ -26,14 +26,19 @@ class Completions:
 
     @staticmethod
     def rdp_host_complete(ctx, param, incomplete):
-        hosts_config = tunnels_config().get(
-            ctx.params['profile'], {}).get("rdp", {}).get("hosts", [])
+        hosts_config = (
+            tunnels_config()
+            .get(ctx.params["profile"], {})
+            .get("rdp", {})
+            .get("hosts", [])
+        )
 
-        hosts_list = [x for x in hosts_config if x.get('name', False)]
+        hosts_list = [x for x in hosts_config if x.get("name", False)]
 
         completions = [
-            CompletionItem(k.get('name'), help=f"{k.get('host')}:{k.get('port')}")
-            for k in hosts_list if k.get('name').startswith(incomplete)
+            CompletionItem(k.get("name"), help=f"{k.get('host')}:{k.get('port')}")
+            for k in hosts_list
+            if k.get("name").startswith(incomplete)
         ]
 
         return completions
@@ -76,14 +81,19 @@ class Completions:
 
     @staticmethod
     def vnc_host_complete(ctx, param, incomplete):
-        hosts_config = tunnels_config().get(
-            ctx.params['profile'], {}).get("vnc", {}).get("hosts", [])
+        hosts_config = (
+            tunnels_config()
+            .get(ctx.params["profile"], {})
+            .get("vnc", {})
+            .get("hosts", [])
+        )
 
-        hosts_list = [x for x in hosts_config if x.get('name', False)]
+        hosts_list = [x for x in hosts_config if x.get("name", False)]
 
         completions = [
-            CompletionItem(k.get('name'), help=f"{k.get('host')}:{k.get('port')}")
-            for k in hosts_list if k.get('name').startswith(incomplete)
+            CompletionItem(k.get("name"), help=f"{k.get('host')}:{k.get('port')}")
+            for k in hosts_list
+            if k.get("name").startswith(incomplete)
         ]
 
         return completions

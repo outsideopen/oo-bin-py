@@ -77,9 +77,12 @@ class TunnelManager:
                 el.append(type(tunnel).__name__)
                 el.append(tunnel.jump_host)
                 el.append(tunnel.pid)
-                el.append(tunnel.forward_port) if isinstance(tunnel, Socks) else el.append("")
+                el.append(tunnel.forward_port) if isinstance(
+                    tunnel, Socks
+                ) else el.append("")
                 el.append(tunnel.browser_profile_name) if isinstance(
-                    tunnel, Socks) else el.append("")
+                    tunnel, Socks
+                ) else el.append("")
                 table.append(el)
 
         if table:
@@ -128,7 +131,9 @@ class TunnelManager:
             profiles_dir = BrowserProfile.primary_profile_path()
             all_profiles = [str(x) for x in profiles_dir.glob("*.Tunnels")]
 
-        running_profiles = [x.browser_profile_path for x in self.__tunnels if isinstance(x, Socks)]
+        running_profiles = [
+            x.browser_profile_path for x in self.__tunnels if isinstance(x, Socks)
+        ]
 
         available_profiles = list(set(all_profiles) - set(running_profiles))
 

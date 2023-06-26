@@ -63,7 +63,9 @@ def status():
 
 
 @tunnels.command(help="Manage rdp tunnels")
-@click.argument("profile", shell_complete=Completions.rdp_profile_complete, required=False)
+@click.argument(
+    "profile", shell_complete=Completions.rdp_profile_complete, required=False
+)
 @click.argument("host", shell_complete=Completions.rdp_host_complete, required=False)
 def rdp(profile, host):
     if not profile or not host:
@@ -75,7 +77,9 @@ def rdp(profile, host):
 
 
 @tunnels.command(help="Manage vnc tunnels")
-@click.argument("profile", shell_complete=Completions.vnc_profile_complete, required=False)
+@click.argument(
+    "profile", shell_complete=Completions.vnc_profile_complete, required=False
+)
 @click.argument("host", shell_complete=Completions.vnc_host_complete, required=False)
 def vnc(profile, host):
     if not profile or not host:

@@ -4,10 +4,10 @@ from subprocess import DEVNULL, Popen
 
 import colorama
 
+from oo_bin.config import tunnels_config
 from oo_bin.errors import SystemNotSupportedError
 from oo_bin.tunnels.tunnel import Tunnel
 from oo_bin.utils import is_linux, is_mac, is_wsl
-from oo_bin.config import tunnels_config
 
 
 class Rdp(Tunnel):
@@ -15,7 +15,7 @@ class Rdp(Tunnel):
         super().__init__(name)
 
         hosts_config = tunnels_config().get(name, {}).get("rdp", {}).get("hosts", [])
-        hosts_config = [x for x in hosts_config if x.get('name', False)]
+        hosts_config = [x for x in hosts_config if x.get("name", False)]
 
         if len(hosts_config) > 0:
             host_config = hosts_config[0]
