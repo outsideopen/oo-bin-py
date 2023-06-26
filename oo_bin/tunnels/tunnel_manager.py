@@ -58,65 +58,61 @@ class TunnelManager:
         else:
             return [x for x in self.__tunnels]
 
-    def status(self):
+    def print_table(self, tunnels, no_data_msg="No tunnels running!"):
         headers = [
             "Profile",
+            "Type",
             "Jump Host",
-            "Forward Port",
-            # "Type",
             "PID",
-            # "Browser Profile",
+            "Forward Port",
+            "Browser Profile",
         ]
 
         table = []
 
-        for tunnel in self.tunnels():
+        for tunnel in tunnels:
             if tunnel.pid:
-                table.append(
-                    [
-                        tunnel.name,
-                        tunnel.jump_host,
-                        tunnel.forward_port,
-                        tunnel.pid,
-                        # tunnel.state.browser_profile_name,
-                    ]
-                )
+                el = []
+                el.append(tunnel.name)
+                el.append(type(tunnel).__name__)
+                el.append(tunnel.jump_host)
+                el.append(tunnel.pid)
+                el.append(tunnel.forward_port) if isinstance(
+                    tunnel, Socks
+                ) else el.append("")
+                el.append(tunnel.browser_profile_name) if isinstance(
+                    tunnel, Socks
+                ) else el.append("")
+                table.append(el)
 
         if table:
             print(t.tabulate(table, headers, tablefmt="grid"))
         else:
-            print(f"\n{Style.BRIGHT}No tunnels running!")
+            print(f"\n{Style.BRIGHT}{no_data_msg}")
+
+    def status(self):
+        self.print_table(self.tunnels())
 
     def stop_all(self):
         self.stop([x.name for x in self.__tunnels])
 
     def stop(self, profiles):
-        headers = ["Profile", "Jump Host", "PID", "Browser Profile"]
-        table = []
-
         tunnels = []
+        stopped = []
         for profile in profiles:
             tunnels.append(self.tunnel(profile))
 
         for tunnel in tunnels:
             try:
                 tunnel.stop()
-                table.append(
-                    [
-                        tunnel.name,
-                        tunnel.jump_host,
-                        # tunnel.state.type,
-                        tunnel.pid,
-                        # tunnel.state.browser_profile_name,
-                    ]
-                )
+                stopped.append(tunnel)
 
             except FileNotFoundError:
                 print(f"{Fore.YELLOW}autossh is not running", file=sys.stderr)
 
         if len(tunnels) > 0:
             print(f"{Style.BRIGHT}The following processes were stopped")
-            print(t.tabulate(table, headers, tablefmt="grid"))
+            self.print_table(stopped)
         else:
             print(f"{Style.BRIGHT}No processes were stopped")
 
@@ -135,16 +131,21 @@ class TunnelManager:
             profiles_dir = BrowserProfile.primary_profile_path()
             all_profiles = [str(x) for x in profiles_dir.glob("*.Tunnels")]
 
-        running_profiles = [x.browser_profile_path for x in self.__tunnels]
+        running_profiles = [
+            x.browser_profile_path for x in self.__tunnels if isinstance(x, Socks)
+        ]
 
         available_profiles = list(set(all_profiles) - set(running_profiles))
 
         if len(available_profiles) == 0:
-            raise BrowserProfileUnavailableError(
-                """No Browser Profile is available.
+            if multiple_profiles:
+                error_message = """No Browser Profile is available.
 
-You can create a new profile by running:      `oo tunnels profile new`
-You can clone an existing profile by running: `oo tunnels profile clone <ProfileName>`"""
-            )
+    You can create a new profile by running:      `oo tunnels profile new`
+    You can clone an existing profile by running: `oo tunnels profile clone <ProfileName>`"""
+            else:
+                error_message = "A Socks tunnel is already running. If you want to run multiple tunnels, you can enable it in the configuration."
+
+            raise BrowserProfileUnavailableError(error_message)
 
         return (os.path.basename(available_profiles[0]), str(available_profiles[0]))

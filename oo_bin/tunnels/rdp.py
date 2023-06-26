@@ -4,25 +4,38 @@ from subprocess import DEVNULL, Popen
 
 import colorama
 
-from oo_bin.errors import DependencyNotMetError, SystemNotSupportedError
+from oo_bin.config import tunnels_config
+from oo_bin.errors import SystemNotSupportedError
 from oo_bin.tunnels.tunnel import Tunnel
 from oo_bin.utils import is_linux, is_mac, is_wsl
 
 
 class Rdp(Tunnel):
-    def __init__(self, name):
+    def __init__(self, name, host):
         super().__init__(name)
+
+        hosts_config = tunnels_config().get(name, {}).get("rdp", {}).get("hosts", [])
+        hosts_config = [x for x in hosts_config if x.get("name", False)]
+
+        if len(hosts_config) > 0:
+            host_config = hosts_config[0]
+            self.__host = host_config.get("host", "")
+            self.__port = host_config.get("port", "3389")
+        else:
+            host_val = host.split(":", 1)
+            self.__host = host_val[0]
+            self.__port = host_val[1] or "3389"
 
         self.__rdp_pid = None
         self.__local_port = self.open_port()
 
     @property
     def host(self):
-        return self._config.get("host") or None
+        return self.__host
 
     @property
     def port(self):
-        return self._config.get("port") or None
+        return self.__port
 
     @property
     def width(self):
@@ -38,7 +51,7 @@ class Rdp(Tunnel):
 
     @property
     def local_port(self):
-        return self._config.get("local_host") or self.__local_port
+        return self._config.get("local_port") or self.__local_port
 
     @property
     def rdp_pid(self):
@@ -92,9 +105,9 @@ class Rdp(Tunnel):
         SystemNotSupportedError("Your system is not supported")
 
     def stop(self):
-        Popen(["kill", str(self.pid)], stdout=DEVNULL)
+        super().stop()
 
-        if not is_wsl():
+        if not is_wsl() and self.is_running(self.rdp_pid):
             self.__kill_rdp()
 
     def start(self):
@@ -125,9 +138,3 @@ class Rdp(Tunnel):
             Popen(["kill", str(self.rdp_pid)], stdout=DEVNULL, stderr=f)
 
         return True
-
-    def runtime_dependencies_met(self):
-        if not self._autossh_bin:
-            raise DependencyNotMetError(
-                "autossh is not installed, or is not in the path"
-            )

@@ -63,23 +63,29 @@ def status():
 
 
 @tunnels.command(help="Manage rdp tunnels")
-@click.argument("profile", shell_complete=Completions.rdp_complete, required=False)
-def rdp(profile):
-    if not profile:
+@click.argument(
+    "profile", shell_complete=Completions.rdp_profile_complete, required=False
+)
+@click.argument("host", shell_complete=Completions.rdp_host_complete, required=False)
+def rdp(profile, host):
+    if not profile or not host:
         click.echo(click.get_current_context().get_help())
     else:
-        rdp = TunnelManager().add(Rdp(profile))
+        rdp = TunnelManager().add(Rdp(profile, host))
         rdp.runtime_dependencies_met()
         rdp.start()
 
 
 @tunnels.command(help="Manage vnc tunnels")
-@click.argument("profile", shell_complete=Completions.vnc_complete, required=False)
-def vnc(profile):
-    if not profile:
+@click.argument(
+    "profile", shell_complete=Completions.vnc_profile_complete, required=False
+)
+@click.argument("host", shell_complete=Completions.vnc_host_complete, required=False)
+def vnc(profile, host):
+    if not profile or not host:
         click.echo(click.get_current_context().get_help())
     else:
-        vnc = TunnelManager().add(Vnc(profile))
+        vnc = TunnelManager().add(Vnc(profile, host))
         vnc.runtime_dependencies_met()
         vnc.start()
 

@@ -117,7 +117,7 @@ class Socks(Tunnel):
     def stop(self):
         super().stop()
 
-        if not is_wsl():
+        if not is_wsl() and self.is_running(self.browser_pid):
             self.__kill_browser()
 
     def start(self):
@@ -155,10 +155,7 @@ class Socks(Tunnel):
         return True
 
     def runtime_dependencies_met(self):
-        if not self._autossh_bin:
-            raise DependencyNotMetError(
-                "autossh is not installed, or is not in the path"
-            )
+        super().runtime_dependencies_met()
 
         if not self.__browser_bin:
             raise DependencyNotMetError(
