@@ -1,48 +1,97 @@
 import shutil
-import time
 from subprocess import DEVNULL, Popen
 
 from colorama import Fore
-from progress.bar import IncrementalBar
 
-from oo_bin.config import tunnels_config
-from oo_bin.errors import (
-    ConfigNotFoundError,
-    DependencyNotMetError,
-    ProcessFailedError,
-    SystemNotSupportedError,
-)
+from oo_bin.errors import DependencyNotMetError, SystemNotSupportedError
 from oo_bin.tunnels.browser_profile import BrowserProfile
 from oo_bin.tunnels.tunnel import Tunnel
-from oo_bin.tunnels.tunnel_type import TunnelType
 from oo_bin.utils import is_linux, is_mac, is_wsl
 
 
 class Socks(Tunnel):
-    def __init__(self, state):
-        super().__init__(state)
+    def __init__(self, name):
+        super().__init__(name)
 
-        self.state.type = TunnelType.SOCKS.value
-
-        self.forward_port = self.open_port()
+        self.__forward_port = self.open_port()
+        self.__browser_profile_name = None
+        self.__browser_profile_path = None
+        self.__browser_pid = None
 
     @property
-    def config(self):
-        config = tunnels_config()
+    def forward_host(self):
+        return self._config.get("forward_host") or "127.0.0.1"
 
-        section = config.get(self.state.name, {})
+    @property
+    def forward_port(self):
+        return self._config.get("forward_port") or self.__forward_port
 
-        if not section:
-            raise ConfigNotFoundError(
-                f"{self.state.name} could not be found in your configuration file"
-            )
+    @property
+    def urls(self):
+        return self._config.get("urls") or None
 
-        return {
-            "jump_host": section.get("jump_host", None),
-            "forward_host": section.get("forward_host", "127.0.0.1"),
-            "forward_port": section.get("forward_port", self.forward_port),
-            "urls": section.get("urls", None),
-        }
+    @property
+    def browser_profile_name(self):
+        return self.__browser_profile_name
+
+    @browser_profile_name.setter
+    def browser_profile_name(self, value):
+        self.__browser_profile_name = value
+        # self._save()
+
+    @property
+    def browser_profile_path(self):
+        return self.__browser_profile_path
+
+    @browser_profile_path.setter
+    def browser_profile_path(self, value):
+        self.__browser_profile_path = value
+        # self._save()
+
+    @property
+    def browser_pid(self):
+        return self.__browser_pid
+
+    @browser_pid.setter
+    def browser_pid(self, value):
+        self.__browser_pid = value
+        # self._save()
+
+    # @property
+    # def config(self):
+    #     config = tunnels_config()
+
+    #     section = config.get(self.name, {})
+
+    #     if not section:
+    #         raise ConfigNotFoundError(
+    #             f"{self.name} could not be found in your configuration file"
+    #         )
+
+    #     return {
+    #         "jump_host": section.get("jump_host", None),
+    #         "forward_host": section.get("forward_host", "127.0.0.1"),
+    #         "forward_port": section.get("forward_port", self.forward_port),
+    #         "urls": section.get("urls", None),
+    #     }
+
+    @property
+    def _cmd(self):
+        return [
+            self._autossh_bin,
+            "-N",
+            "-M",
+            "0",
+            "-D",
+            f"{self.forward_port}",
+            "-o",
+            "ServerAliveInterval=3",
+            "-o",
+            "ServerAliveCountMax=30",
+            "-F",
+            f"{self._ssh_config}",
+            f"{self.jump_host}",
+        ]
 
     @property
     def __browser_bin(self):
@@ -66,57 +115,17 @@ class Socks(Tunnel):
         SystemNotSupportedError("Your system is not supported")
 
     def stop(self):
-        Popen(["kill", str(self.state.pid)], stdout=DEVNULL)
+        super().stop()
 
         if not is_wsl():
             self.__kill_browser()
 
-        self.state.delete()
-
     def start(self):
         super().start()
 
-        cmd = [
-            self.__autossh_bin__,
-            "-N",
-            "-M",
-            "0",
-            "-D",
-            f"{self.config['forward_port']}",
-            "-o",
-            "ServerAliveInterval=3",
-            "-o",
-            "ServerAliveCountMax=30",
-            "-F",
-            f"{self.__ssh_config__}",
-            f"{self.config['jump_host']}",
-        ]
-        with open(self.__cache_file__, "a") as f1:
-            process = Popen(cmd, stdout=DEVNULL, stderr=f1)
-            pid = process.pid
-
-            self.state.pid = pid
-            self.state.jump_host = self.config["jump_host"]
-            self.state.forward_port = self.config["forward_port"]
-
-            bar = IncrementalBar(
-                f"Starting {self.state.name}", max=20, suffix="%(percent)d%%"
-            )
-            for i in range(0, 20):
-                time.sleep(0.15)
-                bar.next()
-                if process.poll():
-                    print("")
-                    msg = f"autossh failed after {(i * 0.15):.2g}s.\
-You can view the logs at {self.__cache_file__}"
-
-                    raise ProcessFailedError(msg)
-            bar.finish()
-
-        urls = self.config["urls"]
-        if urls:
-            self.__launch_browser(urls)
-            print(f"Launching Firefox with tabs: {', '.join(urls)}")
+        if self.urls:
+            self.__launch_browser(self.urls)
+            print(f"Launching Firefox with tabs: {', '.join(self.urls)}")
         else:
             print(
                 Fore.YELLOW
@@ -124,30 +133,29 @@ You can view the logs at {self.__cache_file__}"
             )
 
     def __launch_browser(self, urls):
-        browser_profile = BrowserProfile(self.state.browser_profile_path)
-        browser_profile.set_socks_proxy(
-            self.config["forward_host"], self.config["forward_port"]
-        )
+        browser_profile = BrowserProfile(self.browser_profile_path)
+        browser_profile.set_socks_proxy(self.forward_host, self.forward_port)
 
         cmd = [
             self.__browser_bin,
             "--profile",
-            self.state.browser_profile_path,
+            self.browser_profile_path,
         ] + urls
 
-        with open(self.__cache_file__, "a") as f1:
+        with open(self._cache_file, "a") as f1:
             pid = Popen(cmd, stdout=DEVNULL, stderr=f1).pid
 
-            self.state.browser_pid = pid
+            self.browser_pid = pid
+            self.save()
 
     def __kill_browser(self):
-        with open(self.__cache_file__, "a") as f:
-            Popen(["kill", "-9", str(self.state.browser_pid)], stdout=DEVNULL, stderr=f)
+        with open(self._cache_file, "a") as f:
+            Popen(["kill", "-9", str(self.browser_pid)], stdout=DEVNULL, stderr=f)
 
         return True
 
     def runtime_dependencies_met(self):
-        if not self.__autossh_bin__:
+        if not self._autossh_bin:
             raise DependencyNotMetError(
                 "autossh is not installed, or is not in the path"
             )
@@ -156,6 +164,3 @@ You can view the logs at {self.__cache_file__}"
             raise DependencyNotMetError(
                 "firefox is not installed, or is not in the path"
             )
-
-    def run(self):
-        self.start()

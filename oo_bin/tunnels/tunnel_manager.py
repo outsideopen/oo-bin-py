@@ -1,5 +1,5 @@
 import os
-import re
+import pickle
 import sys
 from pathlib import Path
 
@@ -11,11 +11,7 @@ from xdg import BaseDirectory
 from oo_bin.config import main_config
 from oo_bin.errors import BrowserProfileUnavailableError
 from oo_bin.tunnels.browser_profile import BrowserProfile
-from oo_bin.tunnels.rdp import Rdp
 from oo_bin.tunnels.socks import Socks
-from oo_bin.tunnels.tunnel_state import TunnelState
-from oo_bin.tunnels.tunnel_type import TunnelType
-from oo_bin.tunnels.vnc import Vnc
 
 
 @singleton
@@ -26,53 +22,39 @@ class TunnelManager:
             if state_directory
             else Path(BaseDirectory.save_data_path("oo_bin"))
         )
-        self.__tunnels = self.__init_tunnels(state_directory)
+        self.__tunnels = self.__load_tunnels(state_directory)
 
-    def __init_tunnels(self, state_directory):
+    def __load_tunnels(self, state_directory):
         tunnels = []
-        for data_path in sorted(state_directory.glob("*.json"), key=os.path.getmtime):
-            match = re.match("(.*)\.json", os.path.basename(data_path))
-            profile = match[1]
-
-            if profile:
-                state = TunnelState(profile, state_file=data_path)
-                if state.type == TunnelType.SOCKS.value:
-                    tunnel = Socks(state)
-                elif state.type == TunnelType.RDP.value:
-                    tunnel = Rdp(state)
-                elif state.type == TunnelType.VNC.value:
-                    tunnel = Vnc(state)
+        for data_path in sorted(state_directory.glob("*.pkl"), key=os.path.getmtime):
+            with open(data_path, "rb") as f:
+                tunnel = pickle.load(f)
 
                 if tunnel.is_running():
                     tunnels.append(tunnel)
                 else:
-                    tunnel.state.delete()
+                    tunnel.stop()
 
         return tunnels
 
-    def add(self, profile, type):
-        state = TunnelState(profile)
-        if type == TunnelType.SOCKS:
-            tunnel = Socks(state)
+    def add(self, tunnel):
+        if isinstance(tunnel, Socks):
             (next_profile_name, next_profile_path) = self.next_browser_profile()
-            tunnel.state.browser_profile_name = next_profile_name
-            tunnel.state.browser_profile_path = next_profile_path
-        elif type == TunnelType.RDP:
-            tunnel = Rdp(state)
-        elif type == TunnelType.VNC:
-            tunnel = Vnc(state)
+            tunnel.browser_profile_name = next_profile_name
+            tunnel.browser_profile_path = next_profile_path
+            tunnel.save()
 
         self.__tunnels.append(tunnel)
         return tunnel
 
     def tunnel(self, profile):
-        tunnels = [x for x in self.__tunnels if x.state.name == profile]
+        tunnels = [x for x in self.__tunnels if x.name == profile]
 
         return tunnels[0] if len(tunnels) > 0 else None
 
     def tunnels(self, type=None):
         if type:
-            return [x for x in self.__tunnels if x.state.type == type.value]
+            return [x for x in self.__tunnels if isinstance(x, type)]
         else:
             return [x for x in self.__tunnels]
 
@@ -81,28 +63,24 @@ class TunnelManager:
             "Profile",
             "Jump Host",
             "Forward Port",
-            "Type",
+            # "Type",
             "PID",
-            "Browser Profile",
+            # "Browser Profile",
         ]
 
         table = []
-        keys = [e for e in TunnelType]
 
-        for key in keys:
-            tunnels = self.tunnels(type=key)
-            for tunnel in tunnels:
-                if tunnel.state.pid:
-                    table.append(
-                        [
-                            tunnel.state.name,
-                            tunnel.state.jump_host,
-                            tunnel.state.forward_port,
-                            tunnel.state.type,
-                            tunnel.state.pid,
-                            tunnel.state.browser_profile_name,
-                        ]
-                    )
+        for tunnel in self.tunnels():
+            if tunnel.pid:
+                table.append(
+                    [
+                        tunnel.name,
+                        tunnel.jump_host,
+                        tunnel.forward_port,
+                        tunnel.pid,
+                        # tunnel.state.browser_profile_name,
+                    ]
+                )
 
         if table:
             print(t.tabulate(table, headers, tablefmt="grid"))
@@ -110,10 +88,10 @@ class TunnelManager:
             print(f"\n{Style.BRIGHT}No tunnels running!")
 
     def stop_all(self):
-        self.stop([x.state.name for x in self.__tunnels])
+        self.stop([x.name for x in self.__tunnels])
 
     def stop(self, profiles):
-        headers = ["Profile", "Jump Host", "Type", "PID", "Browser Profile"]
+        headers = ["Profile", "Jump Host", "PID", "Browser Profile"]
         table = []
 
         tunnels = []
@@ -125,11 +103,11 @@ class TunnelManager:
                 tunnel.stop()
                 table.append(
                     [
-                        tunnel.state.name,
-                        tunnel.state.jump_host,
-                        tunnel.state.type,
-                        tunnel.state.pid,
-                        tunnel.state.browser_profile_name,
+                        tunnel.name,
+                        tunnel.jump_host,
+                        # tunnel.state.type,
+                        tunnel.pid,
+                        # tunnel.state.browser_profile_name,
                     ]
                 )
 
@@ -157,7 +135,7 @@ class TunnelManager:
             profiles_dir = BrowserProfile.primary_profile_path()
             all_profiles = [str(x) for x in profiles_dir.glob("*.Tunnels")]
 
-        running_profiles = [x.state.browser_profile_path for x in self.__tunnels]
+        running_profiles = [x.browser_profile_path for x in self.__tunnels]
 
         available_profiles = list(set(all_profiles) - set(running_profiles))
 
