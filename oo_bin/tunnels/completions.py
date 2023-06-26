@@ -12,14 +12,28 @@ from oo_bin.tunnels.tunnel_manager import TunnelManager
 
 class Completions:
     @staticmethod
-    def rdp_complete(ctx, param, incomplete):
+    def rdp_profile_complete(ctx, param, incomplete):
         config = tunnels_config()
         tunnels_list = list(config.keys())
 
         completions = [
-            CompletionItem(k, help="rdp")
+            CompletionItem(k, help="Rdp")
             for k in tunnels_list
             if k.startswith(incomplete)
+        ]
+
+        return completions
+
+    @staticmethod
+    def rdp_host_complete(ctx, param, incomplete):
+        hosts_config = tunnels_config().get(
+            ctx.params['profile'], {}).get("rdp", {}).get("hosts", [])
+
+        hosts_list = [x for x in hosts_config if x.get('name', False)]
+
+        completions = [
+            CompletionItem(k.get('name'), help=f"{k.get('host')}:{k.get('port')}")
+            for k in hosts_list if k.get('name').startswith(incomplete)
         ]
 
         return completions
@@ -29,7 +43,7 @@ class Completions:
         config = tunnels_config()
         tunnels_list = list(config.keys())
         completions = [
-            CompletionItem(k, help="socks")
+            CompletionItem(k, help="Socks")
             for k in tunnels_list
             if k.startswith(incomplete)
         ]
@@ -48,14 +62,28 @@ class Completions:
         return completions + extras
 
     @staticmethod
-    def vnc_complete(ctx, param, incomplete):
+    def vnc_profile_complete(ctx, param, incomplete):
         config = tunnels_config()
         tunnels_list = list(config.keys())
 
         completions = [
-            CompletionItem(k, help="vnc")
+            CompletionItem(k, help="Vnc")
             for k in tunnels_list
             if k.startswith(incomplete)
+        ]
+
+        return completions
+
+    @staticmethod
+    def vnc_host_complete(ctx, param, incomplete):
+        hosts_config = tunnels_config().get(
+            ctx.params['profile'], {}).get("vnc", {}).get("hosts", [])
+
+        hosts_list = [x for x in hosts_config if x.get('name', False)]
+
+        completions = [
+            CompletionItem(k.get('name'), help=f"{k.get('host')}:{k.get('port')}")
+            for k in hosts_list if k.get('name').startswith(incomplete)
         ]
 
         return completions
@@ -64,9 +92,9 @@ class Completions:
     def stop_complete(ctx, param, incomplete):
         tunnels = TunnelManager().tunnels()
         completions = [
-            CompletionItem(k.state.name, help=k.state.type)
+            CompletionItem(k.name, help=type(k))
             for k in tunnels
-            if k.state.name.startswith(incomplete)
+            if k.name.startswith(incomplete)
         ]
         return completions
 
