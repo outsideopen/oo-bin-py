@@ -75,12 +75,13 @@ def rdp(profile, host):
 
 
 @tunnels.command(help="Manage vnc tunnels")
-@click.argument("profile", shell_complete=Completions.vnc_complete, required=False)
-def vnc(profile):
-    if not profile:
+@click.argument("profile", shell_complete=Completions.vnc_profile_complete, required=False)
+@click.argument("host", shell_complete=Completions.vnc_host_complete, required=False)
+def vnc(profile, host):
+    if not profile or not host:
         click.echo(click.get_current_context().get_help())
     else:
-        vnc = TunnelManager().add(Vnc(profile))
+        vnc = TunnelManager().add(Vnc(profile, host))
         vnc.runtime_dependencies_met()
         vnc.start()
 
