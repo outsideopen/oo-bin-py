@@ -10,8 +10,11 @@ import tabulate as t
 from colorama import Style
 from xdg import BaseDirectory
 
-from oo_bin.tunnels import Completions, TunnelManager, TunnelType
+from oo_bin.tunnels import Completions, TunnelManager
 from oo_bin.tunnels.browser_profile import BrowserProfile
+from oo_bin.tunnels.rdp import Rdp
+from oo_bin.tunnels.socks import Socks
+from oo_bin.tunnels.vnc import Vnc
 
 
 class SkipArg(click.Group):
@@ -32,9 +35,9 @@ def tunnels(ctx, profile):
         return
 
     if ctx.invoked_subcommand is None:
-        socks = TunnelManager().add(profile, TunnelType.SOCKS)
+        socks = TunnelManager().add(Socks(profile))
         socks.runtime_dependencies_met()
-        return socks.run()
+        return socks.start()
 
 
 @tunnels.command("stop", help="Stop tunnels")
@@ -65,9 +68,9 @@ def rdp(profile):
     if not profile:
         click.echo(click.get_current_context().get_help())
     else:
-        rdp = TunnelManager().add(profile, TunnelType.RDP)
+        rdp = TunnelManager().add(Rdp(profile))
         rdp.runtime_dependencies_met()
-        rdp.run()
+        rdp.start()
 
 
 @tunnels.command(help="Manage vnc tunnels")
@@ -76,9 +79,9 @@ def vnc(profile):
     if not profile:
         click.echo(click.get_current_context().get_help())
     else:
-        vnc = TunnelManager().add(profile, TunnelType.VNC)
+        vnc = TunnelManager().add(Vnc(profile))
         vnc.runtime_dependencies_met()
-        vnc.run()
+        vnc.start()
 
 
 @tunnels.group()

@@ -1,69 +1,88 @@
 import shutil
 import sys
-import time
 from subprocess import DEVNULL, Popen
 
 import colorama
-from progress.bar import IncrementalBar
 
-from oo_bin.config import tunnels_config
-from oo_bin.errors import (
-    ConfigNotFoundError,
-    DependencyNotMetError,
-    ProcessFailedError,
-    SystemNotSupportedError,
-)
+from oo_bin.errors import DependencyNotMetError, SystemNotSupportedError
 from oo_bin.tunnels.tunnel import Tunnel
-from oo_bin.tunnels.tunnel_type import TunnelType
 from oo_bin.utils import is_linux, is_mac, is_wsl
 
 
 class Rdp(Tunnel):
-    def __init__(self, state):
-        super().__init__(state)
+    def __init__(self, name):
+        super().__init__(name)
 
-        self.state = state
-
-        self.state.type = TunnelType.RDP.value
-
-        self.local_port = self.open_port()
+        self.__rdp_pid = None
+        self.__local_port = self.open_port()
 
     @property
-    def config(self):
-        config = tunnels_config(profile=self.state.name)
+    def host(self):
+        return self._config.get("host") or None
 
-        if not config:
-            raise ConfigNotFoundError(
-                f"{self.state.name} could not be found in your configuration file"
-            )
+    @property
+    def port(self):
+        return self._config.get("port") or None
 
-        return {
-            "jump_host": config.get("jump_host", None),
-            "user": config.get("user", None),
-            "host": config.get("host", None),
-            "port": config.get("port", "3389"),
-            "width": config.get("width", "1920"),
-            "height": config.get("height", "1080"),
-            "local_host": "127.0.0.1",
-            "local_port": config.get("local_port", self.local_port),
-        }
+    @property
+    def width(self):
+        return self._config.get("width") or "1920"
 
-    def __rdp_cmd__(self):
+    @property
+    def height(self):
+        return self._config.get("height") or None
+
+    @property
+    def local_host(self):
+        return self._config.get("local_host") or "127.0.0.1"
+
+    @property
+    def local_port(self):
+        return self._config.get("local_host") or self.__local_port
+
+    @property
+    def rdp_pid(self):
+        return self.__rdp_pid
+
+    @rdp_pid.setter
+    def rdp_pid(self, value):
+        self.__rdp_pid = value
+
+    @property
+    def _cmd(self):
+        return [
+            self._autossh_bin,
+            "-N",
+            "-M",
+            "0",
+            "-L",
+            f"{self.local_port}:{self.host}:{self.port}",
+            "-o",
+            "ServerAliveInterval=3",
+            "-o",
+            "ServerAliveCountMax=30",
+            "-F",
+            f"{self._ssh_config}",
+            f"{self.jump_host}",
+        ]
+
+    @property
+    def __rdp_cmd(self):
         if is_wsl():
             mstsc = shutil.which("mstsc.exe", path="/mnt/c/Windows/system32")
             return [
                 mstsc,
-                f"/w:{self.config['width']}",
-                f"/h:{self.config['height']}",
-                f"/v:{self.config['local_host']}:{self.config['local_port']}",
+                f"/w:{self.width}",
+                f"/h:{self.height}",
+                f"/v:{self.local_host}:{self.local_port}",
             ]
         elif is_mac():
-            url = f"rdp://{self.config['local_host']:{self.config['local_port']}}"
+            url = f"rdp://{self.local_host}:{self.local_port}"
 
             return ["open", url]
 
         elif is_linux():
-            url = f"rdp://{self.config['local_host']}:{self.config['local_port']}"
+            url = f"rdp://{self.local_host}:{self.local_port}"
 
             print("Automatically launching RDP client on linux is not supported")
             print(f"You can manually launch your client at {url}")
@@ -73,62 +92,26 @@ class Rdp(Tunnel):
         SystemNotSupportedError("Your system is not supported")
 
     def stop(self):
-        Popen(["kill", str(self.state.pid)], stdout=DEVNULL)
+        Popen(["kill", str(self.pid)], stdout=DEVNULL)
 
         if not is_wsl():
-            self.__kill_rdp__()
+            self.__kill_rdp()
 
     def start(self):
         super().start()
 
-        cmd = [
-            self.__autossh_bin__,
-            "-N",
-            "-M",
-            "0",
-            "-L",
-            f"{self.config['local_port']}:{self.config['host']}:{self.config['port']}",
-            "-o",
-            "ServerAliveInterval=3",
-            "-o",
-            "ServerAliveCountMax=30",
-            "-F",
-            f"{self.__ssh_config__}",
-            f"{self.config['jump_host']}",
-        ]
-
-        with open(self.__cache_file__, "a") as f1:
-            process = Popen(cmd, stdout=DEVNULL, stderr=f1)
-            pid = process.pid
-
-            self.state.pid = pid
-            self.state.jump_host = self.config["jump_host"]
-            # self.state.forward_port = self.config["forward_port"]
-
-            bar = IncrementalBar(
-                f"Starting {self.state.name}", max=10, suffix="%(percent)d%%"
-            )
-            for i in range(0, 20):
-                time.sleep(0.15)
-                bar.next()
-                if process.poll():
-                    msg = f"autossh failed after {i * 0.15}s.\
-You can view the logs at {self.__cache_file__}"
-
-                    raise ProcessFailedError(msg)
-            bar.finish()
-
-        self.__launch_rdp__()
+        self.__launch_rdp()
         print("Launching rdp")
 
-    def __launch_rdp__(self):
+    def __launch_rdp(self):
         try:
-            cmd = self.__rdp_cmd__()
+            cmd = self.__rdp_cmd
 
-            with open(self.__cache_file__, "a") as f:
+            with open(self._cache_file, "a") as f:
                 pid = Popen(cmd, stdout=DEVNULL, stderr=f).pid
 
-                self.state.rdp_pid = pid
+                self.rdp_pid = pid
+                self.save()
 
         except FileNotFoundError:
             print(
@@ -137,17 +120,14 @@ You can view the logs at {self.__cache_file__}"
             )
             sys.exit(1)
 
-    def __kill_rdp__(self):
-        with open(self.__cache_file__, "a") as f:
-            Popen(["kill", str(self.state.rdp_pid)], stdout=DEVNULL, stderr=f)
+    def __kill_rdp(self):
+        with open(self._cache_file, "a") as f:
+            Popen(["kill", str(self.rdp_pid)], stdout=DEVNULL, stderr=f)
 
         return True
 
     def runtime_dependencies_met(self):
-        if not self.__autossh_bin__:
+        if not self._autossh_bin:
             raise DependencyNotMetError(
                 "autossh is not installed, or is not in the path"
             )
-
-    def run(self):
-        self.start()
