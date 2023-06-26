@@ -33,6 +33,7 @@ We support the following Remote desktop clients
 ## SSH
 
 You need an SSH configuration, and matching `tunnels.toml`
+Remember to back up your private SSH keys ;)
 
 ## Firefox
 
@@ -53,6 +54,16 @@ Run the following command to install the script as your current user. It can als
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/outsideopen/oo-bin-py/HEAD/install.sh)"
 ```
+
+  - Enter Y to enable config updates
+  ```Enable remote tunnels config update? (Y/N): y```
+   - Enter username and password for the config URL
+   ```username: github```
+    ```password: [enter password of the online config file location]```
+  - Enter Y to enable automated daily updates
+  ```Automatically check for updates, once a day? (Y/N): y```
+  - This can be done manually at any time by running:
+    ```oo tunnels --update```
 
 ## Install a Pre-release version
 
