@@ -70,11 +70,14 @@ class Tunnel(ABC):
         with open(pickle_file, "wb") as f:
             pickle.dump(self, f)
 
-    def is_running(self):
-        if not self.pid:
+    def is_running(self, pid=None):
+        if not pid:
+            pid = self.pid
+
+        if not pid:
             return False
 
-        ps_output = Popen(["ps", "-f", "-p", str(self.pid)], stdout=PIPE).communicate()
+        ps_output = Popen(["ps", "-f", "-p", str(pid)], stdout=PIPE).communicate()
 
         ps_utf8 = ps_output[0].decode("utf-8") if len(ps_output[0]) > 0 else ""
 
