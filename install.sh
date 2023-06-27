@@ -48,7 +48,7 @@ function install_dependencies {
 
 function install {
 	if [ $PRERELEASE ]; then
-    FILENAME=$(curl -L https://api.github.com/repos/outsideopen/oo-bin-py/releases | jq -r 'map(select(.prerelease)) | .[0].assets[0].name')
+		FILENAME=$(curl -L https://api.github.com/repos/outsideopen/oo-bin-py/releases | jq -r 'map(select(.prerelease)) | .[0].assets[0].name')
 		DOWNLOAD_URL=$(curl -L https://api.github.com/repos/outsideopen/oo-bin-py/releases | jq -r 'map(select(.prerelease)) | .[0].assets[0].browser_download_url')
 	else
 		FILENAME=$(curl -L https://api.github.com/repos/outsideopen/oo-bin-py/releases/latest | jq -r '.assets[0].name')
@@ -69,16 +69,32 @@ function add_tunnels_config_download {
 		*) return ;;
 		esac
 
-		read -p "url: [https://outsideopen.com/oo_bin] " URL
-		URL=${URL:-https://outsideopen.com/oo_bin}
-		read -r -p "username: " USERNAME
-		read -r -s -p "password: " PASSWORD
-		echo ""
-		read -p "Automatically check for updates, once a day? (Y/N): " AUTO
-		case $AUTO in
-		[yY]*) AUTO="true" ;;
-		*) AUTO="false" ;;
-		esac
+		AUTH_FAIL=1
+
+		while [ $AUTH_FAIL != 0 ]; do
+
+			read -p "url: [https://outsideopen.com/oo_bin] " URL
+			URL=${URL:-https://outsideopen.com/oo_bin}
+			read -r -p "username: " USERNAME
+			read -r -s -p "password: " PASSWORD
+			echo ""
+			read -p "Automatically check for updates, once a day? (Y/N): " AUTO
+			case $AUTO in
+			[yY]*) AUTO="true" ;;
+			*) AUTO="false" ;;
+			esac
+
+			set +e
+			(curl --fail -u "${USERNAME}:${PASSWORD}" https://outsideopen.com/api/oo_bin/ >/dev/null 2>&1)
+			AUTH_FAIL=$?
+			set -e
+
+			if [ $AUTH_FAIL != 0 ]; then
+				echo ""
+				echo "We could not contact the update server. Please check your network connection, and make sure you have the correct credentials, before trying again."
+			fi
+
+		done
 
 		{
 			echo '[tunnels.update]'
