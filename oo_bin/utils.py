@@ -13,6 +13,7 @@ from xdg import BaseDirectory
 
 from oo_bin import __version__
 from oo_bin.config import backup_tunnels_config, config_path, main_config
+from oo_bin.errors import HttpError
 
 data_path = BaseDirectory.save_data_path("oo_bin")
 last_update_file = os.path.join(data_path, "last_update")
@@ -51,16 +52,23 @@ def update_tunnels_config():
         password = update.get("password")
 
         for file in files:
-            with requests.get(
-                f"{update.get('url')}/{file}", auth=(username, password), stream=True
-            ) as r:
-                r.raise_for_status()
-                with open(f"{config_path}/{file}", "wb") as f:
-                    shutil.copyfileobj(r.raw, f)
-            print(
-                Fore.GREEN
-                + f"Your configuration has been updated from {update.get('url')}/{file}"
-            )
+            try:
+                with requests.get(
+                    f"{update.get('url')}/{file}",
+                    auth=(username, password),
+                    stream=True,
+                ) as r:
+                    r.raise_for_status()
+                    with open(f"{config_path}/{file}", "wb") as f:
+                        shutil.copyfileobj(r.raw, f)
+                print(
+                    Fore.GREEN
+                    + f"Your configuration has been updated from {update.get('url')}/{file}"
+                )
+            except requests.exceptions.HTTPError as e:
+                raise HttpError(
+                    f"Your configuration could not be automatically updated. See the error below for more details:\n\n{e}"
+                )
     else:
         print(Fore.RED + "Remote updates are disabled in your configuration")
 
