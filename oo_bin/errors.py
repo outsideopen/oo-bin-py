@@ -32,3 +32,7 @@ class InvalidProfileError(OOBinError):
 
 class BrowserProfileUnavailableError(OOBinError):
     pass
+
+
+class HttpError(OOBinError):
+    pass
