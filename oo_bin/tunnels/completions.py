@@ -36,7 +36,9 @@ class Completions:
         hosts_list = [x for x in hosts_config if x.get("name", False)]
 
         completions = [
-            CompletionItem(k.get("name"), help=f"{k.get('host')}:{k.get('port')}")
+            CompletionItem(
+                k.get("name"), help=f"{k.get('host')}:{k.get('port', '3389')}"
+            )
             for k in hosts_list
             if k.get("name").startswith(incomplete)
         ]
@@ -91,7 +93,9 @@ class Completions:
         hosts_list = [x for x in hosts_config if x.get("name", False)]
 
         completions = [
-            CompletionItem(k.get("name"), help=f"{k.get('host')}:{k.get('port')}")
+            CompletionItem(
+                k.get("name"), help=f"{k.get('host')}:{k.get('port', '5900')}"
+            )
             for k in hosts_list
             if k.get("name").startswith(incomplete)
         ]
