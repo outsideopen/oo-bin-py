@@ -22,7 +22,16 @@ class Completions:
             if k.startswith(incomplete)
         ]
 
-        return completions
+        extras = [
+            CompletionItem(e["name"], help=e["help"])
+            for e in [
+                {"name": "status", "help": "Tunnel status"},
+                {"name": "stop", "help": "Stop tunnel"},
+            ]
+            if e["name"].startswith(incomplete)
+        ]
+
+        return completions + extras
 
     @staticmethod
     def rdp_host_complete(ctx, param, incomplete):
@@ -59,8 +68,6 @@ class Completions:
             for e in [
                 {"name": "status", "help": "Tunnel status"},
                 {"name": "stop", "help": "Stop tunnel"},
-                {"name": "rdp", "help": "Manage rdp tunnels"},
-                {"name": "vnc", "help": "Manage vnc tunnels"},
                 {"name": "profile", "help": "Manage browser profiles"},
             ]
             if e["name"].startswith(incomplete)
@@ -79,7 +86,16 @@ class Completions:
             if k.startswith(incomplete)
         ]
 
-        return completions
+        extras = [
+            CompletionItem(e["name"], help=e["help"])
+            for e in [
+                {"name": "status", "help": "Tunnel status"},
+                {"name": "stop", "help": "Stop tunnel"},
+            ]
+            if e["name"].startswith(incomplete)
+        ]
+
+        return completions + extras
 
     @staticmethod
     def vnc_host_complete(ctx, param, incomplete):

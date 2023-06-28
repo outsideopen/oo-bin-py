@@ -24,7 +24,7 @@ class Rdp(Tunnel):
         else:
             host_val = host.split(":", 1)
             self.__host = host_val[0]
-            self.__port = host_val[1] or "3389"
+            self.__port = host_val[1] if len(host_val) > 1 else "3389"
 
         self.__rdp_pid = None
         self.__local_port = self.open_port()
