@@ -9,7 +9,9 @@ from oo_bin.errors import OOBinError
 from oo_bin.hexme.command import hexme
 from oo_bin.macme.command import macme
 from oo_bin.ssh.command import ssh
+from oo_bin.tunnels.command import rdp
 from oo_bin.tunnels.command import tunnels
+from oo_bin.tunnels.command import vnc
 from oo_bin.utils import auto_update, update_package, update_tunnels_config
 
 colorama.init(autoreset=True)
@@ -33,8 +35,10 @@ def cli(ctx, update):
 cli.add_command(dnsme)
 cli.add_command(hexme)
 cli.add_command(macme)
+cli.add_command(rdp)
 cli.add_command(ssh)
 cli.add_command(tunnels)
+cli.add_command(vnc)
 
 
 def main():

@@ -90,11 +90,14 @@ class TunnelManager:
         else:
             print(f"\n{Style.BRIGHT}{no_data_msg}")
 
-    def status(self):
-        self.print_table(self.tunnels())
+    def status(self, type=None):
+        self.print_table(self.tunnels(type))
 
-    def stop_all(self):
-        self.stop([x.name for x in self.__tunnels])
+    def stop_all(self, type=None):
+        if type:
+            self.stop([x.name for x in self.__tunnels if isinstance(x, type)])
+        else:
+            self.stop([x.name for x in self.__tunnels])
 
     def stop(self, profiles):
         tunnels = []

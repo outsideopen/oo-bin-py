@@ -24,8 +24,9 @@ class Vnc(Tunnel):
         else:
             host_val = host.split(":", 1)
             self.__host = host_val[0]
-            self.__port = host_val[1] or "5900"
+            self.__port = host_val[1] if len(host_val) > 1 else "5900"
 
+        self.__vnc_pid = None
         self.__local_port = self.open_port()
 
     @property
@@ -43,6 +44,14 @@ class Vnc(Tunnel):
     @property
     def local_port(self):
         return self._config.get("local_port") or self.__local_port
+
+    @property
+    def vnc_pid(self):
+        return self.__rdp_pid
+
+    @vnc_pid.setter
+    def vnc_pid(self, value):
+        self.__vnc_pid = value
 
     @property
     def _cmd(self):

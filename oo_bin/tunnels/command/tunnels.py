@@ -12,9 +12,7 @@ from xdg import BaseDirectory
 
 from oo_bin.tunnels import Completions, TunnelManager
 from oo_bin.tunnels.browser_profile import BrowserProfile
-from oo_bin.tunnels.rdp import Rdp
 from oo_bin.tunnels.socks import Socks
-from oo_bin.tunnels.vnc import Vnc
 
 
 class SkipArg(click.Group):
@@ -26,7 +24,7 @@ class SkipArg(click.Group):
         super(SkipArg, self).parse_args(ctx, args)
 
 
-@click.group(cls=SkipArg, invoke_without_command=True, help="Manage tunnels")
+@click.group(cls=SkipArg, invoke_without_command=True, help="Manage Socks Tunnels")
 @click.pass_context
 @click.argument("profile", shell_complete=Completions.socks_complete, required=False)
 def tunnels(ctx, profile):
@@ -48,46 +46,19 @@ def stop(ctx, profile):
         tunnel = TunnelManager().tunnel(profile)
         if tunnel:
             tunnel.stop()
+            print(f"{Style.BRIGHT}{tunnel.name} has been stopped")
         else:
             print(f"{Style.BRIGHT}No process was stopped")
 
     else:
         tunnel_manager = TunnelManager()
-        tunnel_manager.stop_all()
+        tunnel_manager.stop_all(type=Socks)
 
 
 @tunnels.command(help="Tunnels status")
 def status():
     tunnel_manager = TunnelManager()
-    tunnel_manager.status()
-
-
-@tunnels.command(help="Manage rdp tunnels")
-@click.argument(
-    "profile", shell_complete=Completions.rdp_profile_complete, required=False
-)
-@click.argument("host", shell_complete=Completions.rdp_host_complete, required=False)
-def rdp(profile, host):
-    if not profile or not host:
-        click.echo(click.get_current_context().get_help())
-    else:
-        rdp = TunnelManager().add(Rdp(profile, host))
-        rdp.runtime_dependencies_met()
-        rdp.start()
-
-
-@tunnels.command(help="Manage vnc tunnels")
-@click.argument(
-    "profile", shell_complete=Completions.vnc_profile_complete, required=False
-)
-@click.argument("host", shell_complete=Completions.vnc_host_complete, required=False)
-def vnc(profile, host):
-    if not profile or not host:
-        click.echo(click.get_current_context().get_help())
-    else:
-        vnc = TunnelManager().add(Vnc(profile, host))
-        vnc.runtime_dependencies_met()
-        vnc.start()
+    tunnel_manager.status(type=Socks)
 
 
 @tunnels.group()
