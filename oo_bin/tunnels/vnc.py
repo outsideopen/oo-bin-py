@@ -7,7 +7,7 @@ import colorama
 from oo_bin.config import tunnels_config
 from oo_bin.errors import SystemNotSupportedError
 from oo_bin.tunnels.tunnel import Tunnel
-from oo_bin.utils import is_linux, is_mac, is_wsl
+from oo_bin.utils import is_linux, is_mac, is_wsl, port_available
 
 
 class Vnc(Tunnel):
@@ -27,7 +27,13 @@ class Vnc(Tunnel):
             self.__port = host_val[1] if len(host_val) > 1 else "5900"
 
         self.__vnc_pid = None
-        self.__local_port = self.open_port()
+
+        config_port = host_config.get("local_port", None)
+        self.__local_port = (
+            config_port
+            if config_port and port_available(int(config_port), self.local_host)
+            else self.open_port()
+        )
 
     @property
     def host(self):
@@ -43,7 +49,7 @@ class Vnc(Tunnel):
 
     @property
     def local_port(self):
-        return self._config.get("local_port") or self.__local_port
+        return self.__local_port
 
     @property
     def vnc_pid(self):
