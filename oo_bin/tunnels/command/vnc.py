@@ -1,9 +1,8 @@
 import click
+from colorama import Style
 
 from oo_bin.tunnels import Completions, TunnelManager
 from oo_bin.tunnels.vnc import Vnc
-
-from colorama import Style
 
 
 class SkipArg(click.Group):

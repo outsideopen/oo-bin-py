@@ -1,5 +1,6 @@
 import os
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
@@ -145,3 +146,13 @@ def auto_update():
             update_tunnels_config()
             update_package()
             __set_last_updated_time()
+
+
+def port_available(port, host="127.0.0.1"):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.bind((host, port))
+    except socket.error:
+        return False
+    s.close()
+    return True

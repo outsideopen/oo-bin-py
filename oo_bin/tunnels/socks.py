@@ -6,7 +6,7 @@ from colorama import Fore
 from oo_bin.errors import DependencyNotMetError, SystemNotSupportedError
 from oo_bin.tunnels.browser_profile import BrowserProfile
 from oo_bin.tunnels.tunnel import Tunnel
-from oo_bin.utils import is_linux, is_mac, is_wsl
+from oo_bin.utils import is_linux, is_mac, is_wsl, port_available
 
 
 class Socks(Tunnel):
@@ -18,13 +18,20 @@ class Socks(Tunnel):
         self.__browser_profile_path = None
         self.__browser_pid = None
 
+        config_port = self._config.get("forward_port", None)
+        self.__forward_port = (
+            config_port
+            if config_port and port_available(int(config_port), self.forward_host)
+            else self.open_port()
+        )
+
     @property
     def forward_host(self):
         return self._config.get("forward_host") or "127.0.0.1"
 
     @property
     def forward_port(self):
-        return self._config.get("forward_port") or self.__forward_port
+        return self.__forward_port
 
     @property
     def urls(self):
