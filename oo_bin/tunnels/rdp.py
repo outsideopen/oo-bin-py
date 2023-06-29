@@ -121,7 +121,6 @@ class Rdp(Tunnel):
         super().start()
 
         self.__launch_rdp()
-        print("Launching rdp")
 
     def __launch_rdp(self):
         try:
