@@ -79,10 +79,10 @@ class TunnelManager:
                 el.append(tunnel.pid)
                 el.append(tunnel.forward_port) if isinstance(
                     tunnel, Socks
-                ) else el.append("")
+                ) else el.append(tunnel.local_port)
                 el.append(tunnel.browser_profile_name) if isinstance(
                     tunnel, Socks
-                ) else el.append("")
+                ) else el.append("N/A")
                 table.append(el)
 
         if table:
