@@ -52,4 +52,4 @@ def stop(ctx, profile):
 @vnc.command(help="Tunnels status")
 def status():
     tunnel_manager = TunnelManager()
-    tunnel_manager.status(type=Vnc)
+    tunnel_manager.status()
