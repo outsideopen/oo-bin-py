@@ -93,7 +93,7 @@ class Vnc(Tunnel):
                 f"{self.local_host}::{self.local_port}",
             ]
         elif is_mac():
-            url = f"vnc://{self.local_host:{self.local_port}}"
+            url = f"vnc://{self.local_host}:{self.local_port}"
             return ["open", url]
 
         elif is_linux():
