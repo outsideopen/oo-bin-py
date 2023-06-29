@@ -100,7 +100,7 @@ class Vnc(Tunnel):
             print("\nAutomatically launching VNC client on linux is not supported")
 
             return ["true"]
-        
+
         SystemNotSupportedError("Your system is not supported")
 
     def stop(self):
