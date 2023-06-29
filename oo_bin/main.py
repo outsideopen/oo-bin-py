@@ -8,6 +8,7 @@ from oo_bin.dnsme.command import dnsme
 from oo_bin.errors import OOBinError
 from oo_bin.hexme.command import hexme
 from oo_bin.macme.command import macme
+from oo_bin.ping.command import ping
 from oo_bin.ssh.command import ssh
 from oo_bin.tunnels.command import rdp, tunnels, vnc
 from oo_bin.utils import auto_update, update_package, update_tunnels_config
@@ -33,6 +34,7 @@ def cli(ctx, update):
 cli.add_command(dnsme)
 cli.add_command(hexme)
 cli.add_command(macme)
+cli.add_command(ping)
 cli.add_command(rdp)
 cli.add_command(ssh)
 cli.add_command(tunnels)

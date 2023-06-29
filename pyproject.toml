@@ -4,13 +4,34 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "oo-bin"
-description="Outside Open bin scripts"
-authors = [{name = "Greg Lawler", email = "greg@outsideopen.com"}, {name = "Andy Rusch", email="arusch@outsideopen.com"}, {name = "Tjaart van der Walt", email="tjaart@outsideopen.com"}]
+description = "Outside Open bin scripts"
+authors = [
+	{ name = "Greg Lawler", email = "greg@outsideopen.com" },
+	{ name = "Andy Rusch", email = "arusch@outsideopen.com" },
+	{ name = "Tjaart van der Walt", email = "tjaart@outsideopen.com" },
+]
 readme = "README.md"
 requires-python = ">=3.7"
 dynamic = ["version"]
 
-dependencies = ["click", "colorama", "dnspython", "mozfile", "mozprofile", "namegenerator", "progress", "pyperclip", "pyxdg", "requests", "singleton-decorator", "tabulate", "tomli >= 1.1.0 ; python_version < '3.11'", "whois == 0.9.24", "wslPath"]
+dependencies = [
+	"click",
+	"colorama",
+	"dnspython",
+	"icmplib",
+	"mozfile",
+	"mozprofile",
+	"namegenerator",
+	"progress",
+	"pyperclip",
+	"pyxdg",
+	"requests",
+	"singleton-decorator",
+	"tabulate",
+	"tomli >= 1.1.0 ; python_version < '3.11'",
+	"whois == 0.9.24",
+	"wslPath",
+]
 
 [project.urls]
 Home = "https://github.com/outsideopen/oo-bin"
