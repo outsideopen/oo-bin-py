@@ -22,6 +22,7 @@ class Rdp(Tunnel):
             self.__host = host_config.get("host", "")
             self.__port = host_config.get("port", "3389")
         else:
+            host_config = {}
             host_val = host.split(":", 1)
             self.__host = host_val[0]
             self.__port = host_val[1] if len(host_val) > 1 else "3389"
@@ -87,6 +88,9 @@ class Rdp(Tunnel):
 
     @property
     def __rdp_cmd(self):
+        url = f"rdp://{self.local_host}:{self.local_port}"
+        print(f"RDP url: {url}")
+
         if is_wsl():
             mstsc = shutil.which("mstsc.exe", path="/mnt/c/Windows/system32")
             return [
@@ -101,10 +105,7 @@ class Rdp(Tunnel):
             return ["open", url]
 
         elif is_linux():
-            url = f"rdp://{self.local_host}:{self.local_port}"
-
-            print("Automatically launching RDP client on linux is not supported")
-            print(f"You can manually launch your client at {url}")
+            print("\nAutomatically launching RDP client on linux is not supported")
 
             return ["true"]
 

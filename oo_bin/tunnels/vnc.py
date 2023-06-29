@@ -22,6 +22,7 @@ class Vnc(Tunnel):
             self.__host = host_config.get("host", "")
             self.__port = host_config.get("port", "5900")
         else:
+            host_config = {}
             host_val = host.split(":", 1)
             self.__host = host_val[0]
             self.__port = host_val[1] if len(host_val) > 1 else "5900"
@@ -79,6 +80,9 @@ class Vnc(Tunnel):
 
     @property
     def __vnc_cmd(self):
+        url = f"vnc://{self.local_host}:{self.local_port}"
+        print(f"\nVNC url: {url}")
+
         if is_wsl():
             viewer = shutil.which(
                 "vncviewer.exe", path="/mnt/c/Program Files/RealVNC/VNC Viewer"
@@ -93,12 +97,10 @@ class Vnc(Tunnel):
             return ["open", url]
 
         elif is_linux():
-            url = f"vnc://{self.local_host}:{self.local_port}"
-            print("Automatically launching VNC client on linux is not supported")
-            print(f"You can manually launch your client at {url}")
+            print("\nAutomatically launching VNC client on linux is not supported")
 
             return ["true"]
-
+        
         SystemNotSupportedError("Your system is not supported")
 
     def stop(self):
