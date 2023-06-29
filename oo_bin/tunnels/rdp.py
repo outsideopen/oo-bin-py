@@ -19,9 +19,11 @@ class Rdp(Tunnel):
 
         if len(hosts_config) > 0:
             host_config = hosts_config[0]
+            self.__host_name = host_config.get("name", "")
             self.__host = host_config.get("host", "")
             self.__port = host_config.get("port", "3389")
         else:
+            host_config = {}
             host_val = host.split(":", 1)
             self.__host = host_val[0]
             self.__port = host_val[1] if len(host_val) > 1 else "3389"
@@ -34,6 +36,10 @@ class Rdp(Tunnel):
             if config_port and port_available(int(config_port), self.local_host)
             else self.open_port()
         )
+
+    @property
+    def host_name(self):
+        return self.__host_name
 
     @property
     def host(self):
@@ -87,6 +93,9 @@ class Rdp(Tunnel):
 
     @property
     def __rdp_cmd(self):
+        url = f"rdp://{self.local_host}:{self.local_port}"
+        print(f"RDP url: {url}")
+
         if is_wsl():
             mstsc = shutil.which("mstsc.exe", path="/mnt/c/Windows/system32")
             return [
@@ -96,15 +105,33 @@ class Rdp(Tunnel):
                 f"/v:{self.local_host}:{self.local_port}",
             ]
         elif is_mac():
-            url = f"rdp://{self.local_host}:{self.local_port}"
-
-            return ["open", url]
-
+            return [
+                "osascript",
+                "-e",
+                'tell application "Microsoft Remote Desktop" to activate',
+                "-e",
+                "delay 0.1",
+                "-e",
+                'tell application "System Events" to keystroke "f" using {command down}',
+                "-e",
+                "delay 0.1",
+                "-e",
+                f'tell application "System Events" to keystroke "{self.host_name}"',
+                "-e",
+                "delay 0.1",
+                "-e",
+                'tell application "System Events" to key code 48',
+                "-e",
+                "delay 0.1",
+                "-e",
+                'tell application "System Events" to key code 09',
+                "-e",
+                "delay 0.1",
+                "-e",
+                'tell application "System Events" to keystroke return',
+            ]
         elif is_linux():
-            url = f"rdp://{self.local_host}:{self.local_port}"
-
-            print("Automatically launching RDP client on linux is not supported")
-            print(f"You can manually launch your client at {url}")
+            print("\nAutomatically launching RDP client on linux is not supported")
 
             return ["true"]
 
@@ -120,7 +147,6 @@ class Rdp(Tunnel):
         super().start()
 
         self.__launch_rdp()
-        print("Launching rdp")
 
     def __launch_rdp(self):
         try:
