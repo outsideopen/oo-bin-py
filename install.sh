@@ -188,7 +188,7 @@ echo 'Config Auto Update'
 echo '******************'
 add_tunnels_config_download
 # We need to update here, or the completions may fail
-oo tunnels --update
+oo --update
 echo ''
 echo 'Configure Completions'
 echo '*********************'
