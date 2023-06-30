@@ -39,10 +39,19 @@ class TunnelManager:
 
     def add(self, tunnel):
         if isinstance(tunnel, Socks):
-            (next_profile_name, next_profile_path) = self.next_browser_profile()
-            tunnel.browser_profile_name = next_profile_name
-            tunnel.browser_profile_path = next_profile_path
-            tunnel.save()
+            if tunnel.multiple_profiles:
+                (next_profile_name, next_profile_path) = self.next_browser_profile()
+                tunnel.browser_profile_name = next_profile_name
+                tunnel.browser_profile_path = next_profile_path
+
+            else:
+                if len(self.tunnels(type=Socks)) > 0:
+                    raise BrowserProfileUnavailableError(
+                        "Socks tunnel already in use. Please stop the existing tunnel before starting a new one."
+                    )
+
+                tunnel.browser_profile_name = "Tunnels"
+                tunnel.save()
 
         self.__tunnels.append(tunnel)
         return tunnel
@@ -120,19 +129,11 @@ class TunnelManager:
             print(f"{Style.BRIGHT}No processes were stopped")
 
     def next_browser_profile(self):
-        multiple_profiles = (
-            main_config().get("tunnels", {}).get("socks", {}).get("multiple", False)
+        profiles_dir = Path(
+            os.path.join(BaseDirectory.save_data_path("oo_bin"), "profiles")
         )
 
-        if multiple_profiles:
-            profiles_dir = Path(
-                os.path.join(BaseDirectory.save_data_path("oo_bin"), "profiles")
-            )
-
-            all_profiles = [str(x) for x in profiles_dir.glob("*")]
-        else:
-            profiles_dir = BrowserProfile.primary_profile_path()
-            all_profiles = [str(x) for x in profiles_dir.glob("*.Tunnels")]
+        all_profiles = [str(x) for x in profiles_dir.glob("*")]
 
         running_profiles = [
             x.browser_profile_path for x in self.__tunnels if isinstance(x, Socks)
@@ -141,7 +142,7 @@ class TunnelManager:
         available_profiles = list(set(all_profiles) - set(running_profiles))
 
         if len(available_profiles) == 0:
-            if multiple_profiles:
+            if self.multiple_profiles:
                 error_message = """No Browser Profile is available.
 
     You can create a new profile by running:      `oo tunnels profile new`
