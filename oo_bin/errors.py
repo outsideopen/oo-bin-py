@@ -36,3 +36,7 @@ class BrowserProfileUnavailableError(OOBinError):
 
 class HttpError(OOBinError):
     pass
+
+
+class PortUnavailableError(OOBinError):
+    pass

@@ -3,7 +3,12 @@ from subprocess import DEVNULL, Popen
 
 from colorama import Fore
 
-from oo_bin.errors import DependencyNotMetError, SystemNotSupportedError
+from oo_bin.config import main_config
+from oo_bin.errors import (
+    DependencyNotMetError,
+    PortUnavailableError,
+    SystemNotSupportedError,
+)
 from oo_bin.tunnels.browser_profile import BrowserProfile
 from oo_bin.tunnels.tunnel import Tunnel
 from oo_bin.utils import is_linux, is_mac, is_wsl, port_available
@@ -18,11 +23,21 @@ class Socks(Tunnel):
         self.__browser_profile_path = None
         self.__browser_pid = None
 
-        config_port = self._config.get("forward_port", None)
-        self.__forward_port = (
-            config_port
-            if config_port and port_available(int(config_port), self.forward_host)
-            else self.open_port()
+        config_port = self._config.get("forward_port", "2080")
+        if not port_available(int(config_port), self.forward_host):
+            PortUnavailableError(
+                f"Port '{config_port}' is unavailable. Please specify a different port in the configuration file, and your Firefox profile."
+            )
+
+        self.__forward_port = config_port
+
+    @property
+    def multiple_profiles(self):
+        return (
+            main_config()
+            .get("tunnels", {})
+            .get("socks", {})
+            .get("multiple_profiles", False)
         )
 
     @property
@@ -44,7 +59,6 @@ class Socks(Tunnel):
     @browser_profile_name.setter
     def browser_profile_name(self, value):
         self.__browser_profile_name = value
-        # self._save()
 
     @property
     def browser_profile_path(self):
@@ -53,7 +67,6 @@ class Socks(Tunnel):
     @browser_profile_path.setter
     def browser_profile_path(self, value):
         self.__browser_profile_path = value
-        # self._save()
 
     @property
     def browser_pid(self):
@@ -62,25 +75,6 @@ class Socks(Tunnel):
     @browser_pid.setter
     def browser_pid(self, value):
         self.__browser_pid = value
-        # self._save()
-
-    # @property
-    # def config(self):
-    #     config = tunnels_config()
-
-    #     section = config.get(self.name, {})
-
-    #     if not section:
-    #         raise ConfigNotFoundError(
-    #             f"{self.name} could not be found in your configuration file"
-    #         )
-
-    #     return {
-    #         "jump_host": section.get("jump_host", None),
-    #         "forward_host": section.get("forward_host", "127.0.0.1"),
-    #         "forward_port": section.get("forward_port", self.forward_port),
-    #         "urls": section.get("urls", None),
-    #     }
 
     @property
     def _cmd(self):
@@ -140,17 +134,18 @@ class Socks(Tunnel):
             )
 
     def __launch_browser(self, urls):
-        browser_profile = BrowserProfile(self.browser_profile_path)
-        browser_profile.set_socks_proxy(self.forward_host, self.forward_port)
+        cmd = [self.__browser_bin]
 
-        cmd = [
-            self.__browser_bin,
-            "--profile",
-            self.browser_profile_path,
-        ] + urls
+        if self.multiple_profiles:
+            browser_profile = BrowserProfile(self.browser_profile_path)
+            browser_profile.set_socks_proxy(self.forward_host, self.forward_port)
 
-        with open(self._cache_file, "a") as f1:
-            pid = Popen(cmd, stdout=DEVNULL, stderr=f1).pid
+            cmd += ["--profile", self.browser_profile_path] + urls
+        else:
+            cmd += ["-P", self.browser_profile_name] + urls
+
+        with open(self._cache_file, "a") as f:
+            pid = Popen(cmd, stdout=DEVNULL, stderr=f).pid
 
             self.browser_pid = pid
             self.save()
