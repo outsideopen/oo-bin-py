@@ -15,7 +15,7 @@ class Rdp(Tunnel):
         super().__init__(name)
 
         hosts_config = tunnels_config().get(name, {}).get("rdp", {}).get("hosts", [])
-        hosts_config = [x for x in hosts_config if x.get("name", False)]
+        hosts_config = [x for x in hosts_config if x.get("name", None) == host]
 
         if len(hosts_config) > 0:
             host_config = hosts_config[0]
