@@ -1,0 +1,2 @@
+[tunnels]
+ssh_config = "/my/ssh/config/path"
