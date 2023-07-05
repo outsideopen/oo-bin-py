@@ -21,4 +21,4 @@ jobs:
       - run: sudo apt-get install -y autossh libdbus-1-dev
       - run: pip install flit
       - run: flit install --deps all
-      - run: pytest
+      - run: pytest --ignore tests/manual_tests/
