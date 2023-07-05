@@ -105,7 +105,6 @@ class Vnc(Tunnel):
         # self.__kill_vnc()
 
     def start(self):
-        print(port_available)
         if is_autossh_running(self.local_port):
             raise PortUnavailableError(
                 f"Autossh is already running on port {self.local_port}. You need to stop this process before running tunnels."
