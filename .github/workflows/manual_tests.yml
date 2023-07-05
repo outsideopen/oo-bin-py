@@ -1,0 +1,32 @@
+name: Manual Tests
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform'
+        required: true
+        type: choice
+        options:
+        - mac
+        - windows
+        - linux
+      success:
+        description: 'Did the tests pass?'
+        required: true
+        type: boolean
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    if:  ${{ inputs.platform == 'linux' }}
+    steps:
+      - run: ${{ inputs.success }}
+  mac:
+    runs-on: ubuntu-latest
+    if:  ${{ inputs.platform == 'mac' }}
+    steps:
+      - run: ${{ inputs.success }}
+  windows:
+    runs-on: ubuntu-latest
+    if:  ${{ inputs.platform == 'windows' }}
+    steps:
+      - run: ${{ inputs.success }}
