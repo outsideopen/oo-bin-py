@@ -46,14 +46,6 @@ class Rdp(Tunnel):
         return self.__port
 
     @property
-    def width(self):
-        return self._config.get("width") or "1920"
-
-    @property
-    def height(self):
-        return self._config.get("height") or None
-
-    @property
     def local_host(self):
         return self._config.get("local_host") or "127.0.0.1"
 
@@ -96,8 +88,6 @@ class Rdp(Tunnel):
             mstsc = shutil.which("mstsc.exe", path="/mnt/c/Windows/system32")
             return [
                 mstsc,
-                f"/w:{self.width}",
-                f"/h:{self.height}",
                 f"/v:{self.local_host}:{self.local_port}",
             ]
         elif is_mac():
