@@ -11,7 +11,7 @@ from oo_bin.errors import (
 )
 from oo_bin.tunnels.browser_profile import BrowserProfile
 from oo_bin.tunnels.tunnel import Tunnel
-from oo_bin.utils import is_linux, is_mac, is_wsl, port_available
+from oo_bin.utils import is_autossh_running, is_linux, is_mac, is_wsl, port_available
 
 
 class Socks(Tunnel):
@@ -122,6 +122,11 @@ class Socks(Tunnel):
             self.__kill_browser()
 
     def start(self):
+        if is_autossh_running(self.forward_port):
+            raise PortUnavailableError(
+                f"Autossh is already running on port {self.forward_port}. You need to stop this process before running tunnels."
+            )
+
         super().start()
 
         if self.urls:

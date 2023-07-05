@@ -5,9 +5,9 @@ from subprocess import DEVNULL, Popen
 import colorama
 
 from oo_bin.config import tunnels_config
-from oo_bin.errors import SystemNotSupportedError
+from oo_bin.errors import PortUnavailableError, SystemNotSupportedError
 from oo_bin.tunnels.tunnel import Tunnel
-from oo_bin.utils import is_linux, is_mac, is_wsl, port_available
+from oo_bin.utils import is_autossh_running, is_linux, is_mac, is_wsl, port_available
 
 
 class Rdp(Tunnel):
@@ -31,11 +31,7 @@ class Rdp(Tunnel):
         self.__rdp_pid = None
 
         config_port = host_config.get("local_port", None)
-        self.__local_port = (
-            config_port
-            if config_port and port_available(int(config_port), self.local_host)
-            else self.open_port()
-        )
+        self.__local_port = config_port if config_port else self.open_port()
 
     @property
     def host_name(self):
@@ -144,6 +140,11 @@ class Rdp(Tunnel):
             self.__kill_rdp()
 
     def start(self):
+        if is_autossh_running(self.local_port):
+            raise PortUnavailableError(
+                f"Autossh is already running on port {self.local_port}. You need to stop this process before running tunnels."
+            )
+
         super().start()
 
         self.__launch_rdp()
