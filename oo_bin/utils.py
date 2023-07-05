@@ -7,6 +7,7 @@ import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
 from platform import uname
+from subprocess import DEVNULL, PIPE, Popen
 
 import requests
 from colorama import Fore
@@ -156,3 +157,12 @@ def port_available(port, host="127.0.0.1"):
         return False
     s.close()
     return True
+
+
+def is_autossh_running(port):
+    process1 = Popen(["ps", "-ef"], stdout=PIPE)
+    process2 = Popen(["grep", "autossh"], stdin=process1.stdout, stdout=PIPE)
+    process3 = Popen(["grep", f"{port}"], stdin=process2.stdout, stdout=PIPE)
+    output, error = process3.communicate(timeout=5)
+
+    return output
