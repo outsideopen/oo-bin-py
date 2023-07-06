@@ -1,7 +1,10 @@
+import os
 import shutil
+from pathlib import Path
 from subprocess import DEVNULL, Popen
 
 from colorama import Fore
+from xdg import BaseDirectory
 
 from oo_bin.config import main_config
 from oo_bin.errors import (
@@ -30,6 +33,13 @@ class Socks(Tunnel):
             )
 
         self.__forward_port = config_port
+
+        self._pickle_file = Path(
+            os.path.join(
+                BaseDirectory.save_data_path("oo_bin"),
+                f"{self.name}_{self.forward_port}_socks.pkl",
+            )
+        )
 
     @property
     def multiple_profiles(self):
