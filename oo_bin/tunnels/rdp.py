@@ -19,7 +19,6 @@ class Rdp(Tunnel):
 
         if len(hosts_config) > 0:
             host_config = hosts_config[0]
-            self.__host_name = host_config.get("name", "")
             self.__host = host_config.get("host", "")
             self.__port = host_config.get("port", "3389")
         else:
@@ -32,10 +31,6 @@ class Rdp(Tunnel):
 
         config_port = host_config.get("local_port", None)
         self.__local_port = config_port if config_port else self.open_port()
-
-    @property
-    def host_name(self):
-        return self.__host_name
 
     @property
     def host(self):
@@ -91,31 +86,10 @@ class Rdp(Tunnel):
                 f"/v:{self.local_host}:{self.local_port}",
             ]
         elif is_mac():
-            return [
-                "osascript",
-                "-e",
-                'tell application "Microsoft Remote Desktop" to activate',
-                "-e",
-                "delay 0.1",
-                "-e",
-                'tell application "System Events" to keystroke "f" using {command down}',
-                "-e",
-                "delay 0.1",
-                "-e",
-                f'tell application "System Events" to keystroke "{self.host_name}"',
-                "-e",
-                "delay 0.1",
-                "-e",
-                'tell application "System Events" to key code 48',
-                "-e",
-                "delay 0.1",
-                "-e",
-                'tell application "System Events" to key code 09',
-                "-e",
-                "delay 0.1",
-                "-e",
-                'tell application "System Events" to keystroke return',
-            ]
+            url = f"rdp://{self.local_host}:{self.local_port}"
+
+            return ["open", url]
+
         elif is_linux():
             print("\nAutomatically launching RDP client on linux is not supported")
 
