@@ -52,7 +52,7 @@ def stop(ctx, profile):
 
     else:
         tunnel_manager = TunnelManager()
-        tunnel_manager.stop_all(type=Socks)
+        tunnel_manager.stop_all()
 
 
 @tunnels.command(help="Tunnels status")

@@ -46,7 +46,7 @@ def stop(ctx, profile):
 
     else:
         tunnel_manager = TunnelManager()
-        tunnel_manager.stop_all(type=Rdp)
+        tunnel_manager.stop_all()
 
 
 @rdp.command(help="Tunnels status")

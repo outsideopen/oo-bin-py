@@ -46,7 +46,7 @@ def stop(ctx, profile):
 
     else:
         tunnel_manager = TunnelManager()
-        tunnel_manager.stop_all(type=Vnc)
+        tunnel_manager.stop_all()
 
 
 @vnc.command(help="Tunnels status")
