@@ -39,7 +39,8 @@ class Tunnel(ABC):
             main_config().get("tunnels", {}).get("ssh_config", ssh_config_path)
         )
 
-        self.__pickle_file = Path(
+        # Can get overwritten by subclasses
+        self._pickle_file = Path(
             os.path.join(BaseDirectory.save_data_path("oo_bin"), f"{self.name}.pkl")
         )
 
@@ -66,7 +67,7 @@ class Tunnel(ABC):
         # self._save()
 
     def save(self, file=None):
-        pickle_file = file if file else self.__pickle_file
+        pickle_file = file if file else self._pickle_file
         with open(pickle_file, "wb") as f:
             pickle.dump(self, f)
 
@@ -112,7 +113,7 @@ You can view the logs at {self._cache_file}"
         if self.is_running():
             Popen(["kill", str(self.pid)], stdout=DEVNULL)
 
-        self.__pickle_file.unlink(missing_ok=True)
+        self._pickle_file.unlink(missing_ok=True)
 
     def runtime_dependencies_met(self):
         if not self._autossh_bin:

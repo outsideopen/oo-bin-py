@@ -1,8 +1,11 @@
+import os
 import shutil
 import sys
+from pathlib import Path
 from subprocess import DEVNULL, Popen
 
 import colorama
+from xdg import BaseDirectory
 
 from oo_bin.config import tunnels_config
 from oo_bin.errors import PortUnavailableError, SystemNotSupportedError
@@ -31,6 +34,13 @@ class Vnc(Tunnel):
 
         config_port = host_config.get("local_port", None)
         self.__local_port = config_port if config_port else self.open_port()
+
+        self._pickle_file = Path(
+            os.path.join(
+                BaseDirectory.save_data_path("oo_bin"),
+                f"{self.name}_{self.local_port}_vnc.pkl",
+            )
+        )
 
     @property
     def host(self):
