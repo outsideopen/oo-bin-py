@@ -14,5 +14,5 @@ else
   SUCCESS=false
 fi
 
-echo "{\"platform\": \"$PLATFORM\", \"success\":\"$SUCCESS\"}" | gh workflow run manual_tests.yml --json 
+echo "{\"platform\": \"$PLATFORM\", \"success\":\"$SUCCESS\"}" | gh workflow run manual_tests.yml --json --ref $(git rev-parse --abbrev-ref HEAD)
 
