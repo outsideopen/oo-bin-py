@@ -10,7 +10,7 @@ from xdg import BaseDirectory
 from oo_bin.config import tunnels_config
 from oo_bin.errors import PortUnavailableError, SystemNotSupportedError
 from oo_bin.tunnels.tunnel import Tunnel
-from oo_bin.utils import is_autossh_running, is_linux, is_mac, is_wsl, port_available
+from oo_bin.utils import is_autossh_running, is_linux, is_mac, is_wsl
 
 
 class Vnc(Tunnel):

@@ -56,7 +56,15 @@ function install {
 	fi
 
 	curl -LJO $DOWNLOAD_URL
-
+	
+	if ls ~/.local/share/oo_bin/*.pkl > /dev/null 2>&1; then
+		echo ""
+		echo "The application cannot be updated while tunnels are running. Please stop all tunnels and try again:"
+		echo ""
+		echo "oo tunnels stop"
+		echo "oo --update"
+		exit 1
+	fi
 	pip3 install --force-reinstall ./"$FILENAME"
 	rm "$FILENAME"
 }

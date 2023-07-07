@@ -8,9 +8,7 @@ from colorama import Fore, Style
 from singleton_decorator import singleton
 from xdg import BaseDirectory
 
-from oo_bin.config import main_config
 from oo_bin.errors import BrowserProfileUnavailableError
-from oo_bin.tunnels.browser_profile import BrowserProfile
 from oo_bin.tunnels.socks import Socks
 
 
