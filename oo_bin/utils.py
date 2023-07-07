@@ -7,7 +7,7 @@ import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
 from platform import uname
-from subprocess import DEVNULL, PIPE, Popen
+from subprocess import PIPE, Popen
 
 import requests
 from colorama import Fore
@@ -15,7 +15,7 @@ from xdg import BaseDirectory
 
 from oo_bin import __version__
 from oo_bin.config import backup_tunnels_config, config_path, main_config
-from oo_bin.errors import HttpError
+from oo_bin.errors import HttpError, OOBinError
 
 data_path = BaseDirectory.save_data_path("oo_bin")
 last_update_file = os.path.join(data_path, "last_update")
@@ -130,6 +130,15 @@ def update_package():
             download_url = release_info.get("assets", [{}])[0].get(
                 "browser_download_url", None
             )
+
+            if (
+                len(list(Path(BaseDirectory.save_data_path("oo_bin")).glob("*.pkl")))
+                > 0
+            ):
+                raise OOBinError(
+                    "The application cannot be updated while tunnels are running. Please stop all tunnels and try again:\n\noo tunnels stop\noo --update"
+                )
+
             tmp_file = __download_package(download_url)
 
             cmd = ["pip3", "install", "--force-reinstall", str(tmp_file)]
