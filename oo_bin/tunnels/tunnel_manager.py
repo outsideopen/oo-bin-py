@@ -102,15 +102,12 @@ class TunnelManager:
 
     def stop_all(self, type=None):
         if type:
-            self.stop([x.name for x in self.__tunnels if isinstance(x, type)])
+            self.stop([x for x in self.__tunnels if isinstance(x, type)])
         else:
-            self.stop([x.name for x in self.__tunnels])
+            self.stop([x for x in self.__tunnels])
 
-    def stop(self, profiles):
-        tunnels = []
+    def stop(self, tunnels):
         stopped = []
-        for profile in profiles:
-            tunnels.append(self.tunnel(profile))
 
         for tunnel in tunnels:
             try:
