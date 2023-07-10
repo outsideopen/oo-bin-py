@@ -8,7 +8,11 @@ import colorama
 from xdg import BaseDirectory
 
 from oo_bin.config import tunnels_config
-from oo_bin.errors import PortUnavailableError, SystemNotSupportedError
+from oo_bin.errors import (
+    DependencyNotMetError,
+    PortUnavailableError,
+    SystemNotSupportedError,
+)
 from oo_bin.tunnels.tunnel import Tunnel
 from oo_bin.utils import is_autossh_running, is_linux, is_mac, is_wsl
 
@@ -93,6 +97,11 @@ class Vnc(Tunnel):
             viewer = shutil.which(
                 "vncviewer.exe", path="/mnt/c/Program Files/RealVNC/VNC Viewer"
             )
+            if not viewer:
+                raise DependencyNotMetError(
+                    "You need to install RealVNC viewer. See: https://www.realvnc.com/en/connect/download/viewer/"
+                )
+
             return [
                 viewer,
                 "-useaddressbook",

@@ -8,7 +8,11 @@ import colorama
 from xdg import BaseDirectory
 
 from oo_bin.config import tunnels_config
-from oo_bin.errors import PortUnavailableError, SystemNotSupportedError
+from oo_bin.errors import (
+    DependencyNotMetError,
+    PortUnavailableError,
+    SystemNotSupportedError,
+)
 from oo_bin.tunnels.tunnel import Tunnel
 from oo_bin.utils import is_autossh_running, is_linux, is_mac, is_wsl
 
@@ -91,6 +95,11 @@ class Rdp(Tunnel):
 
         if is_wsl():
             mstsc = shutil.which("mstsc.exe", path="/mnt/c/Windows/system32")
+
+            if not mstsc:
+                raise DependencyNotMetError(
+                    "You need mstsc.exe installed. See: https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/mstsc"
+                )
             return [
                 mstsc,
                 f"/v:{self.local_host}:{self.local_port}",
