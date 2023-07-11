@@ -19,12 +19,12 @@ class Dnsme:
         if not shutil.which("whois"):
             raise DependencyNotMetError("whois is not installed, or is not in the path")
 
-        self.__whois_failed = False
-        try:
-            if not self.__whois:
-                raise DomainNotExistError(f"The domain {self.domain} does not exist")
-        except whois.exceptions.WhoisCommandFailed:
-            self.__whois_failed = True
+        # self.__whois_failed = False
+        # try:
+        if not self.__whois:
+            raise DomainNotExistError(f"The domain {self.domain} does not exist")
+        # except whois.exceptions.WhoisCommandFailed:
+        #     self.__whois_failed = True
 
         self.a = None
         self.mx = None
@@ -33,7 +33,10 @@ class Dnsme:
 
     @property
     def __expiration_date(self):
-        if type(self.__whois.expiration_date) is list and len(self.__whois.expiration_date) > 0:
+        if (
+            type(self.__whois.expiration_date) is list
+            and len(self.__whois.expiration_date) > 0
+        ):
             return self.__whois.expiration_date[0].astimezone()
         elif type(self.__whois.expiration_date) is datetime:
             return self.__whois.expiration_date.astimezone()
@@ -43,7 +46,7 @@ class Dnsme:
     @property
     def __days_to_expiration(self):
         if type(self.__expiration_date) is datetime:
-            return self.__expiration_date - datetime.now().astimezone()
+            return (self.__expiration_date - datetime.now().astimezone()).days
         else:
             return "Unknown"
 
@@ -141,16 +144,9 @@ class Dnsme:
 
     def __str__(self):
         s = f"{colorama.Style.BRIGHT}Registrar Info\n"
-        if not self.__whois_failed:
-            s += f"{colorama.Style.RESET_ALL}Registrar: {self.__whois.registrar}\n"
-            s += f"{self.domain} expires in {self.__days_to_expiration} \
-days on {self.__expiration_date}\n"
-        else:
-            s += f"""{colorama.Style.RESET_ALL}{colorama.Fore.RED}The whois command failed for the given domain. This may be caused by a known bug with whois on Mac.
-
-https://github.com/mboot-github/WhoisDomain#notes-for-mac-users\n"""
-
-        s += "\n"
+        s += f"{colorama.Style.RESET_ALL}Registrar: {self.__whois.registrar}\n"
+        s += f"{self.domain} expires in {self.__days_to_expiration} days on {self.__expiration_date}"
+        s += "\n\n"
 
         s += f"{colorama.Style.RESET_ALL}{colorama.Style.BRIGHT}A Records\n"
         for a_entry in self.__a_lookup:
