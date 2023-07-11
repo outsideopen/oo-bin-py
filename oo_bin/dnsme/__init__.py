@@ -2,10 +2,10 @@ import re
 import shutil
 from datetime import datetime
 
+import colorama
 import dns.resolver
 import dns.reversename
 import whoisdomain as whois
-import colorama
 
 from oo_bin.errors import DependencyNotMetError, DomainNotExistError
 
@@ -17,11 +17,11 @@ class Dnsme:
         if not shutil.which("whois"):
             raise DependencyNotMetError("whois is not installed, or is not in the path")
 
-        self.__whois_failed = True
+        self.__whois_failed = False
         try:
-            if not self.__whois__:
+            if not self.__whois:
                 raise DomainNotExistError(f"The domain {self.domain} does not exist")
-        except (whois.exceptions.WhoisCommandFailed):
+        except whois.exceptions.WhoisCommandFailed:
             self.__whois_failed = True
 
         self.a = None
@@ -30,11 +30,11 @@ class Dnsme:
         self.txt = None
 
     @property
-    def __whois__(self):
+    def __whois(self):
         return whois.query(self.domain)
 
     @property
-    def __a_lookup__(self):
+    def __a_lookup(self):
         try:
             if not self.a:
                 self.a = sorted(dns.resolver.resolve(self.domain, "A"))
@@ -43,7 +43,7 @@ class Dnsme:
             return []
 
     @property
-    def __mx_lookup__(self):
+    def __mx_lookup(self):
         try:
             if not self.mx:
                 self.mx = sorted(
@@ -55,7 +55,7 @@ class Dnsme:
             return []
 
     @property
-    def __ns_lookup__(self):
+    def __ns_lookup(self):
         try:
             if not self.ns:
                 self.ns = sorted(dns.resolver.resolve(self.domain, "NS"))
@@ -64,9 +64,9 @@ class Dnsme:
             return []
 
     @property
-    def __reverse_lookup__(self):
+    def __reverse_lookup(self):
         reverse = []
-        for a_record in self.__a_lookup__:
+        for a_record in self.__a_lookup:
             try:
                 a = dns.reversename.from_address(f"{a_record}")
                 for ptr in dns.resolver.query(a, "PTR"):
@@ -77,23 +77,23 @@ class Dnsme:
         return reverse
 
     @property
-    def __spf_lookup__(self):
+    def __spf_lookup(self):
         spf_entries = []
-        for txt_entry in self.__txt_lookup__:
+        for txt_entry in self.__txt_lookup:
             if re.search(r"spf", f"{txt_entry}"):
                 spf_entries.append(txt_entry)
 
         return spf_entries
 
     @property
-    def __dmarc_lookup__(self):
+    def __dmarc_lookup(self):
         try:
             return sorted(dns.resolver.resolve(f"_dmarc.{self.domain}", "TXT"))
         except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
             return []
 
     @property
-    def __dkim_lookup__(self):
+    def __dkim_lookup(self):
         dkims = []
         try:
             selector1 = dns.resolver.resolve(
@@ -116,7 +116,7 @@ class Dnsme:
         return dkims
 
     @property
-    def __txt_lookup__(self):
+    def __txt_lookup(self):
         if not self.txt:
             try:
                 self.txt = sorted(dns.resolver.resolve(self.domain, "TXT"))
@@ -128,54 +128,53 @@ class Dnsme:
     def __str__(self):
         s = f"{colorama.Style.BRIGHT}Registrar Info\n"
         if not self.__whois_failed:
-            s += f"{colorama.Style.RESET_ALL}Registrar: {self.__whois__.registrar}\n"
-            s += f"{self.domain} expires in {(self.__whois__.expiration_date - datetime.now()).days} \
-days on {self.__whois__.expiration_date.astimezone()}\n"
+            s += f"{colorama.Style.RESET_ALL}Registrar: {self.__whois.registrar}\n"
+            s += f"{self.domain} expires in {(self.__whois.expiration_date - datetime.now()).days} \
+days on {self.__whois.expiration_date.astimezone()}\n"
         else:
-            s += f"""{colorama.Style.RESET_ALL}{colorama.Fore.RED}The whois command failed for the given domain. There is a known bug with whois on Mac. 
-Please see the link for details: 
+            s += f"""{colorama.Style.RESET_ALL}{colorama.Fore.RED}The whois command failed for the given domain. This may be caused by a known bug with whois on Mac.
 
 https://github.com/mboot-github/WhoisDomain#notes-for-mac-users\n"""
 
         s += "\n"
 
         s += f"{colorama.Style.RESET_ALL}{colorama.Style.BRIGHT}A Records\n"
-        for a_entry in self.__a_lookup__:
+        for a_entry in self.__a_lookup:
             s += f"{colorama.Style.RESET_ALL}{a_entry}\n"
         s += "\n"
 
         s += f"{colorama.Style.BRIGHT}MX Records\n"
-        for mx_entry in self.__mx_lookup__:
+        for mx_entry in self.__mx_lookup:
             s += f"{colorama.Style.RESET_ALL}{mx_entry.preference: <2} {mx_entry.exchange}\n"
         s += "\n"
 
         s += f"{colorama.Style.BRIGHT}NS Records\n"
-        for ns_entry in self.__ns_lookup__:
+        for ns_entry in self.__ns_lookup:
             s += f"{colorama.Style.RESET_ALL}{ns_entry}\n"
         s += "\n"
 
         s += f"{colorama.Style.BRIGHT}Reverse DNS\n"
-        for reverse_entry in self.__reverse_lookup__:
+        for reverse_entry in self.__reverse_lookup:
             s += f"{colorama.Style.RESET_ALL}{reverse_entry}\n"
         s += "\n"
 
         s += f"{colorama.Style.BRIGHT}SPF Records\n"
-        for spf_entry in self.__spf_lookup__:
+        for spf_entry in self.__spf_lookup:
             s += f"{colorama.Style.RESET_ALL}{spf_entry}\n"
         s += "\n"
 
         s += f"{colorama.Style.BRIGHT}DMARC Record\n"
-        for dmarc_entry in self.__dmarc_lookup__:
+        for dmarc_entry in self.__dmarc_lookup:
             s += f"{colorama.Style.RESET_ALL}{dmarc_entry}\n"
         s += "\n"
 
         s += f"{colorama.Style.BRIGHT}DKIM Records (Office 365 only)\n"
-        for dkim_entry in self.__dkim_lookup__:
+        for dkim_entry in self.__dkim_lookup:
             s += f"{colorama.Style.RESET_ALL}{dkim_entry}\n"
         s += "\n"
 
         s += f"{colorama.Style.BRIGHT}TXT Records\n"
-        for txt_entry in self.__txt_lookup__:
+        for txt_entry in self.__txt_lookup:
             s += f"{colorama.Style.RESET_ALL}{txt_entry}\n"
 
         return s
