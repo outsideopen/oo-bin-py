@@ -29,7 +29,7 @@ dependencies = [
 	"singleton-decorator",
 	"tabulate",
 	"tomli >= 1.1.0 ; python_version < '3.11'",
-	"whois ==0.9.27",
+	"whoisdomain",
 	"wslPath",
 ]
 

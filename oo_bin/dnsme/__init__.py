@@ -4,8 +4,8 @@ from datetime import datetime
 
 import dns.resolver
 import dns.reversename
-import whois
-from colorama import Style
+import whoisdomain as whois
+import colorama
 
 from oo_bin.errors import DependencyNotMetError, DomainNotExistError
 
@@ -17,8 +17,12 @@ class Dnsme:
         if not shutil.which("whois"):
             raise DependencyNotMetError("whois is not installed, or is not in the path")
 
-        if not self.__whois__:
-            raise DomainNotExistError(f"The domain {self.domain} does not exist")
+        self.__whois_failed = True
+        try:
+            if not self.__whois__:
+                raise DomainNotExistError(f"The domain {self.domain} does not exist")
+        except (whois.exceptions.WhoisCommandFailed):
+            self.__whois_failed = True
 
         self.a = None
         self.mx = None
@@ -122,50 +126,56 @@ class Dnsme:
         return self.txt
 
     def __str__(self):
-        s = f"{Style.BRIGHT}Registrar Info\n"
-        s += f"{Style.RESET_ALL}Registrar: {self.__whois__.registrar}\n"
-        s += f"{self.domain} expires in {(self.__whois__.expiration_date - datetime.now()).days} \
+        s = f"{colorama.Style.BRIGHT}Registrar Info\n"
+        if not self.__whois_failed:
+            s += f"{colorama.Style.RESET_ALL}Registrar: {self.__whois__.registrar}\n"
+            s += f"{self.domain} expires in {(self.__whois__.expiration_date - datetime.now()).days} \
 days on {self.__whois__.expiration_date.astimezone()}\n"
+        else:
+            s += f"""{colorama.Style.RESET_ALL}{colorama.Fore.RED}The whois command failed for the given domain. There is a known bug with whois on Mac. 
+Please see the link for details: 
+
+https://github.com/mboot-github/WhoisDomain#notes-for-mac-users\n"""
 
         s += "\n"
 
-        s += f"{Style.BRIGHT}A Records\n"
+        s += f"{colorama.Style.RESET_ALL}{colorama.Style.BRIGHT}A Records\n"
         for a_entry in self.__a_lookup__:
-            s += f"{Style.RESET_ALL}{a_entry}\n"
+            s += f"{colorama.Style.RESET_ALL}{a_entry}\n"
         s += "\n"
 
-        s += f"{Style.BRIGHT}MX Records\n"
+        s += f"{colorama.Style.BRIGHT}MX Records\n"
         for mx_entry in self.__mx_lookup__:
-            s += f"{Style.RESET_ALL}{mx_entry.preference: <2} {mx_entry.exchange}\n"
+            s += f"{colorama.Style.RESET_ALL}{mx_entry.preference: <2} {mx_entry.exchange}\n"
         s += "\n"
 
-        s += f"{Style.BRIGHT}NS Records\n"
+        s += f"{colorama.Style.BRIGHT}NS Records\n"
         for ns_entry in self.__ns_lookup__:
-            s += f"{Style.RESET_ALL}{ns_entry}\n"
+            s += f"{colorama.Style.RESET_ALL}{ns_entry}\n"
         s += "\n"
 
-        s += f"{Style.BRIGHT}Reverse DNS\n"
+        s += f"{colorama.Style.BRIGHT}Reverse DNS\n"
         for reverse_entry in self.__reverse_lookup__:
-            s += f"{Style.RESET_ALL}{reverse_entry}\n"
+            s += f"{colorama.Style.RESET_ALL}{reverse_entry}\n"
         s += "\n"
 
-        s += f"{Style.BRIGHT}SPF Records\n"
+        s += f"{colorama.Style.BRIGHT}SPF Records\n"
         for spf_entry in self.__spf_lookup__:
-            s += f"{Style.RESET_ALL}{spf_entry}\n"
+            s += f"{colorama.Style.RESET_ALL}{spf_entry}\n"
         s += "\n"
 
-        s += f"{Style.BRIGHT}DMARC Record\n"
+        s += f"{colorama.Style.BRIGHT}DMARC Record\n"
         for dmarc_entry in self.__dmarc_lookup__:
-            s += f"{Style.RESET_ALL}{dmarc_entry}\n"
+            s += f"{colorama.Style.RESET_ALL}{dmarc_entry}\n"
         s += "\n"
 
-        s += f"{Style.BRIGHT}DKIM Records (Office 365 only)\n"
+        s += f"{colorama.Style.BRIGHT}DKIM Records (Office 365 only)\n"
         for dkim_entry in self.__dkim_lookup__:
-            s += f"{Style.RESET_ALL}{dkim_entry}\n"
+            s += f"{colorama.Style.RESET_ALL}{dkim_entry}\n"
         s += "\n"
 
-        s += f"{Style.BRIGHT}TXT Records\n"
+        s += f"{colorama.Style.BRIGHT}TXT Records\n"
         for txt_entry in self.__txt_lookup__:
-            s += f"{Style.RESET_ALL}{txt_entry}\n"
+            s += f"{colorama.Style.RESET_ALL}{txt_entry}\n"
 
         return s
