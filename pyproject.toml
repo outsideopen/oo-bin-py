@@ -24,12 +24,12 @@ dependencies = [
 	"namegenerator",
 	"progress",
 	"pyperclip",
+	"python-whois",
 	"pyxdg",
 	"requests",
 	"singleton-decorator",
 	"tabulate",
 	"tomli >= 1.1.0 ; python_version < '3.11'",
-	"whoisdomain",
 	"wslPath",
 ]
 
