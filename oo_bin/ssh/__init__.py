@@ -7,7 +7,7 @@ from oo_bin.errors import OOBinError
 
 
 class Ssh:
-    def connect(self, profile, host=None):
+    def connect(self, profile, host=""):
         jump_host = tunnels_config().get(profile, {}).get("jump_host", None)
         hosts_config = tunnels_config().get(profile, {}).get("ssh", {}).get("hosts", [])
         hosts_config = [x for x in hosts_config if x.get("name", None) == host]
@@ -33,7 +33,7 @@ class Ssh:
             )
 
         if host:
-            cmd = ["ssh", "-J", jump_host, f"{ssh_host}:{ssh_port}"]
+            cmd = ["ssh", "-J", jump_host, "-p", ssh_port, ssh_host]
         else:
             cmd = ["ssh", jump_host]
 
