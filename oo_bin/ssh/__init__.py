@@ -3,7 +3,6 @@ import os
 from click.shell_completion import CompletionItem
 
 from oo_bin.config import tunnels_config, tunnels_config_path
-
 from oo_bin.errors import OOBinError
 
 
@@ -42,13 +41,32 @@ class Ssh:
         return cmd
 
     @staticmethod
-    def shell_complete(ctx, param, incomplete):
+    def profile_complete(ctx, param, incomplete):
         config = tunnels_config()
         tunnels_list = list(config.keys())
         completions = [
-            CompletionItem(k, help="socks")
+            CompletionItem(k, help="Ssh")
             for k in tunnels_list
             if k.startswith(incomplete)
+        ]
+
+        return completions
+
+    @staticmethod
+    def host_complete(ctx, param, incomplete):
+        hosts_config = (
+            tunnels_config()
+            .get(ctx.params["profile"], {})
+            .get("ssh", {})
+            .get("hosts", [])
+        )
+
+        hosts_list = [x for x in hosts_config if x.get("name", False)]
+
+        completions = [
+            CompletionItem(k.get("name"), help=f"{k.get('host')}:{k.get('port', '22')}")
+            for k in hosts_list
+            if k.get("name").startswith(incomplete)
         ]
 
         return completions
