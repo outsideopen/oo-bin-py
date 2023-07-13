@@ -2,20 +2,44 @@ import os
 
 from click.shell_completion import CompletionItem
 
-from oo_bin.config import tunnels_config
+from oo_bin.config import tunnels_config, tunnels_config_path
+
+from oo_bin.errors import OOBinError
 
 
 class Ssh:
-    def connect(self, profile):
-        config = tunnels_config()
-        section = config.get(profile, {})
-        jump_host = section.get("jump_host", None)
+    def connect(self, profile, host=None):
+        jump_host = tunnels_config().get(profile, {}).get("jump_host", None)
+        hosts_config = tunnels_config().get(profile, {}).get("ssh", {}).get("hosts", [])
+        hosts_config = [x for x in hosts_config if x.get("name", None) == host]
 
-        if jump_host:
+        ssh_host = ""
+        ssh_port = "22"
+
+        if len(hosts_config) > 0:
+            host_config = hosts_config[0]
+            ssh_host = host_config.get("host", "")
+            ssh_port = host_config.get("port", "22")
+        else:
+            parsed_host = host.split(":", 1)
+
+            ssh_host = parsed_host[0]
+
+            if len(parsed_host) > 1:
+                ssh_port = parsed_host[1]
+
+        if not jump_host:
+            raise OOBinError(
+                f"Jump host not defined in configuration. Update {tunnels_config_path}"
+            )
+
+        if host:
+            cmd = ["ssh", "-J", jump_host, f"{ssh_host}:{ssh_port}"]
+        else:
             cmd = ["ssh", jump_host]
-            os.spawnvpe(os.P_WAIT, "ssh", cmd, os.environ)
 
-            return cmd
+        os.spawnvpe(os.P_WAIT, "ssh", cmd, os.environ)
+        return cmd
 
     @staticmethod
     def shell_complete(ctx, param, incomplete):
