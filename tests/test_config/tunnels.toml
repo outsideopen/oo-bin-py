@@ -12,3 +12,9 @@ hosts = [
 	{ name = 'first_vnc', host = '192.168.2.1', local_port = '60011' },
 	{ name = 'second_vnc', host = '192.168.2.2', local_port = '60012' },
 ]
+
+[foo.ssh]
+hosts = [
+	{ name = 'first_ssh', host = '192.168.2.1', port  = "2211" },
+	{ name = 'second_ssh', host = '192.168.2.2', port = "2222" },
+]
