@@ -2,6 +2,7 @@ import os
 import pickle
 import sys
 from pathlib import Path
+from subprocess import DEVNULL, Popen
 
 import tabulate as t
 from colorama import Fore, Style
@@ -25,13 +26,24 @@ class TunnelManager:
     def __load_tunnels(self, state_directory):
         tunnels = []
         for data_path in sorted(state_directory.glob("*.pkl"), key=os.path.getmtime):
-            with open(data_path, "rb") as f:
-                tunnel = pickle.load(f)
+            try:
+                with open(data_path, "rb") as f:
+                    tunnel = pickle.load(f)
 
-                if tunnel.is_running():
-                    tunnels.append(tunnel)
-                else:
-                    tunnel.stop()
+                    if tunnel.is_running():
+                        tunnels.append(tunnel)
+                    else:
+                        tunnel.stop()
+            except (AttributeError, EOFError, ImportError, IndexError):
+                print(f"{Style.BRIGHT}Inconsistent tunnel state detected.\n")
+                print(f"Deleting state file: {Style.BRIGHT}{data_path}")
+                data_path.unlink(missing_ok=True)
+
+                if tunnel.pid:
+                    print(
+                        f"Stopping the offending process, with PID: {Style.BRIGHT}{tunnel.pid}"
+                    )
+                    Popen(["kill", str(tunnel.pid)], stdout=DEVNULL, stderr=DEVNULL)
 
         return tunnels
 
