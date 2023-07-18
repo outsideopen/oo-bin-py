@@ -168,6 +168,16 @@ function fish_add_completions {
 	fi
 }
 
+function add_ssh_config {
+	if cat $HOME/.ssh/config | grep -q 'include ~/.config/oo_bin/ssh_config'; then
+		echo '~/.config/oo_bin/ssh_config is already included in ~/.ssh/config. Nothing to be done'
+	else
+		echo 'Adding `include ~/.config/oo_bin/ssh_config` to ~/.ssh/config'
+		echo 'include ~/.config/oo_bin/ssh_config' >>$HOME/.ssh/config
+	fi
+
+}
+
 for i in "$@"; do
 	case $i in
 	--prerelease)
@@ -198,6 +208,9 @@ add_tunnels_config_download
 # We need to update here, or the completions may fail
 oo --update
 echo ''
+echo 'Configure Ssh'
+echo '*************'
+add_ssh_config
 echo 'Configure Completions'
 echo '*********************'
 # We check the bash version, because Mac still has an old version of Bash by default
