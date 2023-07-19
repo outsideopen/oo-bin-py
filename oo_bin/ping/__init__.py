@@ -1,10 +1,9 @@
-from time import sleep
+import os
 
 from click.shell_completion import CompletionItem
-from colorama import Style
-from icmplib import ping
 
 from oo_bin.config import tunnels_config
+from oo_bin.utils import is_linux, is_mac, is_wsl
 
 
 class Ping:
@@ -13,18 +12,15 @@ class Ping:
         section = config.get(profile, {})
         jump_host = section.get("jump_host", None)
 
-        print(f"Pinging {Style.BRIGHT}{jump_host}\n")
-        for i in range(0, 10):
-            sleep(0.5)
-            result = ping(jump_host, count=1, timeout=1, privileged=False)
-            if result.is_alive:
-                print(
-                    f"{Style.BRIGHT}{result.address} {Style.RESET_ALL}seq={i + 1} time={round(result.min_rtt, 1)} ms"
-                )
-            else:
-                print(
-                    f"{Style.BRIGHT}{result.address} {Style.RESET_ALL}Request Timeout from seq={i + 1}"
-                )
+        cmd = ["ping"]
+        if is_linux or is_wsl:
+            cmd.append("-OO")
+        elif is_mac:
+            cmd.append("-v")
+
+        cmd.append(jump_host)
+
+        os.spawnvpe(os.P_WAIT, "ping", cmd, os.environ)
 
     @staticmethod
     def shell_complete(ctx, param, incomplete):
