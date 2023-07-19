@@ -13,9 +13,9 @@ class Ping:
         jump_host = section.get("jump_host", None)
 
         cmd = ["ping"]
-        if is_linux or is_wsl:
+        if is_linux() or is_wsl():
             cmd.append("-OO")
-        elif is_mac:
+        elif is_mac():
             cmd.append("-v")
 
         cmd.append(jump_host)
