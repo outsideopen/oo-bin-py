@@ -138,6 +138,7 @@ class Socks(Tunnel):
             )
 
         super().start()
+        print(f"Connected to {self.jump_host}")
 
         if self.urls:
             self.__launch_browser(self.urls)
