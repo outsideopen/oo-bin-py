@@ -32,10 +32,9 @@ def rdp(ctx, profile, host):
         rdp.start()
 
 
-@rdp.command("stop", help="Stop tunnels")
-@click.pass_context
+@rdp.command("stop", help="Stop rdp tunnels")
 @click.argument("profile", shell_complete=Completions.stop_complete, required=False)
-def stop(ctx, profile):
+def stop(profile):
     if profile:
         tunnel = TunnelManager().tunnel(profile)
         if tunnel:
@@ -46,7 +45,13 @@ def stop(ctx, profile):
 
     else:
         tunnel_manager = TunnelManager()
-        tunnel_manager.stop_all()
+        tunnel_manager.stop_all(type=Rdp)
+
+
+@rdp.command("stopall", help="Stop all tunnels")
+def stopall():
+    tunnel_manager = TunnelManager()
+    tunnel_manager.stop_all()
 
 
 @rdp.command(help="Tunnels status")
