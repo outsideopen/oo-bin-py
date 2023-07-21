@@ -20,7 +20,7 @@ class Ssh:
             ssh_host = host_config.get("host", "")
             ssh_port = host_config.get("port", "22")
         else:
-            parsed_host = host.split(":", 1)
+            parsed_host = host.split(":", 1) if host else [""]
 
             ssh_host = parsed_host[0]
 
