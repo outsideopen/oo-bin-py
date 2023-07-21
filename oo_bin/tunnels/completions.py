@@ -26,7 +26,8 @@ class Completions:
             CompletionItem(e["name"], help=e["help"])
             for e in [
                 {"name": "status", "help": "Tunnel status"},
-                {"name": "stop", "help": "Stop tunnel"},
+                {"name": "stop", "help": "Stop RDP tunnels"},
+                {"name": "stopall", "help": "Stop all tunnels"},
             ]
             if e["name"].startswith(incomplete)
         ]
@@ -67,7 +68,8 @@ class Completions:
             CompletionItem(e["name"], help=e["help"])
             for e in [
                 {"name": "status", "help": "Tunnel status"},
-                {"name": "stop", "help": "Stop tunnel"},
+                {"name": "stop", "help": "Stop Socks tunnels"},
+                {"name": "stopall", "help": "Stop all tunnels"},
                 {"name": "profile", "help": "Manage browser profiles"},
             ]
             if e["name"].startswith(incomplete)
@@ -90,7 +92,8 @@ class Completions:
             CompletionItem(e["name"], help=e["help"])
             for e in [
                 {"name": "status", "help": "Tunnel status"},
-                {"name": "stop", "help": "Stop tunnel"},
+                {"name": "stop", "help": "Stop VNC tunnels"},
+                {"name": "stopall", "help": "Stop all tunnels"},
             ]
             if e["name"].startswith(incomplete)
         ]
@@ -122,7 +125,7 @@ class Completions:
     def stop_complete(ctx, param, incomplete):
         tunnels = TunnelManager().tunnels()
         completions = [
-            CompletionItem(k.name, help=type(k))
+            CompletionItem(k.name, help=type(k).__name__)
             for k in tunnels
             if k.name.startswith(incomplete)
         ]

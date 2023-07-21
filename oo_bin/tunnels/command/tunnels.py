@@ -38,10 +38,9 @@ def tunnels(ctx, profile):
         return socks.start()
 
 
-@tunnels.command("stop", help="Stop tunnels")
-@click.pass_context
+@tunnels.command("stop", help="Stop Socks tunnels")
 @click.argument("profile", shell_complete=Completions.stop_complete, required=False)
-def stop(ctx, profile):
+def stop(profile):
     if profile:
         tunnel = TunnelManager().tunnel(profile)
         if tunnel:
@@ -52,7 +51,13 @@ def stop(ctx, profile):
 
     else:
         tunnel_manager = TunnelManager()
-        tunnel_manager.stop_all()
+        tunnel_manager.stop_all(type=Socks)
+
+
+@tunnels.command("stopall", help="Stop all tunnels")
+def stopall():
+    tunnel_manager = TunnelManager()
+    tunnel_manager.stop_all()
 
 
 @tunnels.command(help="Tunnels status")
