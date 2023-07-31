@@ -56,7 +56,13 @@ class Dnsme:
             if not self.a:
                 self.a = sorted(dns.resolver.resolve(self.domain, "A"))
             return self.a
-        except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
+        except (
+            dns.resolver.LifetimeTimeout,
+            dns.resolver.NXDOMAIN,
+            dns.resolver.YXDOMAIN,
+            dns.resolver.NoAnswer,
+            dns.resolver.NoNameservers,
+        ):
             return []
 
     @property
@@ -68,7 +74,13 @@ class Dnsme:
                     key=lambda d: (d.preference, d.exchange),
                 )
             return self.mx
-        except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
+        except (
+            dns.resolver.LifetimeTimeout,
+            dns.resolver.NXDOMAIN,
+            dns.resolver.YXDOMAIN,
+            dns.resolver.NoAnswer,
+            dns.resolver.NoNameservers,
+        ):
             return []
 
     @property
@@ -77,7 +89,13 @@ class Dnsme:
             if not self.ns:
                 self.ns = sorted(dns.resolver.resolve(self.domain, "NS"))
             return self.ns
-        except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
+        except (
+            dns.resolver.LifetimeTimeout,
+            dns.resolver.NXDOMAIN,
+            dns.resolver.YXDOMAIN,
+            dns.resolver.NoAnswer,
+            dns.resolver.NoNameservers,
+        ):
             return []
 
     @property
@@ -88,7 +106,13 @@ class Dnsme:
                 a = dns.reversename.from_address(f"{a_record}")
                 for ptr in dns.resolver.query(a, "PTR"):
                     reverse.append(ptr)
-            except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
+            except (
+                dns.resolver.LifetimeTimeout,
+                dns.resolver.NXDOMAIN,
+                dns.resolver.YXDOMAIN,
+                dns.resolver.NoAnswer,
+                dns.resolver.NoNameservers,
+            ):
                 pass
 
         return reverse
@@ -106,7 +130,13 @@ class Dnsme:
     def __dmarc_lookup(self):
         try:
             return sorted(dns.resolver.resolve(f"_dmarc.{self.domain}", "TXT"))
-        except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
+        except (
+            dns.resolver.LifetimeTimeout,
+            dns.resolver.NXDOMAIN,
+            dns.resolver.YXDOMAIN,
+            dns.resolver.NoAnswer,
+            dns.resolver.NoNameservers,
+        ):
             return []
 
     @property
@@ -118,7 +148,13 @@ class Dnsme:
             )
             for dkim_entry in selector1:
                 dkims.append(dkim_entry)
-        except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
+        except (
+            dns.resolver.LifetimeTimeout,
+            dns.resolver.NXDOMAIN,
+            dns.resolver.YXDOMAIN,
+            dns.resolver.NoAnswer,
+            dns.resolver.NoNameservers,
+        ):
             pass
 
         try:
@@ -127,7 +163,13 @@ class Dnsme:
             )
             for dkim_entry in selector2:
                 dkims.append(dkim_entry)
-        except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
+        except (
+            dns.resolver.LifetimeTimeout,
+            dns.resolver.NXDOMAIN,
+            dns.resolver.YXDOMAIN,
+            dns.resolver.NoAnswer,
+            dns.resolver.NoNameservers,
+        ):
             pass
 
         return dkims
