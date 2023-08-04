@@ -12,6 +12,16 @@ from oo_bin.ping.command import ping
 from oo_bin.ssh.command import ssh
 from oo_bin.tunnels.command import rdp, tunnels, vnc
 from oo_bin.utils import auto_update, update_package, update_tunnels_config
+from oo_bin.config import main_config
+
+import sentry_sdk
+
+dsn = main_config().get("sentry", {}).get("dsn", None)
+
+sentry_sdk.init(
+    dsn=dsn,
+    traces_sample_rate=0.1,
+)
 
 colorama.init(autoreset=True)
 
