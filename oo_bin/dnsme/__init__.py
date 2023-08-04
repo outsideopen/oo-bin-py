@@ -179,7 +179,13 @@ class Dnsme:
         if not self.txt:
             try:
                 self.txt = sorted(dns.resolver.resolve(self.domain, "TXT"))
-            except dns.resolver.NoAnswer:
+            except (
+                dns.resolver.LifetimeTimeout,
+                dns.resolver.NXDOMAIN,
+                dns.resolver.YXDOMAIN,
+                dns.resolver.NoAnswer,
+                dns.resolver.NoNameservers,
+            ):
                 self.txt = ""
 
         return self.txt
