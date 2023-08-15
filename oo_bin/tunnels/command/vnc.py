@@ -35,26 +35,24 @@ def vnc(ctx, profile, host):
 @vnc.command("stop", help="Stop Vnc tunnels")
 @click.argument("profile", shell_complete=Completions.stop_complete, required=False)
 def stop(profile):
+    manager = TunnelManager()
     if profile:
-        tunnel = TunnelManager().tunnel(profile)
+        tunnel = manager.tunnel(profile)
         if tunnel:
-            tunnel.stop()
-            print(f"{Style.BRIGHT}{tunnel.name} has been stopped")
+            manager.stop([tunnel])
         else:
-            print(f"{Style.BRIGHT}No process was stopped")
-
+            manager.stop([])
     else:
-        tunnel_manager = TunnelManager()
-        tunnel_manager.stop_all(type=Vnc)
+        manager.stop_all(type=Vnc)
 
 
 @vnc.command("stopall", help="Stop all tunnels")
 def stopall():
-    tunnel_manager = TunnelManager()
-    tunnel_manager.stop_all()
+    manager = TunnelManager()
+    manager.stop_all()
 
 
 @vnc.command(help="Tunnels status")
 def status():
-    tunnel_manager = TunnelManager()
-    tunnel_manager.status()
+    manager = TunnelManager()
+    manager.status()
