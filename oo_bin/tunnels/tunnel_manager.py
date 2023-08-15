@@ -41,7 +41,7 @@ class TunnelManager:
 
                 if tunnel.pid:
                     print(
-                        f"Stopping the offending process, with PID: {Style.BRIGHT}{tunnel.pid}"
+                        f"Stopping the offending tunnel, with PID: {Style.BRIGHT}{tunnel.pid}"
                     )
                     Popen(["kill", str(tunnel.pid)], stdout=DEVNULL, stderr=DEVNULL)
 
@@ -77,7 +77,7 @@ class TunnelManager:
         else:
             return [x for x in self.__tunnels]
 
-    def print_table(self, tunnels, no_data_msg="No tunnels running!"):
+    def print_table(self, tunnels, no_data_msg="No tunnels are running!"):
         headers = [
             "Profile",
             "Type",
@@ -125,15 +125,24 @@ class TunnelManager:
             try:
                 tunnel.stop()
                 stopped.append(tunnel)
+                self.__tunnels.remove(tunnel)
 
             except FileNotFoundError:
                 print(f"{Fore.YELLOW}autossh is not running", file=sys.stderr)
 
-        if len(tunnels) > 0:
-            print(f"{Style.BRIGHT}The following processes were stopped")
-            self.print_table(stopped)
+        if len(stopped) > 0:
+            profile_names = ", ".join([el.name for el in stopped])
+            print(
+                f"The following tunnels were stopped: {Style.BRIGHT}{profile_names}\n"
+            )
         else:
-            print(f"{Style.BRIGHT}No processes were stopped")
+            print(f"{Style.BRIGHT}No tunnels were stopped.\n")
+
+        if len(self.__tunnels) > 0:
+            print(f"{Style.BRIGHT}Running Tunnels:")
+            self.print_table(self.__tunnels)
+        else:
+            print(f"{Style.BRIGHT}No tunnels are running.")
 
     def next_browser_profile(self):
         profiles_dir = Path(
