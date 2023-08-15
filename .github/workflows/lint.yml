@@ -11,5 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
+        with:
+          python-version-file: '.python-version'
+      - uses: isort/isort-action@v1
       - uses: psf/black@20.8b1
 
