@@ -105,9 +105,11 @@ class Rdp(Tunnel):
                 f"/v:{self.local_host}:{self.local_port}",
             ]
         elif is_mac():
-            url = f"rdp://{self.local_host}:{self.local_port}"
+            # url = f"rdp://{self.local_host}:{self.local_port}"
 
-            return ["open", url]
+            # For now we only open the Microsoft RDP client.
+            # If things improve with the Microsoft RDP client, maybe we can open the correct url
+            return ["open", "-b", "com.microsoft.rdc.macos"]
 
         elif is_linux():
             print("\nAutomatically launching RDP client on linux is not supported")
