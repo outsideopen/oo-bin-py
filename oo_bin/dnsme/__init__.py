@@ -220,7 +220,7 @@ class Dnsme:
         s += f"{colorama.Style.BRIGHT}SPF Records\n"
         for spf_entry in self.__spf_lookup:
             s += f"{colorama.Style.RESET_ALL}{spf_entry}\n"
-            lookups = SpfValidator.parse(spf_entry).lookups()
+            lookups = SpfValidator.parse(f"{spf_entry}").lookups()
             if lookups > 10:
                 lookups = f"{colorama.Back.RED}{lookups}"
             else:
