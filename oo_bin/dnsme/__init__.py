@@ -225,7 +225,7 @@ class Dnsme:
                 lookups = f"{colorama.Back.RED}{lookups}"
             else:
                 lookups = f"{colorama.Fore.GREEN}{lookups}"
-            s+= f"  Lookups: {lookups}{colorama.Style.RESET_ALL}\n"
+            s += f"  Lookups: {lookups}{colorama.Style.RESET_ALL}\n"
 
         s += "\n"
 
