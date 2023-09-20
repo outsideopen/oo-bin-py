@@ -14,10 +14,13 @@ class SpfValidator:
     state: str
 
     @staticmethod
-    def parse(record):
+    def parse(record) -> T | None:
         recs = record.strip('"').split(" ")
         state = recs.pop()
-        version = recs[0]
+        try:
+            version = recs[0]
+        except Exception:
+            return None
 
         ips = []
         includes = {}
@@ -31,9 +34,7 @@ class SpfValidator:
             else:
                 ips.append((type, host))
 
-        sv = SpfValidator(version=version[-1], includes=includes, ips=ips, state=state)
-
-        return sv
+        return SpfValidator(version=version[-1], includes=includes, ips=ips, state=state)
 
     def lookups(self) -> int:
         """Returns how many lookups occurred"""
