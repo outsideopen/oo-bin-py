@@ -34,7 +34,9 @@ class SpfValidator:
             else:
                 ips.append((type, host))
 
-        return SpfValidator(version=version[-1], includes=includes, ips=ips, state=state)
+        return SpfValidator(
+            version=version[-1], includes=includes, ips=ips, state=state
+        )
 
     def lookups(self) -> int:
         """Returns how many lookups occurred"""
