@@ -10,6 +10,7 @@ import sentry_sdk
 from xdg import BaseDirectory
 
 from oo_bin import __version__
+from oo_bin.cert.command import cert
 from oo_bin.config import main_config
 from oo_bin.dnsme.command import dnsme
 from oo_bin.errors import OOBinError
@@ -45,6 +46,7 @@ def cli(ctx, update):
         return None
 
 
+cli.add_command(cert)
 cli.add_command(dnsme)
 cli.add_command(hexme)
 cli.add_command(macme)

@@ -72,3 +72,12 @@ Sometimes we want to test a release before we make it publicly available. You ca
 ```bash
 curl -O https://raw.githubusercontent.com/outsideopen/oo-bin-py/HEAD/install.sh; bash install.sh --prerelease; rm install.sh
 ```
+
+# Development
+
+```
+pipenv shell
+pip install flit
+flit install --deps all --symlink
+oo [cmd] [args] [options]
+```
