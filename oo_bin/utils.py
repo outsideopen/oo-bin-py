@@ -177,11 +177,13 @@ def is_autossh_running(port):
 
     return output
 
+
 class SkipArg(click.Group):
     """Skips arguments
 
     This is primarily used by the main command to provide a default implementation: see tunnels or cert
     """
+
     def parse_args(self, ctx, args):
         if len(args) > 0 and args[0] in self.commands:
             for param in list(reversed(self.params)):

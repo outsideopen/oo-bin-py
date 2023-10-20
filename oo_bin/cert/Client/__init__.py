@@ -79,26 +79,10 @@ class Client:
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.settimeout(5)
-            try:
-                sock.connect((self.host, int(self.port)))
-            except Exception as e:
-                print(e)
-                print('connect')
-                raise e
+            sock.connect((self.host, int(self.port)))
 
             # if the Client has this filled out it'll be used
             self.starttls(sock)
-
-            def kakaw(conn: OpenSSL.SSL.Connection, cert: OpenSSL.crypto.X509, errno, depth, retval):
-                if errno == 20 or errno == 21:
-                    try:
-                        print(cert.to_cryptography().extensions)
-                        # print(Certificate.parse(self.host, cert))
-                    except Exception as e:
-                        print("couldn't load")
-                    # print(conn,cert)
-                    return True
-                return False
 
             # Initiate the OpenSSL context to get the rest of the information
             ctx = SSL.Context(SSL.TLS_CLIENT_METHOD)

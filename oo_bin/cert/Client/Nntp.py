@@ -8,7 +8,8 @@ class Nntp(Client):
         cert, conn = super.scan()
         conn.hostnameSupport = False
 
-        return cert,conn
+        return cert, conn
+
     def sni(self):
         return False
 
@@ -27,7 +28,7 @@ class Nntp(Client):
         except Exception:
             pass
         if "STARTTLS" not in reply:
-             raise Exception("Expecting STARTTLS server capability")
+            raise Exception("Expecting STARTTLS server capability")
 
         # speak
         socket.sendall(f"STARTTLS\n".encode())

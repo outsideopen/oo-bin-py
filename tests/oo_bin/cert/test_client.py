@@ -15,12 +15,10 @@ def httpserver_listen_address():
 def ssl_cert():
     ca = trustme.CA()
     cert = ca.issue_server_cert(
-        '*.example.com',
-        'www.example.com',
-        common_name='example.com'
+        "*.example.com", "www.example.com", common_name="example.com"
     )
 
-    return {'ca': ca, 'cert': cert}
+    return {"ca": ca, "cert": cert}
 
 
 @pytest.fixture(scope="session")
@@ -28,8 +26,8 @@ def httpserver_ssl_context(ssl_cert):
     clientContext = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
     serverContext = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 
-    ssl_cert['ca'].configure_trust(clientContext)
-    ssl_cert['cert'].configure_cert(serverContext)
+    ssl_cert["ca"].configure_trust(clientContext)
+    ssl_cert["cert"].configure_cert(serverContext)
 
     # ca.configure_trust(clientContext)
     # serverCert.configure_cert(serverContext)
@@ -43,12 +41,9 @@ def httpserver_ssl_context(ssl_cert):
 
 
 class TestClient:
-    # def test_make_(self, mocker):
-    # pass
-
     def test_with_only_host(self, httpserver, ssl_cert):
-        client = Client('localhost', 8888)
+        client = Client("localhost", 8888)
         cert, conn = client.scan()
 
-        assert cert.altNames == ['*.example.com', 'www.example.com']
-        assert cert.commonNames == 'example.com'
+        assert cert.altNames == ["*.example.com", "www.example.com"]
+        assert cert.commonNames == "example.com"

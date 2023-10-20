@@ -38,7 +38,9 @@ def alertOnHostMismatch(cert, conn) -> bool:
     return False
 
 
-@click.group(cls=SkipArg, invoke_without_command=True, help="SSL Certificate Information")
+@click.group(
+    cls=SkipArg, invoke_without_command=True, help="SSL Certificate Information"
+)
 @click.pass_context
 @click.argument("host", required=False)
 @click.argument("port", required=False, default=443)
@@ -50,6 +52,7 @@ def cert(ctx, host, port, starttls):
 
     if ctx.invoked_subcommand is None:
         ctx.forward(check)
+
 
 @cert.command("check", help="Check certificate validity")
 @click.argument("host")
@@ -124,7 +127,9 @@ def details(host: str, port: int | None, starttls: str = "auto") -> None:
     output = str(info)
 
     if msg:
-        msg = "{0:#^{1}}".format(f"{msg:^{len(msg) + 2}}", reduce(lambda a, b: a + b, info._widths) + 4)
+        msg = "{0:#^{1}}".format(
+            f"{msg:^{len(msg) + 2}}", reduce(lambda a, b: a + b, info._widths) + 4
+        )
     msg and click.secho(msg, **style)
     click.echo(output)
     msg and click.secho(msg, **style)

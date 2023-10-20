@@ -17,7 +17,7 @@ class Formatter:
             sub.align["v1"] = "l"
             sub.align["v2"] = "l"
             for idx in range(0, len(names), 2):
-                row = names[idx: idx + 2]
+                row = names[idx : idx + 2]
                 if len(row) != 2:
                     row.append("")
                 for id, val in enumerate(row):

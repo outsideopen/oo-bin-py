@@ -1,12 +1,12 @@
 import base64
 import binascii
 import typing
-from cryptography.x509 import oid
 from dataclasses import InitVar, dataclass
 from datetime import datetime
 from typing import List, Union
 
 import dns.resolver
+from cryptography.x509 import oid
 from OpenSSL.crypto import X509
 
 T = typing.TypeVar("T", bound="Certificate")
@@ -68,7 +68,9 @@ class Certificate:
         c = certificate.to_cryptography()
 
         altNames = []
-        for value in c.extensions.get_extension_for_oid(oid.ExtensionOID.SUBJECT_ALTERNATIVE_NAME).value:
+        for value in c.extensions.get_extension_for_oid(
+            oid.ExtensionOID.SUBJECT_ALTERNATIVE_NAME
+        ).value:
             altNames.append(value.value)
 
         subject = c.subject.rfc4514_string()
