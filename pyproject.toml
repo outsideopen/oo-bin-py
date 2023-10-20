@@ -41,7 +41,11 @@ dependencies = [
 Home = "https://github.com/outsideopen/oo-bin"
 
 [project.optional-dependencies]
-test = ["pytest >=7.3.1", "pytest-mock >=3.10.0"]
+test = [
+	"pytest >=7.3.1",
+	"pytest-mock >=3.10.0",
+	"trustme"
+]
 
 [project.scripts]
 oo = "oo_bin.main:main"
