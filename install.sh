@@ -65,7 +65,7 @@ function install {
 	fi
 
 	curl -LJO $DOWNLOAD_URL
-	pip3 install --force-reinstall --break-system-packages ./"$FILENAME"
+	pip3 install --force-reinstall ./"$FILENAME" --break-system-packages
 	rm "$FILENAME"
 }
 
