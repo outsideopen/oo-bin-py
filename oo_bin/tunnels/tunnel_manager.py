@@ -97,12 +97,16 @@ class TunnelManager:
                         type(tunnel).__name__,
                         tunnel.jump_host,
                         tunnel.pid,
-                        tunnel.forward_port
-                        if isinstance(tunnel, Socks)
-                        else tunnel.local_port,
-                        tunnel.browser_profile_name
-                        if isinstance(tunnel, Socks)
-                        else "N/A",
+                        (
+                            tunnel.forward_port
+                            if isinstance(tunnel, Socks)
+                            else tunnel.local_port
+                        ),
+                        (
+                            tunnel.browser_profile_name
+                            if isinstance(tunnel, Socks)
+                            else "N/A"
+                        ),
                     ]
                 )
 
