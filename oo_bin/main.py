@@ -34,18 +34,12 @@ colorama.init(autoreset=True)
 @click.group(invoke_without_command=True)
 @click.version_option(__version__)
 @click.option("-u", "--update", is_flag=True, help="Update")
-@click.option(
-    "-t",
-    "--update-tag",
-    is_flag=True,
-    help="Update to a specific release",
-    Default=False,
-)
+@click.option("-t", "--update-tag", help="Update to a specific release", default="")
 @click.pass_context
-def cli(ctx, update, updateTag):
-    if update:
+def cli(ctx, update, update_tag):
+    if update or update_tag != "":
         update_tunnels_config()
-        update_package(updateTag)
+        update_package(update_tag)
         return
 
     if not ctx.invoked_subcommand:

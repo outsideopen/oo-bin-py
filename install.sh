@@ -60,14 +60,14 @@ function install {
 	fi
 
 	if [ $PRERELEASE ]; then
-		FILENAME=$(curl -L https://api.github.com/repos/outsideopen/oo-bin-py/releases | jq -r 'map(select(.prerelease)) | .[0].assets[0].name')
-		DOWNLOAD_URL=$(curl -L https://api.github.com/repos/outsideopen/oo-bin-py/releases | jq -r 'map(select(.prerelease)) | .[0].assets[0].browser_download_url')
+		FILENAME=$(curl -s -L https://api.github.com/repos/outsideopen/oo-bin-py/releases | jq -r 'map(select(.prerelease)) | .[0].assets[0].name')
+		DOWNLOAD_URL=$(curl -s -L https://api.github.com/repos/outsideopen/oo-bin-py/releases | jq -r 'map(select(.prerelease)) | .[0].assets[0].browser_download_url')
 	else
 		FILENAME=$(curl -L https://api.github.com/repos/outsideopen/oo-bin-py/releases/latest | jq -r '.assets[0].name')
 		DOWNLOAD_URL=$(curl -L https://api.github.com/repos/outsideopen/oo-bin-py/releases/latest | jq -r '.assets[0].browser_download_url')
 	fi
 
-	curl -LJO $DOWNLOAD_URL
+	curl -ssLJO $DOWNLOAD_URL
 	pipx install --force ./"$FILENAME"
 	rm "$FILENAME"
 }
@@ -194,26 +194,34 @@ echo ''
 echo 'Install Bin Scripts'
 echo '*******************'
 install
-echo ''
-echo 'Config Auto Update'
-echo '******************'
-add_tunnels_config_download
-# We need to update here, or the completions may fail
-oo --update
-echo ''
-echo 'Configure Completions'
-echo '*********************'
-# We check the bash version, because Mac still has an old version of Bash by default
-if bash_version_check; then
-	bash_add_completions
+
+OO_SKIP_CONFIG_UPDATE=${OO_SKIP_CONFIG_UPDATE:=0}
+if [ $OO_SKIP_CONFIG_UPDATE -ne 1 ]; then
+    echo ''
+    echo 'Config Auto Update'
+    echo '******************'
+    add_tunnels_config_download
+    # We need to update here, or the completions may fail
+    oo --update
 fi
 
-if which zsh &>/dev/null; then
-	zsh_add_completions
-fi
+OO_SKIP_COMPLETIONS=${OO_SKIP_COMPLETIONS:=0}
+if [ $OO_SKIP_COMPLETIONS -ne 1 ]; then
+    echo ''
+    echo 'Configure Completions'
+    echo '*********************'
+    # We check the bash version, because Mac still has an old version of Bash by default
+    if bash_version_check; then
+        bash_add_completions
+    fi
 
-if which fish &>/dev/null; then
-	fish_add_completions
+    if which zsh &>/dev/null; then
+        zsh_add_completions
+    fi
+
+    if which fish &>/dev/null; then
+        fish_add_completions
+    fi
 fi
 
 echo ''

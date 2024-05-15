@@ -102,7 +102,7 @@ def __latest_release_info():
 
 def __release_info(tag):
     with requests.get(
-        "https://api.github.com/repos/outsideopen/oo-bin-py/releases/latest"
+        "https://api.github.com/repos/outsideopen/oo-bin-py/releases"
     ) as r:
         r.raise_for_status()
         response = r.json()
@@ -126,8 +126,8 @@ def __download_package(url):
     return tmp_file
 
 
-def update_package(tag=False):
-    if tag is False:
+def update_package(tag=""):
+    if tag == "":
         release_info = __latest_release_info()
         tag = release_info.get("tag_name")
     else:
