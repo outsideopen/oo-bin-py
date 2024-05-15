@@ -142,7 +142,7 @@ def update_package():
 
             tmp_file = __download_package(download_url)
 
-            cmd = ["pip3", "install", "--force-reinstall", str(tmp_file)]
+            cmd = ["pipx", "install", "--force", str(tmp_file)]
             subprocess.run(cmd)
 
 

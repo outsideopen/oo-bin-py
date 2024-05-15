@@ -13,8 +13,8 @@ function install_dependencies {
 			if ! which autossh; then
 				sudo apt-get -y update && sudo apt-get install -y autossh
 			fi
-			if ! which pip3; then
-				sudo apt-get -y update && sudo apt-get install -y python3-pip
+			if ! which pipx; then
+				sudo apt-get -y update && sudo apt-get install -y pipx
 			fi
 			if ! which whois; then
 				sudo apt-get -y update && sudo apt-get install -y whois
@@ -32,6 +32,9 @@ function install_dependencies {
 			fi
 			if [ "$(which python3)" != "/usr/local/bin/python3" ]; then
 				brew install python
+			fi
+			if ! which pipx; then
+			    brew install pipx
 			fi
 			if ! which whois; then
 				brew install whois
@@ -65,7 +68,7 @@ function install {
 	fi
 
 	curl -LJO $DOWNLOAD_URL
-	pip3 install --force-reinstall ./"$FILENAME"
+	pipx install --force ./"$FILENAME"
 	rm "$FILENAME"
 }
 
