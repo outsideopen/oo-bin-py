@@ -100,6 +100,19 @@ def __latest_release_info():
         return response
 
 
+def __release_info(tag):
+    with requests.get(
+        "https://api.github.com/repos/outsideopen/oo-bin-py/releases"
+    ) as r:
+        r.raise_for_status()
+        response = r.json()
+        for release in response:
+            if release["tag_name"] == tag:
+                return release
+
+        return False
+
+
 def __download_package(url):
     tmp_dir = tempfile.mkdtemp(dir=tempfile.gettempdir())
     tmp_file = Path(tmp_dir).joinpath(Path(url).name)
@@ -113,10 +126,15 @@ def __download_package(url):
     return tmp_file
 
 
-def update_package():
-    release_info = __latest_release_info()
-
-    tag = release_info.get("tag_name")
+def update_package(tag=""):
+    if tag == "":
+        release_info = __latest_release_info()
+        tag = release_info.get("tag_name")
+    else:
+        release_info = __release_info(tag)
+        if release_info is False:
+            print(f"No release info for {tag}")
+            sys.exit(1)
 
     if __version__ == "0.0.0":
         print("Updates are not supported on development versions of the project.")
@@ -142,7 +160,7 @@ def update_package():
 
             tmp_file = __download_package(download_url)
 
-            cmd = ["pip3", "install", "--force-reinstall", str(tmp_file)]
+            cmd = ["pipx", "install", "--force", str(tmp_file)]
             subprocess.run(cmd)
 
 
