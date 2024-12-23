@@ -48,6 +48,7 @@ def cli(ctx, update, update_tag):
 
 
 cli.add_command(cert)
+cli.add_command(cert, name='certme')
 cli.add_command(dnsme)
 cli.add_command(hexme)
 cli.add_command(macme)
