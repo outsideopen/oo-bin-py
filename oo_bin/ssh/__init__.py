@@ -38,7 +38,7 @@ class Ssh:
             )
 
         ssh_config = main_config().get("tunnels", {}).get("ssh_config", ssh_config_path)
-        
+
         if host:
             cmd = ["ssh", "-F", ssh_config, "-J", jump_host, "-p", ssh_port, ssh_host]
         else:
