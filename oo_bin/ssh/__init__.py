@@ -2,7 +2,12 @@ import os
 
 from click.shell_completion import CompletionItem
 
-from oo_bin.config import main_config, ssh_config_path, tunnels_config, tunnels_config_path
+from oo_bin.config import (
+    main_config,
+    ssh_config_path,
+    tunnels_config,
+    tunnels_config_path,
+)
 from oo_bin.errors import OOBinError
 
 
