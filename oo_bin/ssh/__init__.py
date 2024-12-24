@@ -2,7 +2,12 @@ import os
 
 from click.shell_completion import CompletionItem
 
-from oo_bin.config import tunnels_config, tunnels_config_path
+from oo_bin.config import (
+    main_config,
+    ssh_config_path,
+    tunnels_config,
+    tunnels_config_path,
+)
 from oo_bin.errors import OOBinError
 
 
@@ -32,10 +37,12 @@ class Ssh:
                 f"Jump host not defined in configuration. Update {tunnels_config_path}"
             )
 
+        ssh_config = main_config().get("tunnels", {}).get("ssh_config", ssh_config_path)
+
         if host:
-            cmd = ["ssh", "-J", jump_host, "-p", ssh_port, ssh_host]
+            cmd = ["ssh", "-F", ssh_config, "-J", jump_host, "-p", ssh_port, ssh_host]
         else:
-            cmd = ["ssh", jump_host]
+            cmd = ["ssh", "-F", ssh_config, jump_host]
 
         os.spawnvpe(os.P_WAIT, "ssh", cmd, os.environ)
         return cmd
