@@ -14,18 +14,24 @@ from oo_bin.errors import DependencyNotMetError, DomainNotExistError
 class Dnsme:
     def __init__(self, domain):
         self.domain = domain
+        self.__whois = None
 
-        self.__whois = whois.whois(self.domain)
+        try:
+            # this allows recursion to get better info
+            self.__whois = whois.whois(self.domain)
+        except whois.exceptions.WhoisDomainNotFoundError:
+            try:
+                # some registrars don't respond, which results in an error, so do the quick method
+                # as a last resort
+                self.__whois = whois.whois(self.domain, flags=whois.NICClient.WHOIS_QUICK)
+            except whois.exceptions.WhoisDomainNotFoundError:
+                pass
 
         if not shutil.which("whois"):
             raise DependencyNotMetError("whois is not installed, or is not in the path")
 
-        # self.__whois_failed = False
-        # try:
-        if not self.__whois:
+        if not self.__whois or not self.__whois.status:
             raise DomainNotExistError(f"The domain {self.domain} does not exist")
-        # except whois.exceptions.WhoisCommandFailed:
-        #     self.__whois_failed = True
 
         self.a = None
         self.mx = None
