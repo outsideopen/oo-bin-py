@@ -43,7 +43,7 @@ class Formatter:
             display = fields[field]
             render = Formatter.echo
             if type(display) is tuple:
-                (display, render) = fields[field]
+                display, render = fields[field]
             table.add_row([display, render(value, certificate, connection)])
 
         return table

@@ -40,7 +40,7 @@ class Commander:
     def load_from_path(self, path):
         cmds = self.find_in_path(path)
         for module_name in cmds:
-            (cmd_name, file) = cmds[module_name]
+            cmd_name, file = cmds[module_name]
             if file:
                 spec = importlib.util.spec_from_file_location(
                     f"shim.{module_name}", file
