@@ -23,7 +23,9 @@ class Dnsme:
             try:
                 # some registrars don't respond, which results in an error, so do the quick method
                 # as a last resort
-                self.__whois = whois.whois(self.domain, flags=whois.NICClient.WHOIS_QUICK)
+                self.__whois = whois.whois(
+                    self.domain, flags=whois.NICClient.WHOIS_QUICK
+                )
             except whois.exceptions.WhoisDomainNotFoundError:
                 pass
 
