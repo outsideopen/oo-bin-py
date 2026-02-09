@@ -52,7 +52,7 @@ class Client:
         :return: Client
         """
         if ":" in host:
-            (host, port) = host.split(":")
+            host, port = host.split(":")
 
         name = None
         if type(starttls) == bool or "auto" == starttls or not starttls:
@@ -93,7 +93,7 @@ class Client:
             ssl.set_connect_state()
             ssl.do_handshake()
 
-            (ip, port) = sock.getpeername()
+            ip, _port = sock.getpeername()
             connection = Connection.parse(self.host, ip, ssl)
             certificate = Certificate.parse(self.host, ssl.get_peer_certificate())
 

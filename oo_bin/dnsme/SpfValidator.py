@@ -25,7 +25,7 @@ class SpfValidator:
         ips = []
         includes = {}
         for host in recs[1:]:
-            (type, host) = host.split(":", 1)
+            type, host = host.split(":", 1)
             if type == "include":
                 for row in dns.resolver.resolve(host, "TXT"):
                     data = row.strings[0].decode("utf8")

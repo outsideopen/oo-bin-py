@@ -50,7 +50,7 @@ class TunnelManager:
     def add(self, tunnel):
         if isinstance(tunnel, Socks):
             if tunnel.multiple_profiles:
-                (next_profile_name, next_profile_path) = self.next_browser_profile()
+                next_profile_name, next_profile_path = self.next_browser_profile()
                 tunnel.browser_profile_name = next_profile_name
                 tunnel.browser_profile_path = next_profile_path
 
