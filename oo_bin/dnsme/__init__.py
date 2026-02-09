@@ -7,6 +7,7 @@ import dns.resolver
 import dns.reversename
 import whois
 
+from oo_bin.dnsme.SpfValidator import SpfValidator
 from oo_bin.errors import DependencyNotMetError, DomainNotExistError
 
 
@@ -121,7 +122,7 @@ class Dnsme:
     def __spf_lookup(self):
         spf_entries = []
         for txt_entry in self.__txt_lookup:
-            if re.search(r"spf", f"{txt_entry}"):
+            if re.search(r"v=spf", f"{txt_entry}"):
                 spf_entries.append(txt_entry)
 
         return spf_entries
@@ -219,6 +220,13 @@ class Dnsme:
         s += f"{colorama.Style.BRIGHT}SPF Records\n"
         for spf_entry in self.__spf_lookup:
             s += f"{colorama.Style.RESET_ALL}{spf_entry}\n"
+            lookups = SpfValidator.parse(f"{spf_entry}").lookups()
+            if lookups > 10:
+                lookups = f"{colorama.Back.RED}{lookups}"
+            else:
+                lookups = f"{colorama.Fore.GREEN}{lookups}"
+            s += f"  Lookups: {lookups}{colorama.Style.RESET_ALL}\n"
+
         s += "\n"
 
         s += f"{colorama.Style.BRIGHT}DMARC Record\n"

@@ -91,18 +91,24 @@ class TunnelManager:
 
         for tunnel in tunnels:
             if tunnel.pid:
-                el = []
-                el.append(tunnel.name)
-                el.append(type(tunnel).__name__)
-                el.append(tunnel.jump_host)
-                el.append(tunnel.pid)
-                el.append(tunnel.forward_port) if isinstance(
-                    tunnel, Socks
-                ) else el.append(tunnel.local_port)
-                el.append(tunnel.browser_profile_name) if isinstance(
-                    tunnel, Socks
-                ) else el.append("N/A")
-                table.append(el)
+                table.append(
+                    [
+                        tunnel.name,
+                        type(tunnel).__name__,
+                        tunnel.jump_host,
+                        tunnel.pid,
+                        (
+                            tunnel.forward_port
+                            if isinstance(tunnel, Socks)
+                            else tunnel.local_port
+                        ),
+                        (
+                            tunnel.browser_profile_name
+                            if isinstance(tunnel, Socks)
+                            else "N/A"
+                        ),
+                    ]
+                )
 
         if table:
             print(t.tabulate(table, headers, tablefmt="grid"))
