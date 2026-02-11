@@ -14,6 +14,8 @@ thresholds = {
     "info": {"days": 14, "opts": {"fg": "yellow"}},
 }
 
+ALIAS = "certme"
+
 
 def alertOnHostMismatch(cert, conn) -> bool:
     if cert.host not in cert.subject and cert.host not in cert.altNames:
