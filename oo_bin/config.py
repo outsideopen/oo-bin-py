@@ -3,6 +3,7 @@ import sys
 from os.path import exists
 from shutil import copyfile
 
+import tomli_w
 from colorama import Style
 from xdg import BaseDirectory
 
@@ -43,6 +44,12 @@ def __get_config(path):
 
 def main_config():
     return __get_config(main_config_path)
+
+
+def save_main_config(config):
+    print(f"Saving main configuration to {main_config_path}")
+    with open(main_config_path, "wb") as f:
+        tomli_w.dump(config, f)
 
 
 def tunnels_config(profile=None):
