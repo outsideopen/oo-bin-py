@@ -13,7 +13,6 @@ class Passme:
         SPECIALS = "*@#$%&~"
 
         URL = "https://outsideopen.com/api/pw/"
-        pw = None
 
         try:
             response = requests.get(URL)
