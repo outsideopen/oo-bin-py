@@ -8,6 +8,7 @@ class Commander:
 
     def __init__(self, path):
         self.commands = {}
+        self.aliases = {}
         self.load_from_path(path)
 
     def find_in_path(self, path):
@@ -61,11 +62,15 @@ class Commander:
                         )
 
             if hasattr(module, cmd_name):
+                if hasattr(module, "ALIAS"):
+                    self.aliases[module_name] = getattr(module, "ALIAS")
+
                 self.commands[module_name] = getattr(module, cmd_name)
 
     def register(self, cli):
         for cmd in self.commands:
             cli.add_command(self.commands[cmd])
+            cli.add_command(self.commands[cmd], name=self.aliases[cmd]) if cmd in self.aliases else None
 
     def load_from_paths(self, *paths):
         # these paths are assumed to be shims as the canonical commands are registered above
