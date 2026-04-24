@@ -55,6 +55,10 @@ def main():
         print(colorama.Fore.RED + f"Error: {e}", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
+        # this only happens when running `pipenv shell` which is most likely a developer
+        if os.environ.get('PIPENV_ACTIVE') == '1':
+            raise e
+
         # Unhandled errors, log to file, or upload to sentry
         if dsn:
             sentry_sdk.capture_exception(e)
