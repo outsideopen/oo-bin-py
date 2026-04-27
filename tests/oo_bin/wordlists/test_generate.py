@@ -1,7 +1,8 @@
-import pytest
 import subprocess
-from pathlib import Path
 from importlib import resources
+from pathlib import Path
+
+import pytest
 
 from oo_bin.wordlists import generate_name
 
