@@ -13,16 +13,8 @@ from xdg import BaseDirectory
 from oo_bin.tunnels import Completions, TunnelManager
 from oo_bin.tunnels.browser_profile import BrowserProfile
 from oo_bin.tunnels.socks import Socks
+from oo_bin.utils import SkipArg
 from oo_bin.wordlists import generate_name
-
-
-class SkipArg(click.Group):
-    def parse_args(self, ctx, args):
-        if len(args) > 0 and args[0] in self.commands:
-            if len(args) == 1 or args[1] not in self.commands:
-                # This condition needs updating for multiple positional arguments
-                args.insert(0, "")
-        super(SkipArg, self).parse_args(ctx, args)
 
 
 @click.group(cls=SkipArg, invoke_without_command=True, help="Manage Socks Tunnels")
