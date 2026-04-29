@@ -56,7 +56,7 @@ def main():
         sys.exit(1)
     except Exception as e:
         # this only happens when running `pipenv shell` which is most likely a developer
-        if os.environ.get('PIPENV_ACTIVE') == "1" or os.environ.get('OO_DEBUG') == "1":
+        if os.environ.get("PIPENV_ACTIVE") == "1" or os.environ.get("OO_DEBUG") == "1":
             raise e
 
         # Unhandled errors, log to file, or upload to sentry
