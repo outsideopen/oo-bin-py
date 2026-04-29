@@ -1,11 +1,11 @@
 import configparser
 import os
 import shutil
+import sys
 from datetime import datetime
 from pathlib import Path
 
 import click
-import namegenerator
 import tabulate as t
 from colorama import Style
 from xdg import BaseDirectory
@@ -13,15 +13,8 @@ from xdg import BaseDirectory
 from oo_bin.tunnels import Completions, TunnelManager
 from oo_bin.tunnels.browser_profile import BrowserProfile
 from oo_bin.tunnels.socks import Socks
-
-
-class SkipArg(click.Group):
-    def parse_args(self, ctx, args):
-        if len(args) > 0 and args[0] in self.commands:
-            if len(args) == 1 or args[1] not in self.commands:
-                # This condition needs updating for multiple positional arguments
-                args.insert(0, "")
-        super(SkipArg, self).parse_args(ctx, args)
+from oo_bin.utils import SkipArg
+from oo_bin.wordlists import generate_name
 
 
 @click.group(cls=SkipArg, invoke_without_command=True, help="Manage Socks Tunnels")
@@ -75,17 +68,34 @@ def profile():
     "parent", shell_complete=Completions.clone_browser_profile, required=False
 )
 def clone(parent):
-    config = configparser.ConfigParser()
-    config.read(os.path.join(BrowserProfile.primary_profile_path(), "profiles.ini"))
+    profile_path = os.path.join(BrowserProfile.primary_profile_path(), "profiles.ini")
+    if not os.path.exists(profile_path):
+        click.secho(
+            "ERROR: No profiles found, please use `oo tunnels profile new` first.",
+            fg="red",
+        )
+        sys.exit(-1)
 
+    config = configparser.ConfigParser()
+    config.read(profile_path)
+
+    primary_profile_path = None
     for key in config:
         if config[key].get("Name", None) == parent:
             primary_profile_path = os.path.join(
                 BrowserProfile.primary_profile_path(), config[key].get("Path")
             )
 
+    # if there is no primary profile we need to fail out again
+    if not primary_profile_path:
+        click.secho(
+            f"ERROR: profile `{parent}` not found, please use `oo tunnels profile new` first.",
+            fg="red",
+        )
+        sys.exit(-1)
+
     profile_path = os.path.join(
-        BaseDirectory.save_data_path("oo_bin"), "profiles", f"{namegenerator.gen()}"
+        BaseDirectory.save_data_path("oo_bin"), "profiles", f"{generate_name()}"
     )
     cloned = BrowserProfile.clone(
         primary_profile_path=primary_profile_path, profile_path=profile_path
@@ -96,18 +106,17 @@ def clone(parent):
     with open(Path(os.path.join(profile.normalized_path, "created_at")), "w") as f:
         f.write(f"{datetime.now()}")
 
-    print(
-        f"Profile cloned from:    {primary_profile_path}\nCreated new profile at: {profile.normalized_path}"
-    )
+    click.secho(f"Profile cloned from:    {primary_profile_path}")
+    click.secho(f"Created new profile at: {profile.normalized_path}")
 
 
 @profile.command(help="Create a new browser profile")
 def new():
     profile_path = os.path.join(
-        BaseDirectory.save_data_path("oo_bin"), "profiles", f"{namegenerator.gen()}"
+        BaseDirectory.save_data_path("oo_bin"), "profiles", f"{generate_name()}"
     )
     profile = BrowserProfile(profile_path)
-    print(f"Profile created at: {profile.normalized_path}")
+    click.secho(f"Profile created at: {profile.normalized_path}")
 
 
 @profile.command(help="List browser profiles")

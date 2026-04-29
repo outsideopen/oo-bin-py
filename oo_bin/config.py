@@ -15,18 +15,10 @@ except ModuleNotFoundError:
 __package_name = "oo_bin"
 
 config_path = BaseDirectory.save_config_path(__package_name)
-main_config_path = os.path.join(
-    BaseDirectory.save_config_path(__package_name), "config.toml"
-)
-tunnels_local_config_path = os.path.join(
-    BaseDirectory.save_config_path(__package_name), "tunnels_local.toml"
-)
-tunnels_config_path = os.path.join(
-    BaseDirectory.save_config_path(__package_name), "tunnels.toml"
-)
-ssh_config_path = os.path.join(
-    BaseDirectory.save_config_path(__package_name), "ssh_config"
-)
+main_config_path = os.path.join(config_path, "config.toml")
+tunnels_local_config_path = os.path.join(config_path, "tunnels_local.toml")
+tunnels_config_path = os.path.join(config_path, "tunnels.toml")
+ssh_config_path = os.path.join(config_path, "ssh_config")
 
 
 def __get_config(path):
