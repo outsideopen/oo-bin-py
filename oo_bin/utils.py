@@ -205,6 +205,9 @@ class SkipArg(click.Group):
     def parse_args(self, ctx, args):
         if len(args) > 0 and args[0] in self.commands:
             for param in list(reversed(self.params)):
-                if type(param) == click.core.Argument:
-                    args.insert(0, param.default if param.default != None else "")
+                if isinstance(param, click.Argument):
+                    value = (
+                        param.default() if callable(param.default) else param.default
+                    )
+                    args.insert(0, str(value) if value != None else "")
         super(SkipArg, self).parse_args(ctx, args)
