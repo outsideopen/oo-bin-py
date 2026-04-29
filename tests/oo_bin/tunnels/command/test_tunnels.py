@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from oo_bin.tunnels.command import tunnels
+from oo_bin.tunnels.command.tunnels import tunnels
 
 
 @patch("oo_bin.tunnels.command.tunnels.generate_name")
