@@ -1,9 +1,7 @@
 import os
-import tomllib
 
 import colorama
 import pyperclip as pc
-import tomli_w
 
 from oo_bin.config import main_config, save_main_config
 
