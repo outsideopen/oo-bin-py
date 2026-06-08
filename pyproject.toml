@@ -32,6 +32,7 @@ dependencies = [
 	"requests",
 	"sentry-sdk",
 	"singleton-decorator",
+	"spf-validator",
 	"tabulate",
 	"tomli >= 1.1.0 ; python_version < '3.11'",
 	"tomli_w",

@@ -6,8 +6,8 @@ import colorama
 import dns.resolver
 import dns.reversename
 import whois
+from spf_validator import validator
 
-from oo_bin.dnsme.SpfValidator import SpfValidator
 from oo_bin.errors import DependencyNotMetError, DomainNotExistError
 
 
@@ -228,14 +228,9 @@ class Dnsme:
         s += f"{colorama.Style.BRIGHT}SPF Records\n"
         for spf_entry in self.__spf_lookup:
             s += f"{colorama.Style.RESET_ALL}{spf_entry}\n"
-            lookups = SpfValidator.parse(f"{spf_entry}").lookups()
-            if lookups > 10:
-                lookups = f"{colorama.Back.RED}{lookups}"
-            else:
-                lookups = f"{colorama.Fore.GREEN}{lookups}"
-            s += f"  Lookups: {lookups}{colorama.Style.RESET_ALL}\n"
-
-        s += "\n"
+            for issue in validator.validate_spf_string(f"{spf_entry}".strip('"')):
+                s += f"{colorama.Fore.RED}{issue}\n"
+        s += f"{colorama.Style.RESET_ALL}\n"
 
         s += f"{colorama.Style.BRIGHT}DMARC Record\n"
         for dmarc_entry in self.__dmarc_lookup:
