@@ -5,6 +5,7 @@ import dns.resolver
 
 T = typing.TypeVar("T", bound="SpfValidator")
 
+include_without_lookups = ["a", "exists", "mx", "redirect", "ptr"]
 
 @dataclass
 class SpfValidator:
@@ -25,8 +26,13 @@ class SpfValidator:
         ips = []
         includes = {}
         for host in recs[1:]:
+            if host in include_without_lookups:
+                includes[host] = host
+                continue
+
             if host == "":
                 continue
+
             type, host = host.split(":", 1)
 
             if type == "include":
@@ -45,5 +51,6 @@ class SpfValidator:
         """Returns how many lookups occurred"""
         total = len(self.includes)
         for include in self.includes:
-            total += self.includes[include].lookups()
+            if include not in include_without_lookups:
+                total += self.includes[include].lookups()
         return total
