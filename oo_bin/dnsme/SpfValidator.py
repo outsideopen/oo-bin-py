@@ -7,6 +7,7 @@ T = typing.TypeVar("T", bound="SpfValidator")
 
 include_without_lookups = ["a", "exists", "mx", "redirect", "ptr"]
 
+
 @dataclass
 class SpfValidator:
     version: int
