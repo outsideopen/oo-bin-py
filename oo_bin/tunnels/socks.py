@@ -9,6 +9,7 @@ from xdg import BaseDirectory
 from oo_bin.config import main_config
 from oo_bin.errors import (
     DependencyNotMetError,
+    InvalidProfileError,
     PortUnavailableError,
     SystemNotSupportedError,
 )
@@ -20,6 +21,9 @@ from oo_bin.utils import is_autossh_running, is_linux, is_mac, is_wsl, port_avai
 class Socks(Tunnel):
     def __init__(self, name):
         super().__init__(name)
+
+        if not self.urls:
+            raise InvalidProfileError(f"No URLs defined for {self.name}")
 
         self.__forward_port = self.open_port()
         self.__browser_profile_name = None
