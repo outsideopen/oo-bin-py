@@ -32,7 +32,7 @@ class Dnsme:
         if not shutil.which("whois"):
             raise DependencyNotMetError("whois is not installed, or is not in the path")
 
-        if not self.__whois or not self.__whois.status:
+        if not self.__whois or not self.__whois.expiration_date:
             raise DomainNotExistError(f"The domain {self.domain} does not exist")
 
         self.a = None
