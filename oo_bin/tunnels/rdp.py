@@ -10,6 +10,7 @@ from xdg import BaseDirectory
 from oo_bin.config import tunnels_config
 from oo_bin.errors import (
     DependencyNotMetError,
+    InvalidProfileError,
     PortUnavailableError,
     SystemNotSupportedError,
 )
@@ -22,6 +23,8 @@ class Rdp(Tunnel):
         super().__init__(name)
 
         hosts_config = tunnels_config().get(name, {}).get("rdp", {}).get("hosts", [])
+        if not hosts_config:
+            raise InvalidProfileError(f"No hosts defined for {self.name}")
         hosts_config = [x for x in hosts_config if x.get("name", None) == host]
 
         if len(hosts_config) > 0:
